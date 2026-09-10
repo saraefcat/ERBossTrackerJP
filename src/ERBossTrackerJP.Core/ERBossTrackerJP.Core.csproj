@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Data\bosses.json"
+                      LogicalName="ERBossTrackerJP.Core.Data.bosses.json" />
+  </ItemGroup>
+
 </Project>
