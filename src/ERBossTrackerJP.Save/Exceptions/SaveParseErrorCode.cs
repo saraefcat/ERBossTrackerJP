@@ -4,6 +4,7 @@ public enum SaveParseErrorCode
 {
     InvalidBnd4Magic,
     Bnd4HeaderOutOfBounds,
+    InvalidBnd4Header,
     Bnd4EntryOutOfBounds,
     UnsupportedSaveVersion,
     EmptyCharacterSlot,

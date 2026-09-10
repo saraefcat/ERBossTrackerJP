@@ -5,7 +5,7 @@
 | 参照元の処理 | C#側の責務 | 状態 |
 |---|---|---|
 | `open_save_file` | Windows側の読み取り専用コピーサービス | 未実装 |
-| `parse_save_bytes` | `Bnd4Reader` | 未実装 |
+| `parse_save_bytes` | `Bnd4Reader` | 初期実装済み |
 | `get_character_slots` | `CharacterSlotReader` | 未実装 |
 | `find_event_flags_offset` | `EventFlagSectionReader` | 未実装 |
 | `load_bst_map` | `EventFlagBlockMapReader` | 未実装 |
@@ -27,7 +27,7 @@
 | Entry data offset | entry `+0x10` / `u32` little-endian |
 | Entry name offset | entry `+0x14` / `u32` little-endian |
 
-PC版では通常12エントリーを持つが、12という期待値を検証する前に、宣言されたエントリー数を使った計算がファイル範囲内であることを確認する。各エントリーは`offset <= fileLength`かつ`size <= fileLength - offset`の形式で検証し、`offset + size`を未検査で計算しない。
+PC版では通常12エントリーを持つが、12という期待値を検証する前に、宣言されたエントリー数を使った計算がファイル範囲内であることを確認する。過大確保を防ぐため、汎用BND4層の対応上限を1024エントリーとする。Elden Ring固有層では後続実装で12エントリーを要求する。各エントリーは`dataStart <= offset <= fileLength`かつ`size <= fileLength - offset`の形式で検証し、`offset + size`を未検査で計算しない。名前オフセットはエントリーヘッダー表の末尾からデータ領域先頭までの名前テーブル内に限定する。
 
 ## キャラクタースロット
 
