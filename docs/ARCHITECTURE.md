@@ -35,6 +35,8 @@ SaveFileLocator -> SaveLoadService -> SaveFileSnapshotReader
 
 `BossProgressService`は選択スロットから取得したイベントフラグ、検証済みのボス定義、組み込みBSTマップを結合する。ボスを安定した表示順で判定し、地域別集計を含む不変の`TrackerSnapshot`を一度に生成する。判定途中の解析エラーでは部分的なスナップショットを公開しない。
 
+`TrackerDisplayService`は`TrackerSnapshot`を変更せず、選択言語に応じたボス名・地域名・場所名を持つ表示モデルへ投影する。撃破状態、地域、本編／DLC、現在の表示言語におけるボス名検索を組み合わせ、言語を切り替えても安定ID、フラグID、撃破状態、集計、元の表示順を維持する。
+
 ## 設計規則
 
 - Viewのコードビハインドには表示固有処理以外を置かない。

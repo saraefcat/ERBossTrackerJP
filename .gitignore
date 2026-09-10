@@ -27,6 +27,10 @@ packages/
 *.tmp
 *.bak
 
+# Local game saves
+*.sl2
+*.co2
+
 # JetBrains Rider
 .idea/
 *.sln.iml

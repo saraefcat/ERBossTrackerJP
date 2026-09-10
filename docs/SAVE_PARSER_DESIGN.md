@@ -12,6 +12,7 @@
 | `check_event_flag` | `EventFlagReader` | 初期実装済み |
 | `load_boss_data` | `BossDefinitionLoader` | ローダー実装済み／本番データ未作成 |
 | 全ボス判定・地域集計 | `BossProgressService` | 初期実装済み |
+| 表示言語・複合フィルター | `TrackerDisplayService` | 初期実装済み |
 
 外部から使用する入口は`IEldenRingSaveReader`とし、`EldenRingSaveReader`がBND4解析、キャラクター一覧、選択スロットのイベントフラグ領域取得を統合する。PC版セーブとして12エントリーを要求し、解析エラーは`SaveParseException`で返す。
 
