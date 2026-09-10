@@ -41,6 +41,8 @@ SOFTWARE.
 - Author: Hapfel
 - License: MIT
 - Usage: セーブ形式の順次解析方式と`eventflag_bst.txt`の由来
+- Redistributed data: `src/ERBossTrackerJP.Save/Data/eventflag_bst.txt`
+- SHA-256: `092C3B73B7049D04087DA425544396BC93ED9B1F80EE3BB3C2E4734C8900B728`
 
 参照元の第三者通知に記載されたMIT表示は次のとおりです。
 

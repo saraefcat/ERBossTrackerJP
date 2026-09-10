@@ -6,14 +6,18 @@ public sealed class SaveParseException : Exception
         SaveParseErrorCode errorCode,
         string message,
         long? offset = null,
-        Exception? innerException = null)
+        Exception? innerException = null,
+        int? lineNumber = null)
         : base(message, innerException)
     {
         ErrorCode = errorCode;
         Offset = offset;
+        LineNumber = lineNumber;
     }
 
     public SaveParseErrorCode ErrorCode { get; }
 
     public long? Offset { get; }
+
+    public int? LineNumber { get; }
 }

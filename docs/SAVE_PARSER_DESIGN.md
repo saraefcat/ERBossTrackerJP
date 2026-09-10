@@ -8,7 +8,7 @@
 | `parse_save_bytes` | `Bnd4Reader` | 初期実装済み |
 | `get_character_slots` | `CharacterSlotReader` | 初期実装済み |
 | `find_event_flags_offset` | `EventFlagSectionReader` | 未実装 |
-| `load_bst_map` | `EventFlagBlockMapReader` | 未実装 |
+| `load_bst_map` | `EventFlagBlockMapReader` | 初期実装済み |
 | `check_event_flag` | `EventFlagReader` | 初期実装済み |
 | `load_boss_data` | ボス定義ローダーと検証サービス | 未実装 |
 
@@ -82,6 +82,8 @@ PC版では通常12エントリーを持つが、12という期待値を検証�
 可変長値は、値を`int`へ変換する前に上限、残りサイズ、乗算オーバーフローを検証する。不正値を推定値へ置換して解析を続行しない。
 
 ## イベントフラグ判定
+
+`eventflag_bst.txt`はUTF-8の`block,offset`形式として厳密に読み取る。空行は許容するが、不正な列数、符号付き値、`uint`範囲外、ブロック重複、オフセット重複、空のマップは`InvalidEventFlagBlockMap`とする。固定した埋め込みデータは11,920件で、SHA-256は`092C3B73B7049D04087DA425544396BC93ED9B1F80EE3BB3C2E4734C8900B728`である。
 
 ```text
 block      = eventId / 1000

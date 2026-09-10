@@ -13,3 +13,5 @@
 *.md text eol=lf
 *.json text eol=lf
 *.txt text eol=lf
+
+src/ERBossTrackerJP.Save/Data/eventflag_bst.txt -text -diff

@@ -10,4 +10,9 @@
     <ProjectReference Include="..\ERBossTrackerJP.Core\ERBossTrackerJP.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Data\eventflag_bst.txt"
+                      LogicalName="ERBossTrackerJP.Save.Data.eventflag_bst.txt" />
+  </ItemGroup>
+
 </Project>

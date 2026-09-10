@@ -10,6 +10,7 @@ public enum SaveParseErrorCode
     InvalidCharacterName,
     UnsupportedSaveVersion,
     EmptyCharacterSlot,
+    InvalidEventFlagBlockMap,
     EventFlagSectionNotFound,
     MissingEventFlagBlock,
     EventFlagOutOfBounds,
