@@ -7,7 +7,7 @@
 | `open_save_file` | Windows側の読み取り専用コピーサービス | 未実装 |
 | `parse_save_bytes` | `Bnd4Reader` | 初期実装済み |
 | `get_character_slots` | `CharacterSlotReader` | 初期実装済み |
-| `find_event_flags_offset` | `EventFlagSectionReader` | 未実装 |
+| `find_event_flags_offset` | `EventFlagSectionReader` | 初期実装済み |
 | `load_bst_map` | `EventFlagBlockMapReader` | 初期実装済み |
 | `check_event_flag` | `EventFlagReader` | 初期実装済み |
 | `load_boss_data` | ボス定義ローダーと検証サービス | 未実装 |
