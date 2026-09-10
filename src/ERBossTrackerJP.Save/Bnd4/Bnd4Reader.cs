@@ -8,8 +8,8 @@ public sealed class Bnd4Reader
     public const int HeaderSize = 0x40;
     public const int EntryHeaderSize = 0x20;
     public const int MaximumEntryCount = 1024;
+    public const int FileCountOffset = 0x0C;
 
-    private const int FileCountOffset = 0x0C;
     private const int DeclaredEntryHeaderSizeOffset = 0x20;
     private const int DataStartOffset = 0x28;
     private const int EntrySizeOffset = 0x08;
