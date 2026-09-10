@@ -6,7 +6,7 @@
 |---|---|---|
 | `open_save_file` | Windows側の読み取り専用コピーサービス | 未実装 |
 | `parse_save_bytes` | `Bnd4Reader` | 初期実装済み |
-| `get_character_slots` | `CharacterSlotReader` | 未実装 |
+| `get_character_slots` | `CharacterSlotReader` | 初期実装済み |
 | `find_event_flags_offset` | `EventFlagSectionReader` | 未実装 |
 | `load_bst_map` | `EventFlagBlockMapReader` | 未実装 |
 | `check_event_flag` | `EventFlagReader` | 初期実装済み |
@@ -38,6 +38,8 @@ PC版では通常12エントリーを持つが、12という期待値を検証�
 - Profile entry: 1件`0x24C` bytes、10件
 - 名前: entry `+0x00`、UTF-16LE、最大32 bytes、NUL終端
 - レベル: entry `+0x22`、`u32` little-endian
+
+`CharacterSlotReader`は非アクティブスロットを結果から除外し、元の0始まりスロット番号を保持する。有効スロットの名前は置換フォールバックを使わずUTF-16LEとして厳密にデコードし、空名、空白名、不正なサロゲートを`InvalidCharacterName`として扱う。
 
 ## イベントフラグ直前までの順次解析
 

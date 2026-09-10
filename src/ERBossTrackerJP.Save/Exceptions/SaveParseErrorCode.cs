@@ -6,6 +6,8 @@ public enum SaveParseErrorCode
     Bnd4HeaderOutOfBounds,
     InvalidBnd4Header,
     Bnd4EntryOutOfBounds,
+    CharacterProfileOutOfBounds,
+    InvalidCharacterName,
     UnsupportedSaveVersion,
     EmptyCharacterSlot,
     EventFlagSectionNotFound,
