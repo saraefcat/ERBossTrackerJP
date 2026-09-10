@@ -10,9 +10,13 @@
 | `find_event_flags_offset` | `EventFlagSectionReader` | 初期実装済み |
 | `load_bst_map` | `EventFlagBlockMapReader` | 初期実装済み |
 | `check_event_flag` | `EventFlagReader` | 初期実装済み |
-| `load_boss_data` | ボス定義ローダーと検証サービス | 未実装 |
+| `load_boss_data` | `BossDefinitionLoader` | ローダー実装済み／本番データ未作成 |
 
 外部から使用する入口は`IEldenRingSaveReader`とし、`EldenRingSaveReader`がBND4解析、キャラクター一覧、選択スロットのイベントフラグ領域取得を統合する。PC版セーブとして12エントリーを要求し、解析エラーは`SaveParseException`で返す。
+
+## ボス定義JSON
+
+ルートは`schemaVersion`と`bosses`を持ち、各ボスは安定ID、イベントフラグID、英語・日本語のボス名／地域名／場所名、`baseGame`または`shadowOfTheErdtree`、一意の表示順を持つ。未知のプロパティ、空欄、前後空白、不正なUTF-8、ID・フラグID・表示順の重複、同一地域IDに対する表記揺れを拒否する。本番データは207件を要求するが、日本語表記を推測で補完せず、出典照合後に別工程で追加する。
 
 ## BND4
 
