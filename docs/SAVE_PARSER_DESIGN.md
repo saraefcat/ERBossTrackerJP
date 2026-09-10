@@ -11,12 +11,15 @@
 | `load_bst_map` | `EventFlagBlockMapReader` | 初期実装済み |
 | `check_event_flag` | `EventFlagReader` | 初期実装済み |
 | `load_boss_data` | `BossDefinitionLoader` | ローダー実装済み／本番データ未作成 |
+| 全ボス判定・地域集計 | `BossProgressService` | 初期実装済み |
 
 外部から使用する入口は`IEldenRingSaveReader`とし、`EldenRingSaveReader`がBND4解析、キャラクター一覧、選択スロットのイベントフラグ領域取得を統合する。PC版セーブとして12エントリーを要求し、解析エラーは`SaveParseException`で返す。
 
 ## ボス定義JSON
 
 ルートは`schemaVersion`と`bosses`を持ち、各ボスは安定ID、イベントフラグID、英語・日本語のボス名／地域名／場所名、`baseGame`または`shadowOfTheErdtree`、一意の表示順を持つ。未知のプロパティ、空欄、前後空白、不正なUTF-8、ID・フラグID・表示順の重複、同一地域IDに対する表記揺れを拒否する。本番データは207件を要求するが、日本語表記を推測で補完せず、出典照合後に別工程で追加する。
+
+`BossProgressService`はボス定義を`sortOrder`順に固定し、選択スロットのイベントフラグを全件判定して、全体および地域別の撃破数を持つ`TrackerSnapshot`を生成する。必要なBSTブロックがない場合やフラグ位置が領域外の場合は未撃破として黙殺せず、`SaveParseException`をそのまま呼び出し側へ返す。
 
 ## BND4
 
