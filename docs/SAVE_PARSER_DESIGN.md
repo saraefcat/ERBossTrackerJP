@@ -4,7 +4,7 @@
 
 | 参照元の処理 | C#側の責務 | 状態 |
 |---|---|---|
-| `open_save_file` | Windows側の読み取り専用コピーサービス | 未実装 |
+| `open_save_file` | `SaveFileSnapshotReader`による共有読み取りとメモリスナップショット | 初期実装済み |
 | `parse_save_bytes` | `Bnd4Reader` | 初期実装済み |
 | `get_character_slots` | `CharacterSlotReader` | 初期実装済み |
 | `find_event_flags_offset` | `EventFlagSectionReader` | 初期実装済み |

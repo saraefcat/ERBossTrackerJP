@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.17763.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\ERBossTrackerJP.Core\ERBossTrackerJP.Core.csproj" />
     <ProjectReference Include="..\..\src\ERBossTrackerJP.Save\ERBossTrackerJP.Save.csproj" />
+    <ProjectReference Include="..\..\src\ERBossTrackerJP\ERBossTrackerJP.csproj" />
   </ItemGroup>
 
 </Project>
