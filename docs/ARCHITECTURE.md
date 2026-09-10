@@ -24,6 +24,15 @@ TrackerSnapshot -> WPF ViewModel
                 -> 将来のOBS出力アダプター
 ```
 
+セーブ読み込みのアプリケーション境界は次のとおりとする。
+
+```text
+SaveFileLocator -> SaveLoadService -> SaveFileSnapshotReader
+                                  -> EldenRingSaveReader
+```
+
+`SaveLoadService`はメモリスナップショットとキャラクター解析を統合し、公開結果にはパス、更新日時、ファイルサイズ、キャラクター一覧だけを含める。生のセーブデータは`LoadedSaveFile`内部に保持し、同じスナップショットからイベントフラグを読むサービス処理だけが利用する。
+
 ## 設計規則
 
 - Viewのコードビハインドには表示固有処理以外を置かない。
