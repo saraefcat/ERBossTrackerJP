@@ -11,9 +11,125 @@
         MinHeight="480"
         WindowStartupLocation="CenterScreen">
     <Grid Margin="24">
-        <TextBlock HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   FontSize="20"
-                   Text="{Binding StatusMessage}" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0"
+                    Margin="0,0,0,20">
+            <TextBlock FontSize="26"
+                       FontWeight="SemiBold"
+                       Text="ER Boss Tracker JP" />
+            <TextBlock Margin="0,6,0,0"
+                       Foreground="#606060"
+                       Text="ELDEN RING セーブファイルの読み取り確認" />
+        </StackPanel>
+
+        <Border Grid.Row="1"
+                Margin="0,0,0,16"
+                Padding="16"
+                BorderBrush="#D4D4D4"
+                BorderThickness="1"
+                CornerRadius="6">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <ComboBox Grid.Row="0"
+                          Grid.Column="0"
+                          MinHeight="34"
+                          Margin="0,0,12,0"
+                          ItemsSource="{Binding SaveCandidates}"
+                          SelectedItem="{Binding SelectedSaveCandidate, Mode=TwoWay}"
+                          IsEnabled="{Binding IsInteractionEnabled}"
+                          DisplayMemberPath="FilePath" />
+                <Button Grid.Row="0"
+                        Grid.Column="1"
+                        MinWidth="96"
+                        Margin="0,0,8,0"
+                        Padding="12,6"
+                        Command="{Binding ReloadCommand}"
+                        Content="読み込み" />
+                <Button Grid.Row="0"
+                        Grid.Column="2"
+                        MinWidth="110"
+                        Margin="0,0,8,0"
+                        Padding="12,6"
+                        Command="{Binding BrowseFolderCommand}"
+                        Content="フォルダー参照" />
+                <Button Grid.Row="0"
+                        Grid.Column="3"
+                        MinWidth="120"
+                        Padding="12,6"
+                        Command="{Binding RefreshDefaultCommand}"
+                        Content="既定場所を再検索" />
+
+                <TextBlock Grid.Row="1"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="4"
+                           Margin="0,12,0,0"
+                           TextWrapping="Wrap"
+                           Text="{Binding StatusMessage}" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2"
+                Padding="16"
+                BorderBrush="#D4D4D4"
+                BorderThickness="1"
+                CornerRadius="6">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0"
+                           Margin="0,0,0,10"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Text="キャラクター" />
+                <ListView Grid.Row="1"
+                          ItemsSource="{Binding CharacterSlots}"
+                          IsEnabled="{Binding IsInteractionEnabled}"
+                          SelectedItem="{Binding SelectedCharacter, Mode=TwoWay}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Width="100"
+                                            Header="スロット"
+                                            DisplayMemberBinding="{Binding SlotNumber}" />
+                            <GridViewColumn Width="320"
+                                            Header="名前"
+                                            DisplayMemberBinding="{Binding Name}" />
+                            <GridViewColumn Width="120"
+                                            Header="レベル"
+                                            DisplayMemberBinding="{Binding Level}" />
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </Grid>
+        </Border>
+
+        <DockPanel Grid.Row="3"
+                   Margin="0,12,0,0">
+            <TextBlock DockPanel.Dock="Right"
+                       Foreground="#606060">
+                <Run Text="セーブ更新日時: " />
+                <Run Text="{Binding SaveLastWriteTimeText}" />
+            </TextBlock>
+            <TextBlock Foreground="#606060"
+                       Text="セーブファイルは読み取り専用で扱います。" />
+        </DockPanel>
     </Grid>
 </Window>

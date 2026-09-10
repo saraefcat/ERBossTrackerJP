@@ -25,6 +25,8 @@ public sealed record CharacterSlot
 
     public int SlotIndex { get; }
 
+    public int SlotNumber => SlotIndex + 1;
+
     public string Name { get; }
 
     public uint Level { get; }
