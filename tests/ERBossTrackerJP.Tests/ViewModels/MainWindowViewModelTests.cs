@@ -2,6 +2,7 @@ using ERBossTrackerJP.Core.Models;
 using ERBossTrackerJP.Core.Presentation;
 using ERBossTrackerJP.Save.Exceptions;
 using ERBossTrackerJP.Services.Dialogs;
+using ERBossTrackerJP.Services.Monitoring;
 using ERBossTrackerJP.Services.SaveFiles;
 using ERBossTrackerJP.Services.Tracking;
 using ERBossTrackerJP.ViewModels;
@@ -218,15 +219,83 @@ public sealed class MainWindowViewModelTests
         Assert.Equal("limgrave", viewModel.RegionFilterId);
     }
 
+    [Fact]
+    public async Task InitializeAsync_StartsMonitoringAndDetectedChangeReloadsSameSlot()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(2, "Monitored", 100)));
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(2, "Monitored", 101)));
+        var monitor = new StubSaveFileMonitor();
+        var trackerService = new StubTrackerSnapshotService();
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            saveFileMonitor: monitor,
+            trackerSnapshotService: trackerService);
+
+        await viewModel.InitializeAsync();
+        await viewModel.HandleSaveFileChangeDetectedAsync(
+            new SaveFileChangedEventArgs(
+                candidate.FilePath,
+                256,
+                new DateTimeOffset(2026, 9, 11, 2, 0, 0, TimeSpan.Zero)));
+
+        Assert.True(monitor.IsRunning);
+        Assert.Equal(candidate.FilePath, monitor.MonitoredFilePath);
+        Assert.Equal(1, monitor.StartCount);
+        Assert.Equal(1, monitor.UpdateBaselineCount);
+        Assert.Equal(2, loadService.CallCount);
+        Assert.Equal(2, trackerService.CallCount);
+        Assert.Equal(2, viewModel.SelectedCharacter?.SlotIndex);
+        Assert.Equal("監視中", viewModel.MonitoringStatusText);
+    }
+
+    [Fact]
+    public async Task DisablingMonitoring_StopsMonitorAndIgnoresChange()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "Manual", 10)));
+        var monitor = new StubSaveFileMonitor();
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            saveFileMonitor: monitor);
+        await viewModel.InitializeAsync();
+
+        viewModel.IsAutoMonitoringEnabled = false;
+        await viewModel.HandleSaveFileChangeDetectedAsync(
+            new SaveFileChangedEventArgs(
+                candidate.FilePath,
+                256,
+                new DateTimeOffset(2026, 9, 11, 2, 0, 0, TimeSpan.Zero)));
+
+        Assert.False(monitor.IsRunning);
+        Assert.Equal(1, monitor.StopCount);
+        Assert.Equal(1, loadService.CallCount);
+        Assert.Equal("停止中", viewModel.MonitoringStatusText);
+    }
+
     private static MainWindowViewModel CreateViewModel(
         ISaveFileLocator locator,
         ISaveLoadService loadService,
         IFolderPickerService? folderPicker = null,
+        ISaveFileMonitor? saveFileMonitor = null,
         ITrackerSnapshotService? trackerSnapshotService = null) =>
         new(
             locator,
             loadService,
             folderPicker ?? new StubFolderPicker(null),
+            saveFileMonitor ?? new StubSaveFileMonitor(),
             trackerSnapshotService ?? new StubTrackerSnapshotService(),
             new TrackerDisplayService());
 
@@ -318,6 +387,63 @@ public sealed class MainWindowViewModelTests
             ReceivedInitialDirectory = initialDirectory;
             return selectedFolder;
         }
+    }
+
+    private sealed class StubSaveFileMonitor : ISaveFileMonitor
+    {
+        public event EventHandler<SaveFileChangedEventArgs>? ChangeDetected;
+
+        public event EventHandler<SaveFileMonitorErrorEventArgs>? MonitoringError;
+
+        public bool IsRunning { get; private set; }
+
+        public string? MonitoredFilePath { get; private set; }
+
+        public int StartCount { get; private set; }
+
+        public int UpdateBaselineCount { get; private set; }
+
+        public int StopCount { get; private set; }
+
+        public void Start(
+            string filePath,
+            long fileSize,
+            DateTimeOffset lastWriteTimeUtc)
+        {
+            StartCount++;
+            IsRunning = true;
+            MonitoredFilePath = filePath;
+        }
+
+        public void UpdateBaseline(
+            string filePath,
+            long fileSize,
+            DateTimeOffset lastWriteTimeUtc)
+        {
+            Assert.Equal(MonitoredFilePath, filePath);
+            UpdateBaselineCount++;
+        }
+
+        public void Stop()
+        {
+            if (IsRunning)
+            {
+                StopCount++;
+            }
+
+            IsRunning = false;
+            MonitoredFilePath = null;
+        }
+
+        public void Dispose() => Stop();
+
+        public void RaiseChange(SaveFileChangedEventArgs eventArgs) =>
+            ChangeDetected?.Invoke(this, eventArgs);
+
+        public void RaiseError(Exception exception) =>
+            MonitoringError?.Invoke(
+                this,
+                new SaveFileMonitorErrorEventArgs(exception));
     }
 
     private sealed class StubTrackerSnapshotService : ITrackerSnapshotService

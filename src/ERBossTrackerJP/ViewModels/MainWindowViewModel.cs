@@ -1,22 +1,26 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using ERBossTrackerJP.Commands;
 using ERBossTrackerJP.Core.Models;
 using ERBossTrackerJP.Core.Presentation;
 using ERBossTrackerJP.Save.Exceptions;
 using ERBossTrackerJP.Services.Dialogs;
+using ERBossTrackerJP.Services.Monitoring;
 using ERBossTrackerJP.Services.SaveFiles;
 using ERBossTrackerJP.Services.Tracking;
 
 namespace ERBossTrackerJP.ViewModels;
 
-public sealed class MainWindowViewModel : ViewModelBase
+public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 {
     private readonly ISaveFileLocator _saveFileLocator;
     private readonly ISaveLoadService _saveLoadService;
     private readonly IFolderPickerService _folderPickerService;
+    private readonly ISaveFileMonitor _saveFileMonitor;
     private readonly ITrackerSnapshotService _trackerSnapshotService;
     private readonly TrackerDisplayService _trackerDisplayService;
+    private readonly SynchronizationContext? _synchronizationContext;
     private readonly ObservableCollection<SaveFileCandidate> _saveCandidates = [];
     private readonly ObservableCollection<CharacterSlot> _characterSlots = [];
     private readonly ObservableCollection<BossListItem> _bosses = [];
@@ -36,8 +40,13 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string? _regionFilterId;
     private string _searchText = string.Empty;
     private bool _isBusy;
+    private bool _isAutoMonitoringEnabled = true;
+    private bool _isProcessingAutomaticReload;
+    private bool _pendingAutomaticReload;
     private bool _isSynchronizingRegionSelection;
     private bool _isUpdatingRegionOptions;
+    private bool _disposed;
+    private string _monitoringStatusText = "停止中";
     private string _statusMessage = "セーブファイルを検索しています…";
     private string _saveLastWriteTimeText = "未読み込み";
 
@@ -45,20 +54,24 @@ public sealed class MainWindowViewModel : ViewModelBase
         ISaveFileLocator saveFileLocator,
         ISaveLoadService saveLoadService,
         IFolderPickerService folderPickerService,
+        ISaveFileMonitor saveFileMonitor,
         ITrackerSnapshotService trackerSnapshotService,
         TrackerDisplayService trackerDisplayService)
     {
         ArgumentNullException.ThrowIfNull(saveFileLocator);
         ArgumentNullException.ThrowIfNull(saveLoadService);
         ArgumentNullException.ThrowIfNull(folderPickerService);
+        ArgumentNullException.ThrowIfNull(saveFileMonitor);
         ArgumentNullException.ThrowIfNull(trackerSnapshotService);
         ArgumentNullException.ThrowIfNull(trackerDisplayService);
 
         _saveFileLocator = saveFileLocator;
         _saveLoadService = saveLoadService;
         _folderPickerService = folderPickerService;
+        _saveFileMonitor = saveFileMonitor;
         _trackerSnapshotService = trackerSnapshotService;
         _trackerDisplayService = trackerDisplayService;
+        _synchronizationContext = SynchronizationContext.Current;
         SaveCandidates = new ReadOnlyObservableCollection<SaveFileCandidate>(_saveCandidates);
         CharacterSlots = new ReadOnlyObservableCollection<CharacterSlot>(_characterSlots);
         Bosses = new ReadOnlyObservableCollection<BossListItem>(_bosses);
@@ -89,6 +102,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         _reloadCommand = new AsyncRelayCommand(
             LoadSelectedSaveAsync,
             () => !IsBusy && SelectedSaveCandidate is not null);
+        _saveFileMonitor.ChangeDetected += OnSaveFileChangeDetected;
+        _saveFileMonitor.MonitoringError += OnSaveFileMonitoringError;
     }
 
     public string Title => "ER Boss Tracker JP";
@@ -140,6 +155,37 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public AsyncRelayCommand ReloadCommand => _reloadCommand;
 
+    public bool IsAutoMonitoringEnabled
+    {
+        get => _isAutoMonitoringEnabled;
+        set
+        {
+            if (!SetProperty(ref _isAutoMonitoringEnabled, value))
+            {
+                return;
+            }
+
+            if (!value)
+            {
+                _pendingAutomaticReload = false;
+                _saveFileMonitor.Stop();
+                MonitoringStatusText = "停止中";
+                return;
+            }
+
+            if (_loadedSave is not null)
+            {
+                ConfigureMonitoring(_loadedSave);
+            }
+        }
+    }
+
+    public string MonitoringStatusText
+    {
+        get => _monitoringStatusText;
+        private set => SetProperty(ref _monitoringStatusText, value);
+    }
+
     public SaveFileCandidate? SelectedSaveCandidate
     {
         get => _selectedSaveCandidate;
@@ -151,6 +197,9 @@ public sealed class MainWindowViewModel : ViewModelBase
             }
 
             _loadedSave = null;
+            _pendingAutomaticReload = false;
+            _saveFileMonitor.Stop();
+            MonitoringStatusText = "停止中";
             ReplaceCharacterSlots([]);
             SetSelectedCharacter(null);
             ClearTrackerSnapshot();
@@ -392,6 +441,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         ReplaceCharacterSlots(loadedSave.CharacterSlots);
         SaveLastWriteTimeText =
             loadedSave.LastWriteTimeUtc.ToLocalTime().ToString("yyyy/MM/dd HH:mm:ss");
+        ConfigureMonitoring(loadedSave);
 
         if (loadedSave.CharacterSlots.Count == 0)
         {
@@ -584,6 +634,160 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             IsBusy = false;
         }
+
+        if (_pendingAutomaticReload && !_isProcessingAutomaticReload)
+        {
+            await ProcessAutomaticReloadsAsync();
+        }
+    }
+
+    private void ConfigureMonitoring(LoadedSaveFile loadedSave)
+    {
+        if (!IsAutoMonitoringEnabled)
+        {
+            return;
+        }
+
+        try
+        {
+            if (_saveFileMonitor.IsRunning &&
+                string.Equals(
+                    _saveFileMonitor.MonitoredFilePath,
+                    loadedSave.SourcePath,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                _saveFileMonitor.UpdateBaseline(
+                    loadedSave.SourcePath,
+                    loadedSave.FileSize,
+                    loadedSave.LastWriteTimeUtc);
+            }
+            else
+            {
+                _saveFileMonitor.Start(
+                    loadedSave.SourcePath,
+                    loadedSave.FileSize,
+                    loadedSave.LastWriteTimeUtc);
+            }
+
+            MonitoringStatusText = "監視中";
+        }
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException)
+        {
+            Trace.WriteLine($"[MainWindowViewModel] Monitoring start failed: {exception}");
+            _saveFileMonitor.Stop();
+            MonitoringStatusText = "監視を開始できません";
+        }
+    }
+
+    private void OnSaveFileChangeDetected(
+        object? sender,
+        SaveFileChangedEventArgs eventArgs) =>
+        PostToSynchronizationContext(
+            () => _ = HandleSaveFileChangeDetectedAsync(eventArgs));
+
+    private void OnSaveFileMonitoringError(
+        object? sender,
+        SaveFileMonitorErrorEventArgs eventArgs) =>
+        PostToSynchronizationContext(() =>
+        {
+            if (_disposed || !IsAutoMonitoringEnabled)
+            {
+                return;
+            }
+
+            Trace.WriteLine(
+                $"[MainWindowViewModel] File watcher error: {eventArgs.Exception}");
+            MonitoringStatusText = "監視中（定期確認で継続）";
+        });
+
+    internal async Task HandleSaveFileChangeDetectedAsync(
+        SaveFileChangedEventArgs eventArgs)
+    {
+        ArgumentNullException.ThrowIfNull(eventArgs);
+
+        if (_disposed || !IsAutoMonitoringEnabled ||
+            SelectedSaveCandidate is null ||
+            !string.Equals(
+                SelectedSaveCandidate.FilePath,
+                eventArgs.FilePath,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        _pendingAutomaticReload = true;
+
+        if (IsBusy || _isProcessingAutomaticReload)
+        {
+            MonitoringStatusText = "更新待機中";
+            return;
+        }
+
+        await ProcessAutomaticReloadsAsync();
+    }
+
+    private async Task ProcessAutomaticReloadsAsync()
+    {
+        if (_isProcessingAutomaticReload)
+        {
+            return;
+        }
+
+        _isProcessingAutomaticReload = true;
+
+        try
+        {
+            while (_pendingAutomaticReload &&
+                   IsAutoMonitoringEnabled &&
+                   SelectedSaveCandidate is not null)
+            {
+                _pendingAutomaticReload = false;
+                MonitoringStatusText = "更新を反映中…";
+                await RunOperationAsync(LoadSelectedSaveCoreAsync);
+            }
+        }
+        finally
+        {
+            _isProcessingAutomaticReload = false;
+
+            if (IsAutoMonitoringEnabled && _saveFileMonitor.IsRunning)
+            {
+                MonitoringStatusText = "監視中";
+            }
+        }
+    }
+
+    private void PostToSynchronizationContext(Action action)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        if (_synchronizationContext is null ||
+            ReferenceEquals(SynchronizationContext.Current, _synchronizationContext))
+        {
+            action();
+            return;
+        }
+
+        _synchronizationContext.Post(
+            static state => ((Action)state!).Invoke(),
+            action);
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        _saveFileMonitor.ChangeDetected -= OnSaveFileChangeDetected;
+        _saveFileMonitor.MonitoringError -= OnSaveFileMonitoringError;
+        _saveFileMonitor.Dispose();
     }
 
     private void ReplaceSaveCandidates(IEnumerable<SaveFileCandidate> candidates)

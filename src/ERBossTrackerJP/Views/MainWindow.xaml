@@ -101,6 +101,11 @@
             <StackPanel DockPanel.Dock="Right"
                         HorizontalAlignment="Right">
                 <TextBlock HorizontalAlignment="Right"
+                           FontWeight="SemiBold"
+                           Foreground="#344054"
+                           Text="{Binding MonitoringStatusText}" />
+                <TextBlock HorizontalAlignment="Right"
+                           Margin="0,3,0,0"
                            Foreground="#667085"
                            Text="最終正常更新" />
                 <TextBlock HorizontalAlignment="Right"
@@ -119,6 +124,7 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
@@ -146,12 +152,19 @@
                 <Button Grid.Row="0"
                         Grid.Column="3"
                         MinWidth="120"
+                        Margin="0,0,14,0"
                         Command="{Binding RefreshDefaultCommand}"
                         Content="既定場所を再検索" />
+                <CheckBox Grid.Row="0"
+                          Grid.Column="4"
+                          VerticalAlignment="Center"
+                          IsChecked="{Binding IsAutoMonitoringEnabled, Mode=TwoWay}"
+                          IsEnabled="{Binding IsInteractionEnabled}"
+                          Content="自動監視" />
 
                 <TextBlock Grid.Row="1"
                            Grid.Column="0"
-                           Grid.ColumnSpan="4"
+                           Grid.ColumnSpan="5"
                            Margin="0,10,0,0"
                            Foreground="#344054"
                            Text="{Binding StatusMessage}"
