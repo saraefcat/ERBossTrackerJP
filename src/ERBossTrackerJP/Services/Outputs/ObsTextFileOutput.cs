@@ -28,12 +28,16 @@ public sealed class ObsTextFileOutput : IObsTextFileOutput
     private readonly object _configurationLock = new();
     private readonly SemaphoreSlim _publishLock = new(1, 1);
     private string _outputDirectory;
+    private string _progressFormat;
     private IReadOnlyList<string> _latestBossIds = [];
 
-    public ObsTextFileOutput(string? outputDirectory = null)
+    public ObsTextFileOutput(
+        string? outputDirectory = null,
+        string? progressFormat = null)
     {
         DefaultOutputDirectory = GetDefaultOutputDirectory();
         _outputDirectory = DefaultOutputDirectory;
+        _progressFormat = DefaultProgressFormat;
 
         if (outputDirectory is not null && !TrySetOutputDirectory(outputDirectory))
         {
@@ -41,9 +45,18 @@ public sealed class ObsTextFileOutput : IObsTextFileOutput
                 "OBS output directory must be a fully qualified path.",
                 nameof(outputDirectory));
         }
+
+        if (progressFormat is not null && !TrySetProgressFormat(progressFormat))
+        {
+            throw new ArgumentException(
+                "OBS progress format is invalid.",
+                nameof(progressFormat));
+        }
     }
 
     public string DefaultOutputDirectory { get; }
+
+    public string DefaultProgressFormat => ObsProgressTextFormatter.DefaultFormat;
 
     public string OutputDirectory
     {
@@ -52,6 +65,17 @@ public sealed class ObsTextFileOutput : IObsTextFileOutput
             lock (_configurationLock)
             {
                 return _outputDirectory;
+            }
+        }
+    }
+
+    public string ProgressFormat
+    {
+        get
+        {
+            lock (_configurationLock)
+            {
+                return _progressFormat;
             }
         }
     }
@@ -83,12 +107,29 @@ public sealed class ObsTextFileOutput : IObsTextFileOutput
         }
     }
 
+    public bool TrySetProgressFormat(string progressFormat)
+    {
+        if (!ObsProgressTextFormatter.TryValidate(
+                progressFormat,
+                out _))
+        {
+            return false;
+        }
+
+        lock (_configurationLock)
+        {
+            _progressFormat = progressFormat;
+        }
+
+        return true;
+    }
+
     public async ValueTask PublishAsync(
         TrackerOutputUpdate update,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(update);
-        string outputDirectory = OutputDirectory;
+        (string outputDirectory, string progressFormat) = GetConfiguration();
         await _publishLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         try
@@ -113,7 +154,8 @@ public sealed class ObsTextFileOutput : IObsTextFileOutput
             IReadOnlyDictionary<string, string> files = CreateOutputFiles(
                 update,
                 latestBosses,
-                percentage);
+                percentage,
+                progressFormat);
 
             await WriteFilesAtomicallyAsync(
                 outputDirectory,
@@ -159,7 +201,8 @@ public sealed class ObsTextFileOutput : IObsTextFileOutput
     private static IReadOnlyDictionary<string, string> CreateOutputFiles(
         TrackerOutputUpdate update,
         IReadOnlyList<BossProgress> latestBosses,
-        string percentage)
+        string percentage,
+        string progressFormat)
     {
         TrackerSnapshot snapshot = update.Snapshot;
         string[] latestBossNames = latestBosses
@@ -195,8 +238,12 @@ public sealed class ObsTextFileOutput : IObsTextFileOutput
 
         return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            [ProgressFileName] =
-                $"{snapshot.Defeated} / {snapshot.Total} ({percentage})",
+            [ProgressFileName] = ObsProgressTextFormatter.Format(
+                progressFormat,
+                snapshot.Defeated,
+                snapshot.Remaining,
+                snapshot.Total,
+                snapshot.ProgressPercentage),
             [DefeatedFileName] = snapshot.Defeated.ToString(CultureInfo.InvariantCulture),
             [RemainingFileName] = snapshot.Remaining.ToString(CultureInfo.InvariantCulture),
             [TotalFileName] = snapshot.Total.ToString(CultureInfo.InvariantCulture),
@@ -204,6 +251,14 @@ public sealed class ObsTextFileOutput : IObsTextFileOutput
             [LatestBossFileName] = string.Join(Environment.NewLine, latestBossNames),
             [SnapshotFileName] = JsonSerializer.Serialize(document, JsonOptions),
         };
+    }
+
+    private (string OutputDirectory, string ProgressFormat) GetConfiguration()
+    {
+        lock (_configurationLock)
+        {
+            return (_outputDirectory, _progressFormat);
+        }
     }
 
     private static async Task WriteFilesAtomicallyAsync(

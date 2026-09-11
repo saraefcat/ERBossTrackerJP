@@ -10,7 +10,8 @@ public sealed record UserSettings(
     bool IsAutoMonitoringEnabled = true,
     ApplicationTheme Theme = ApplicationTheme.Dark,
     bool IsObsOutputEnabled = false,
-    string? ObsOutputDirectory = null)
+    string? ObsOutputDirectory = null,
+    string? ObsProgressFormat = null)
 {
     public static UserSettings Default { get; } = new();
 }

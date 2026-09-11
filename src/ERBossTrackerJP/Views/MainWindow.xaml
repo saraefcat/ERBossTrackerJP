@@ -974,13 +974,28 @@
                             <StackPanel>
                                 <TextBlock FontSize="17"
                                            FontWeight="SemiBold"
-                                           Text="現在の進捗表示書式" />
-                                <TextBox Margin="0,10,0,0"
-                                         IsReadOnly="True"
-                                         Text="{}{defeated} / {total} ({percentage}%)" />
-                                <TextBlock Margin="0,8,0,0"
+                                           Text="進捗表示書式" />
+                                <TextBlock Margin="0,5,0,0"
                                            Foreground="{DynamicResource TextMutedBrush}"
-                                           Text="書式の編集機能は次の調整段階で追加できます。"
+                                           Text="使用可能: {defeated}  {remaining}  {total}  {percentage}（%記号は書式側へ入力）"
+                                           TextWrapping="Wrap" />
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0"
+                                             Margin="0,0,8,0"
+                                             MaxLength="256"
+                                             Text="{Binding ObsProgressFormatDraft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Button Grid.Column="1"
+                                            MinWidth="112"
+                                            Command="{Binding ApplyObsProgressFormatCommand}"
+                                            Content="書式を適用" />
+                                </Grid>
+                                <TextBlock Margin="0,7,0,0"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Text="{Binding ObsProgressFormatStatusText}"
                                            TextWrapping="Wrap" />
                             </StackPanel>
                         </Border>

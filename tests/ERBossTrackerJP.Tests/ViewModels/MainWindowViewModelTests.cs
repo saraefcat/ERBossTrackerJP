@@ -568,6 +568,84 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public async Task ApplyObsProgressFormatAsync_UpdatesPreviewPersistsAndRepublishes()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "OBS Hero", 75)));
+        var obsOutput = new StubObsTextFileOutput();
+        var settingsService = new StubUserSettingsService(
+            new UserSettings(IsObsOutputEnabled: true));
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            userSettingsService: settingsService,
+            obsTextFileOutput: obsOutput);
+        await viewModel.InitializeAsync();
+        viewModel.ObsProgressFormatDraft =
+            "撃破 {defeated}/{total}体・残り{remaining}体・{percentage}%";
+
+        await viewModel.ApplyObsProgressFormatAsync();
+
+        Assert.Equal(
+            viewModel.ObsProgressFormatDraft,
+            obsOutput.ProgressFormat);
+        Assert.Equal(
+            viewModel.ObsProgressFormatDraft,
+            settingsService.LastSaved?.ObsProgressFormat);
+        Assert.Equal("適用済み", viewModel.ObsProgressFormatStatusText);
+        Assert.Equal(2, obsOutput.Updates.Count);
+        Assert.Contains(
+            viewModel.ObsPreviewItems,
+            item => item.FileName == ObsTextFileOutput.ProgressFileName &&
+                    item.Contents == "撃破 1/3体・残り2体・33.3%");
+    }
+
+    [Fact]
+    public async Task ApplyObsProgressFormatAsync_InvalidFormatIsNotApplied()
+    {
+        var obsOutput = new StubObsTextFileOutput();
+        var viewModel = CreateViewModel(
+            new StubSaveFileLocator(),
+            new StubSaveLoadService(),
+            obsTextFileOutput: obsOutput);
+        viewModel.ObsProgressFormatDraft = "{unknown}";
+
+        await viewModel.ApplyObsProgressFormatAsync();
+
+        Assert.Equal(
+            ObsProgressTextFormatter.DefaultFormat,
+            obsOutput.ProgressFormat);
+        Assert.Contains(
+            "使用できない変数",
+            viewModel.ObsProgressFormatStatusText,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Constructor_RestoresObsProgressFormatFromSettings()
+    {
+        const string savedFormat =
+            "撃破 {defeated}/{total}体（{percentage}%）";
+        var obsOutput = new StubObsTextFileOutput();
+        var settingsService = new StubUserSettingsService(
+            new UserSettings(ObsProgressFormat: savedFormat));
+
+        var viewModel = CreateViewModel(
+            new StubSaveFileLocator(),
+            new StubSaveLoadService(),
+            userSettingsService: settingsService,
+            obsTextFileOutput: obsOutput);
+
+        Assert.Equal(savedFormat, obsOutput.ProgressFormat);
+        Assert.Equal(savedFormat, viewModel.ObsProgressFormatDraft);
+        Assert.Equal("適用済み", viewModel.ObsProgressFormatStatusText);
+    }
+
+    [Fact]
     public void MainWindow_BindingsAndThemeResourcesWorkAtRuntime()
     {
         Exception? capturedException = null;
@@ -937,6 +1015,11 @@ public sealed class MainWindowViewModelTests
 
         public string OutputDirectory { get; private set; } = "C:\\obs-default";
 
+        public string DefaultProgressFormat => ObsProgressTextFormatter.DefaultFormat;
+
+        public string ProgressFormat { get; private set; } =
+            ObsProgressTextFormatter.DefaultFormat;
+
         public List<TrackerOutputUpdate> Updates { get; } = [];
 
         public Exception? NextException { get; set; }
@@ -944,6 +1027,19 @@ public sealed class MainWindowViewModelTests
         public bool TrySetOutputDirectory(string outputDirectory)
         {
             OutputDirectory = outputDirectory;
+            return true;
+        }
+
+        public bool TrySetProgressFormat(string progressFormat)
+        {
+            if (!ObsProgressTextFormatter.TryValidate(
+                    progressFormat,
+                    out _))
+            {
+                return false;
+            }
+
+            ProgressFormat = progressFormat;
             return true;
         }
 

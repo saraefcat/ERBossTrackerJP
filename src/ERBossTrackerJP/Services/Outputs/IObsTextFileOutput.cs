@@ -8,5 +8,11 @@ public interface IObsTextFileOutput : ITrackerOutput
 
     string OutputDirectory { get; }
 
+    string DefaultProgressFormat { get; }
+
+    string ProgressFormat { get; }
+
     bool TrySetOutputDirectory(string outputDirectory);
+
+    bool TrySetProgressFormat(string progressFormat);
 }

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using ERBossTrackerJP.Core.Models;
+using ERBossTrackerJP.Services.Outputs;
 using ERBossTrackerJP.Services.Theming;
 
 namespace ERBossTrackerJP.Services.Settings;
@@ -112,7 +113,8 @@ public sealed class JsonUserSettingsService : IUserSettingsService
                 settings.IsAutoMonitoringEnabled,
                 ToThemeCode(settings.Theme),
                 settings.IsObsOutputEnabled,
-                NormalizePath(settings.ObsOutputDirectory));
+                NormalizePath(settings.ObsOutputDirectory),
+                NormalizeObsProgressFormat(settings.ObsProgressFormat));
             string json = JsonSerializer.Serialize(document, SerializerOptions);
             File.WriteAllText(temporaryPath, json);
             File.Move(temporaryPath, _settingsPath, overwrite: true);
@@ -153,7 +155,8 @@ public sealed class JsonUserSettingsService : IUserSettingsService
             document.IsAutoMonitoringEnabled ?? true,
             theme,
             document.IsObsOutputEnabled ?? false,
-            NormalizePath(document.ObsOutputDirectory));
+            NormalizePath(document.ObsOutputDirectory),
+            NormalizeObsProgressFormat(document.ObsProgressFormat));
     }
 
     private static string? NormalizePath(string? path)
@@ -165,6 +168,12 @@ public sealed class JsonUserSettingsService : IUserSettingsService
 
         return path.Trim();
     }
+
+    private static string? NormalizeObsProgressFormat(string? format) =>
+        format is not null &&
+        ObsProgressTextFormatter.TryValidate(format, out _)
+            ? format
+            : null;
 
     private static int? ValidateSlotIndex(int? slotIndex) =>
         slotIndex is >= 0 and < CharacterSlot.MaximumSlotCount
@@ -206,5 +215,6 @@ public sealed class JsonUserSettingsService : IUserSettingsService
         bool? IsAutoMonitoringEnabled,
         string? Theme,
         bool? IsObsOutputEnabled,
-        string? ObsOutputDirectory);
+        string? ObsOutputDirectory,
+        string? ObsProgressFormat);
 }

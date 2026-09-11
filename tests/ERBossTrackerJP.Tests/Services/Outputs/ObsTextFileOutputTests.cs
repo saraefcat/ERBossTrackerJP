@@ -197,6 +197,46 @@ public sealed class ObsTextFileOutputTests
         }
     }
 
+    [Fact]
+    public async Task PublishAsync_UsesConfiguredProgressFormat()
+    {
+        string outputDirectory = CreateTestDirectory();
+
+        try
+        {
+            var output = new ObsTextFileOutput(outputDirectory);
+            Assert.True(output.TrySetProgressFormat(
+                "撃破 {defeated}/{total}体・残り{remaining}体・{percentage}%"));
+
+            await output.PublishAsync(new TrackerOutputUpdate(
+                CreateSnapshot(secondBossDefeated: false),
+                previousSnapshot: null,
+                DisplayLanguage.Japanese));
+
+            Assert.Equal(
+                "撃破 1/2体・残り1体・50.0%",
+                File.ReadAllText(Path.Combine(
+                    outputDirectory,
+                    ObsTextFileOutput.ProgressFileName)));
+        }
+        finally
+        {
+            DeleteTestDirectory(outputDirectory);
+        }
+    }
+
+    [Fact]
+    public void TrySetProgressFormat_InvalidValueKeepsCurrentFormat()
+    {
+        var output = new ObsTextFileOutput();
+        string original = output.ProgressFormat;
+
+        bool changed = output.TrySetProgressFormat("{unknown}");
+
+        Assert.False(changed);
+        Assert.Equal(original, output.ProgressFormat);
+    }
+
     private static TrackerSnapshot CreateSnapshot(
         bool secondBossDefeated,
         bool firstBossDefeated = true,

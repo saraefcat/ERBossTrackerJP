@@ -38,6 +38,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly AsyncRelayCommand _reloadCommand;
     private readonly AsyncRelayCommand _browseObsOutputFolderCommand;
     private readonly AsyncRelayCommand _testObsOutputCommand;
+    private readonly AsyncRelayCommand _applyObsProgressFormatCommand;
     private readonly CancellationTokenSource _obsOutputCancellationSource = new();
     private SaveFileCandidate? _selectedSaveCandidate;
     private CharacterSlot? _selectedCharacter;
@@ -60,6 +61,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private bool _isObsOutputEnabled;
     private ApplicationTheme _applicationTheme = ApplicationTheme.Dark;
     private string _obsOutputDirectory;
+    private string _obsProgressFormatDraft;
+    private string _obsProgressFormatStatusText = "適用済み";
     private string? _settingsSaveFilePath;
     private int? _settingsCharacterSlotIndex;
     private int? _pendingRestoredCharacterSlotIndex;
@@ -120,7 +123,14 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
                 settings.ObsOutputDirectory);
         }
 
+        if (settings.ObsProgressFormat is not null)
+        {
+            _ = obsTextFileOutput.TrySetProgressFormat(
+                settings.ObsProgressFormat);
+        }
+
         _obsOutputDirectory = obsTextFileOutput.OutputDirectory;
+        _obsProgressFormatDraft = obsTextFileOutput.ProgressFormat;
         _isObsOutputEnabled = settings.IsObsOutputEnabled;
         _obsOutputStatusText = _isObsOutputEnabled ? "進捗待ち" : "停止中";
         _settingsSaveFilePath = settings.SaveFilePath;
@@ -136,7 +146,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             _isAutoMonitoringEnabled,
             _applicationTheme,
             _isObsOutputEnabled,
-            _obsOutputDirectory);
+            _obsOutputDirectory,
+            obsTextFileOutput.ProgressFormat);
         _synchronizationContext = SynchronizationContext.Current;
         SaveCandidates = new ReadOnlyObservableCollection<SaveFileCandidate>(_saveCandidates);
         CharacterSlots = new ReadOnlyObservableCollection<CharacterSlot>(_characterSlots);
@@ -174,6 +185,9 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         _testObsOutputCommand = new AsyncRelayCommand(
             TestObsOutputAsync,
             () => !IsBusy && IsObsOutputEnabled && _trackerSnapshot is not null);
+        _applyObsProgressFormatCommand = new AsyncRelayCommand(
+            ApplyObsProgressFormatAsync,
+            CanApplyObsProgressFormat);
         _saveFileMonitor.ChangeDetected += OnSaveFileChangeDetected;
         _saveFileMonitor.MonitoringError += OnSaveFileMonitoringError;
     }
@@ -231,6 +245,9 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         _browseObsOutputFolderCommand;
 
     public AsyncRelayCommand TestObsOutputCommand => _testObsOutputCommand;
+
+    public AsyncRelayCommand ApplyObsProgressFormatCommand =>
+        _applyObsProgressFormatCommand;
 
     public bool IsAutoMonitoringEnabled
     {
@@ -311,6 +328,29 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     }
 
     public string ObsOutputDirectory => _obsOutputDirectory;
+
+    public string ObsProgressFormatDraft
+    {
+        get => _obsProgressFormatDraft;
+        set
+        {
+            value ??= string.Empty;
+
+            if (!SetProperty(ref _obsProgressFormatDraft, value))
+            {
+                return;
+            }
+
+            UpdateObsProgressFormatStatus();
+            _applyObsProgressFormatCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    public string ObsProgressFormatStatusText
+    {
+        get => _obsProgressFormatStatusText;
+        private set => SetProperty(ref _obsProgressFormatStatusText, value);
+    }
 
     public string ObsOutputStatusText
     {
@@ -475,7 +515,12 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     public IReadOnlyList<ObsPreviewItem> ObsPreviewItems =>
     [
         new(ObsTextFileOutput.ProgressFileName,
-            $"{Defeated} / {Total} ({ProgressPercentageText})"),
+            ObsProgressTextFormatter.Format(
+                _obsTextFileOutput.ProgressFormat,
+                Defeated,
+                Remaining,
+                Total,
+                ProgressPercentage)),
         new(ObsTextFileOutput.DefeatedFileName, Defeated.ToString()),
         new(ObsTextFileOutput.RemainingFileName, Remaining.ToString()),
         new(ObsTextFileOutput.TotalFileName, Total.ToString()),
@@ -508,6 +553,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             _reloadCommand.NotifyCanExecuteChanged();
             _browseObsOutputFolderCommand.NotifyCanExecuteChanged();
             _testObsOutputCommand.NotifyCanExecuteChanged();
+            _applyObsProgressFormatCommand.NotifyCanExecuteChanged();
             OnPropertyChanged(nameof(IsInteractionEnabled));
         }
     }
@@ -668,6 +714,55 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         return PublishObsOutputAsync(
             update,
             _obsOutputCancellationSource.Token);
+    }
+
+    public Task ApplyObsProgressFormatAsync()
+    {
+        if (!_obsTextFileOutput.TrySetProgressFormat(ObsProgressFormatDraft))
+        {
+            UpdateObsProgressFormatStatus();
+            return Task.CompletedTask;
+        }
+
+        ObsProgressFormatStatusText = "適用済み";
+        OnPropertyChanged(nameof(ObsPreviewItems));
+        _applyObsProgressFormatCommand.NotifyCanExecuteChanged();
+        PersistUserSettings();
+
+        if (IsObsOutputEnabled && _trackerSnapshot is not null)
+        {
+            QueueObsOutput(_trackerSnapshot, _trackerSnapshot);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private bool CanApplyObsProgressFormat() =>
+        !IsBusy &&
+        !string.Equals(
+            ObsProgressFormatDraft,
+            _obsTextFileOutput.ProgressFormat,
+            StringComparison.Ordinal) &&
+        ObsProgressTextFormatter.TryValidate(
+            ObsProgressFormatDraft,
+            out _);
+
+    private void UpdateObsProgressFormatStatus()
+    {
+        if (string.Equals(
+                ObsProgressFormatDraft,
+                _obsTextFileOutput.ProgressFormat,
+                StringComparison.Ordinal))
+        {
+            ObsProgressFormatStatusText = "適用済み";
+            return;
+        }
+
+        ObsProgressFormatStatusText = ObsProgressTextFormatter.TryValidate(
+            ObsProgressFormatDraft,
+            out string errorMessage)
+                ? "［書式を適用］で反映します。"
+                : errorMessage;
     }
 
     private async Task LoadSelectedSaveCoreAsync()
@@ -957,7 +1052,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             IsAutoMonitoringEnabled,
             _applicationTheme,
             IsObsOutputEnabled,
-            ObsOutputDirectory);
+            ObsOutputDirectory,
+            _obsTextFileOutput.ProgressFormat);
 
         if (settings == _lastPersistedSettings)
         {
