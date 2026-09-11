@@ -442,6 +442,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
+            Trace.WriteLine(
+                $"[MainWindowViewModel] Folder picker failed: {exception}");
             StatusMessage = "フォルダー選択画面を開けませんでした。";
             return;
         }
@@ -535,6 +537,10 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         }
 
         PersistUserSettings();
+        Trace.WriteLine(
+            $"[MainWindowViewModel] Save loaded: {loadedSave.SourcePath}; " +
+            $"Slots={loadedSave.CharacterSlots.Count}; " +
+            $"SelectedSlot={SelectedCharacter?.SlotIndex.ToString() ?? "none"}");
     }
 
     private void SetSelectedCharacter(CharacterSlot? character)
@@ -578,6 +584,10 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
+            Trace.WriteLine(
+                $"[MainWindowViewModel] Progress creation failed for slot " +
+                $"{character.SlotIndex}: {exception}");
+
             if (previousSnapshot?.Character.SlotIndex != character.SlotIndex)
             {
                 ClearTrackerSnapshot();
@@ -792,6 +802,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
+            Trace.WriteLine($"[MainWindowViewModel] Operation failed: {exception}");
             StatusMessage = GetErrorMessage(exception);
         }
         finally
