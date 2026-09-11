@@ -1173,8 +1173,24 @@
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Right"
                                        VerticalAlignment="Center"
-                                       Foreground="{DynamicResource TextMutedBrush}"
-                                       Text="適用または変更した内容は自動的に保存されます。" />
+                                       Text="{Binding SettingsSaveStatusText}"
+                                       TextWrapping="Wrap">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground"
+                                                Value="{DynamicResource TextMutedBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasSettingsSaveError}"
+                                                         Value="True">
+                                                <Setter Property="Foreground"
+                                                        Value="{DynamicResource WarningBrush}" />
+                                                <Setter Property="FontWeight"
+                                                        Value="SemiBold" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                             <StackPanel>
                                 <TextBlock FontSize="17"
                                            FontWeight="SemiBold"

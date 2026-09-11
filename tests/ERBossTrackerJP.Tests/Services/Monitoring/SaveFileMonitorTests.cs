@@ -89,6 +89,66 @@ public sealed class SaveFileMonitorTests
     }
 
     [Fact]
+    public async Task ChangeWithoutBaselineUpdate_IsReportedAgainUntilLoadSucceeds()
+    {
+        string path = CreateTemporaryPath();
+
+        try
+        {
+            await File.WriteAllBytesAsync(path, [0x01]);
+            var file = new FileInfo(path);
+            using var monitor = new SaveFileMonitor(
+                TimeSpan.FromMilliseconds(10),
+                TimeSpan.FromSeconds(30),
+                enableFileSystemWatcher: false,
+                enablePolling: false);
+            var firstNotification = new TaskCompletionSource(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+            var secondNotification = new TaskCompletionSource(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+            int eventCount = 0;
+            monitor.ChangeDetected += (_, _) =>
+            {
+                int count = Interlocked.Increment(ref eventCount);
+
+                if (count == 1)
+                {
+                    firstNotification.TrySetResult();
+                }
+                else if (count == 2)
+                {
+                    secondNotification.TrySetResult();
+                }
+            };
+            monitor.Start(
+                path,
+                file.Length,
+                new DateTimeOffset(file.LastWriteTimeUtc));
+
+            await File.WriteAllBytesAsync(path, [0x01, 0x02]);
+            monitor.NotifyFileSystemChange();
+            await firstNotification.Task.WaitAsync(TimeSpan.FromSeconds(2));
+
+            monitor.NotifyFileSystemChange();
+            await secondNotification.Task.WaitAsync(TimeSpan.FromSeconds(2));
+
+            file.Refresh();
+            monitor.UpdateBaseline(
+                path,
+                file.Length,
+                new DateTimeOffset(file.LastWriteTimeUtc));
+            monitor.NotifyFileSystemChange();
+            await Task.Delay(75);
+
+            Assert.Equal(2, Volatile.Read(ref eventCount));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
     public async Task Stop_CancelsPendingDebouncedNotification()
     {
         string path = CreateTemporaryPath();

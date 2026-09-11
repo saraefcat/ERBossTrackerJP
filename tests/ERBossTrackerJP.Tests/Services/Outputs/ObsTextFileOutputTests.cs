@@ -178,6 +178,93 @@ public sealed class ObsTextFileOutputTests
     }
 
     [Fact]
+    public async Task PublishAsync_FailedBatchRetainsLatestBossForRetry()
+    {
+        string outputDirectory = CreateTestDirectory();
+
+        try
+        {
+            var output = new ObsTextFileOutput(outputDirectory);
+            TrackerSnapshot previous = CreateSnapshot(secondBossDefeated: false);
+            TrackerSnapshot current = CreateSnapshot(secondBossDefeated: true);
+            await output.PublishAsync(new TrackerOutputUpdate(
+                previous,
+                previousSnapshot: null,
+                DisplayLanguage.Japanese));
+            string snapshotPath = Path.Combine(
+                outputDirectory,
+                ObsTextFileOutput.SnapshotFileName);
+
+            await using (var lockedSnapshot = new FileStream(
+                             snapshotPath,
+                             FileMode.Open,
+                             FileAccess.Read,
+                             FileShare.Read))
+            {
+                await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+                    output.PublishAsync(new TrackerOutputUpdate(
+                        current,
+                        previous,
+                        DisplayLanguage.Japanese)).AsTask());
+            }
+
+            await output.PublishAsync(new TrackerOutputUpdate(
+                current,
+                current,
+                DisplayLanguage.Japanese));
+
+            Assert.Equal(
+                "飛竜アギール",
+                File.ReadAllText(Path.Combine(
+                    outputDirectory,
+                    ObsTextFileOutput.LatestBossFileName)));
+        }
+        finally
+        {
+            DeleteTestDirectory(outputDirectory);
+        }
+    }
+
+    [Fact]
+    public async Task PublishAsync_CancellationStopsLockedFileRetry()
+    {
+        string outputDirectory = CreateTestDirectory();
+
+        try
+        {
+            var output = new ObsTextFileOutput(outputDirectory);
+            TrackerSnapshot previous = CreateSnapshot(secondBossDefeated: false);
+            TrackerSnapshot current = CreateSnapshot(secondBossDefeated: true);
+            await output.PublishAsync(new TrackerOutputUpdate(
+                previous,
+                previousSnapshot: null,
+                DisplayLanguage.Japanese));
+            string progressPath = Path.Combine(
+                outputDirectory,
+                ObsTextFileOutput.ProgressFileName);
+            await using var lockedProgress = new FileStream(
+                progressPath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read);
+            using var cancellationSource = new CancellationTokenSource(
+                TimeSpan.FromMilliseconds(25));
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                output.PublishAsync(
+                    new TrackerOutputUpdate(
+                        current,
+                        previous,
+                        DisplayLanguage.Japanese),
+                    cancellationSource.Token).AsTask());
+        }
+        finally
+        {
+            DeleteTestDirectory(outputDirectory);
+        }
+    }
+
+    [Fact]
     public void TrySetOutputDirectory_RejectsRelativePathWithoutChangingTarget()
     {
         string outputDirectory = CreateTestDirectory();

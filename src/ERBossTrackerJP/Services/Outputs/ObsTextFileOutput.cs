@@ -157,11 +157,15 @@ public sealed class ObsTextFileOutput : IObsTextFileOutput
                 percentage,
                 progressFormat);
 
+            // Keep the detected transition even when one of the output files is
+            // temporarily unavailable. A later "re-output current values" call
+            // compares the same snapshot to itself and therefore relies on this
+            // state to restore latest_boss.txt.
+            _latestBossIds = nextLatestBossIds.ToArray();
             await WriteFilesAtomicallyAsync(
                 outputDirectory,
                 files,
                 cancellationToken).ConfigureAwait(false);
-            _latestBossIds = nextLatestBossIds.ToArray();
             System.Diagnostics.Trace.WriteLine(
                 $"[ObsTextFileOutput] Published: {outputDirectory}; " +
                 $"Defeated={snapshot.Defeated}; Total={snapshot.Total}; " +
@@ -321,12 +325,16 @@ public sealed class ObsTextFileOutput : IObsTextFileOutput
 
         for (int attempt = 1; ; attempt++)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             try
             {
                 File.Move(temporaryPath, targetPath, overwrite: true);
                 return;
             }
-            catch (IOException) when (attempt < maximumAttempts)
+            catch (Exception exception) when (
+                attempt < maximumAttempts &&
+                exception is IOException or UnauthorizedAccessException)
             {
                 await Task.Delay(
                     TimeSpan.FromMilliseconds(50 * attempt),

@@ -384,6 +384,36 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public void SettingsSaveFailure_IsShownAndClearedAfterSuccessfulRetry()
+    {
+        var settingsService = new StubUserSettingsService
+        {
+            CanSave = false,
+        };
+        using var viewModel = CreateViewModel(
+            new StubSaveFileLocator(),
+            new StubSaveLoadService(),
+            userSettingsService: settingsService);
+
+        viewModel.DisplayLanguage = DisplayLanguage.English;
+
+        Assert.True(viewModel.HasSettingsSaveError);
+        Assert.Contains(
+            "設定を保存できませんでした",
+            viewModel.SettingsSaveStatusText,
+            StringComparison.Ordinal);
+
+        settingsService.CanSave = true;
+        viewModel.IsDarkMode = false;
+
+        Assert.False(viewModel.HasSettingsSaveError);
+        Assert.Equal(ApplicationTheme.Light, settingsService.LastSaved?.Theme);
+        Assert.Equal(
+            "適用または変更した内容は自動的に保存されます。",
+            viewModel.SettingsSaveStatusText);
+    }
+
+    [Fact]
     public void Theme_DefaultsToDarkAndSwitchesImmediately()
     {
         var settingsService = new StubUserSettingsService();
@@ -432,6 +462,43 @@ public sealed class MainWindowViewModelTests
         Assert.Equal(DisplayLanguage.Japanese, update.DisplayLanguage);
         Assert.Equal("D:\\stream-overlay", obsOutput.OutputDirectory);
         Assert.Equal("出力済み", viewModel.ObsOutputStatusText);
+    }
+
+    [Fact]
+    public async Task DisablingObsOutput_CancelsInFlightPublish()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "OBS Hero", 75)));
+        var obsOutput = new StubObsTextFileOutput();
+        using var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            obsTextFileOutput: obsOutput);
+        await viewModel.InitializeAsync();
+        var publishStarted = new TaskCompletionSource(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        var cancellationObserved = new TaskCompletionSource(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        obsOutput.PublishHandler = (_, cancellationToken) =>
+        {
+            publishStarted.TrySetResult();
+            cancellationToken.Register(
+                () => cancellationObserved.TrySetResult());
+            return new ValueTask(Task.Delay(
+                Timeout.InfiniteTimeSpan,
+                cancellationToken));
+        };
+
+        viewModel.IsObsOutputEnabled = true;
+        await publishStarted.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        viewModel.IsObsOutputEnabled = false;
+
+        await cancellationObserved.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        Assert.Equal("停止中", viewModel.ObsOutputStatusText);
     }
 
     [Fact]
@@ -671,9 +738,14 @@ public sealed class MainWindowViewModelTests
                     candidate.FilePath,
                     new CharacterSlot(0, "Binding Hero", 30)));
                 var themeService = new ApplicationThemeService();
+                var settingsService = new StubUserSettingsService
+                {
+                    CanSave = false,
+                };
                 viewModel = CreateViewModel(
                     locator,
                     loadService,
+                    userSettingsService: settingsService,
                     applicationThemeService: themeService);
                 viewModel.InitializeAsync().GetAwaiter().GetResult();
                 window = new MainWindow
@@ -780,6 +852,11 @@ public sealed class MainWindowViewModelTests
                     settingsTab,
                     System.Windows.Controls.TextBox.TextProperty,
                     nameof(MainWindowViewModel.ObsProgressFormatDraft));
+                AssertSingleBinding<System.Windows.Controls.TextBlock>(
+                    settingsTab,
+                    System.Windows.Controls.TextBlock.TextProperty,
+                    nameof(MainWindowViewModel.SettingsSaveStatusText));
+                Assert.True(viewModel.HasSettingsSaveError);
 
                 var darkBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     application.Resources["AppBackgroundBrush"]);
@@ -1106,10 +1183,17 @@ public sealed class MainWindowViewModelTests
     {
         public UserSettings? LastSaved { get; private set; }
 
+        public bool CanSave { get; set; } = true;
+
         public UserSettings Load() => settings ?? UserSettings.Default;
 
         public bool TrySave(UserSettings userSettings)
         {
+            if (!CanSave)
+            {
+                return false;
+            }
+
             LastSaved = userSettings;
             return true;
         }
@@ -1147,6 +1231,8 @@ public sealed class MainWindowViewModelTests
 
         public Exception? NextException { get; set; }
 
+        public Func<TrackerOutputUpdate, CancellationToken, ValueTask>? PublishHandler { get; set; }
+
         public bool TrySetOutputDirectory(string outputDirectory)
         {
             OutputDirectory = outputDirectory;
@@ -1170,6 +1256,11 @@ public sealed class MainWindowViewModelTests
             TrackerOutputUpdate update,
             CancellationToken cancellationToken = default)
         {
+            if (PublishHandler is not null)
+            {
+                return PublishHandler(update, cancellationToken);
+            }
+
             if (NextException is not null)
             {
                 Exception exception = NextException;

@@ -19,7 +19,8 @@ public sealed class SaveFileMonitor : ISaveFileMonitor
     private Timer? _pollTimer;
     private Timer? _debounceTimer;
     private string? _filePath;
-    private SaveFileStamp? _lastObservedStamp;
+    private SaveFileStamp? _baselineStamp;
+    private SaveFileStamp? _pendingStamp;
     private bool _disposed;
 
     public SaveFileMonitor(
@@ -109,9 +110,10 @@ public sealed class SaveFileMonitor : ISaveFileMonitor
         {
             StopCore();
             _filePath = fullPath;
-            _lastObservedStamp = new SaveFileStamp(
+            _baselineStamp = new SaveFileStamp(
                 fileSize,
                 lastWriteTimeUtc.UtcDateTime);
+            _pendingStamp = null;
 
             if (_enableFileSystemWatcher)
             {
@@ -150,9 +152,10 @@ public sealed class SaveFileMonitor : ISaveFileMonitor
                     "The supplied path is not currently being monitored.");
             }
 
-            _lastObservedStamp = new SaveFileStamp(
+            _baselineStamp = new SaveFileStamp(
                 fileSize,
                 lastWriteTimeUtc.UtcDateTime);
+            _pendingStamp = null;
             _debounceTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
         }
     }
@@ -206,7 +209,8 @@ public sealed class SaveFileMonitor : ISaveFileMonitor
     {
         lock (_syncRoot)
         {
-            _lastObservedStamp = null;
+            _baselineStamp = null;
+            _pendingStamp = null;
             _debounceTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
         }
     }
@@ -258,12 +262,13 @@ public sealed class SaveFileMonitor : ISaveFileMonitor
         {
             if (_filePath is null ||
                 !string.Equals(_filePath, filePath, StringComparison.OrdinalIgnoreCase) ||
-                _lastObservedStamp == stamp)
+                _baselineStamp == stamp ||
+                _pendingStamp == stamp)
             {
                 return;
             }
 
-            _lastObservedStamp = stamp;
+            _pendingStamp = stamp;
             _debounceTimer ??= new Timer(
                 static state => ((SaveFileMonitor)state!).RaiseChangeDetected(),
                 this,
@@ -281,7 +286,8 @@ public sealed class SaveFileMonitor : ISaveFileMonitor
         lock (_syncRoot)
         {
             filePath = _filePath;
-            stamp = _lastObservedStamp;
+            stamp = _pendingStamp;
+            _pendingStamp = null;
         }
 
         if (filePath is null || stamp is null)
@@ -317,7 +323,8 @@ public sealed class SaveFileMonitor : ISaveFileMonitor
         _debounceTimer?.Dispose();
         _debounceTimer = null;
         _filePath = null;
-        _lastObservedStamp = null;
+        _baselineStamp = null;
+        _pendingStamp = null;
     }
 
     private static string ResolveFullPath(string filePath)

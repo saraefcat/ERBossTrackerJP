@@ -39,7 +39,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly AsyncRelayCommand _browseObsOutputFolderCommand;
     private readonly AsyncRelayCommand _testObsOutputCommand;
     private readonly AsyncRelayCommand _applyObsProgressFormatCommand;
-    private readonly CancellationTokenSource _obsOutputCancellationSource = new();
+    private CancellationTokenSource _obsOutputCancellationSource = new();
     private SaveFileCandidate? _selectedSaveCandidate;
     private CharacterSlot? _selectedCharacter;
     private RegionListItem? _selectedRegion;
@@ -70,6 +70,9 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private string _monitoringStatusText = "停止中";
     private string _obsOutputStatusText = "停止中";
     private string _obsLastOutputTimeText = "未出力";
+    private string _settingsSaveStatusText =
+        "適用または変更した内容は自動的に保存されます。";
+    private bool _hasSettingsSaveError;
     private IReadOnlyList<string> _latestObsBossIds = [];
     private string _statusMessage = "セーブファイルを検索しています…";
     private bool _isProgressStatusMessageVisible = true;
@@ -313,6 +316,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
             if (!value)
             {
+                CancelPendingObsOutput();
                 ObsOutputStatusText = "停止中";
             }
             else if (_trackerSnapshot is null)
@@ -366,6 +370,18 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     {
         get => _obsLastOutputTimeText;
         private set => SetProperty(ref _obsLastOutputTimeText, value);
+    }
+
+    public string SettingsSaveStatusText
+    {
+        get => _settingsSaveStatusText;
+        private set => SetProperty(ref _settingsSaveStatusText, value);
+    }
+
+    public bool HasSettingsSaveError
+    {
+        get => _hasSettingsSaveError;
+        private set => SetProperty(ref _hasSettingsSaveError, value);
     }
 
     public string MonitoringStatusText
@@ -1076,13 +1092,32 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
         if (settings == _lastPersistedSettings)
         {
+            HasSettingsSaveError = false;
+            SettingsSaveStatusText =
+                "適用または変更した内容は自動的に保存されます。";
             return;
         }
 
         if (_userSettingsService.TrySave(settings))
         {
             _lastPersistedSettings = settings;
+            HasSettingsSaveError = false;
+            SettingsSaveStatusText =
+                "適用または変更した内容は自動的に保存されます。";
+            return;
         }
+
+        HasSettingsSaveError = true;
+        SettingsSaveStatusText =
+            "設定を保存できませんでした。変更は再起動後に戻る可能性があります。";
+    }
+
+    private void CancelPendingObsOutput()
+    {
+        CancellationTokenSource previousSource = _obsOutputCancellationSource;
+        _obsOutputCancellationSource = new CancellationTokenSource();
+        previousSource.Cancel();
+        previousSource.Dispose();
     }
 
     private static bool PathsEqual(string? left, string? right)
@@ -1327,6 +1362,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         try
         {
             await _obsTextFileOutput.PublishAsync(update, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             PostToSynchronizationContext(() =>
             {
                 if (!_disposed && IsObsOutputEnabled)
@@ -1379,6 +1415,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
         _disposed = true;
         _obsOutputCancellationSource.Cancel();
+        _obsOutputCancellationSource.Dispose();
         _saveFileMonitor.ChangeDetected -= OnSaveFileChangeDetected;
         _saveFileMonitor.MonitoringError -= OnSaveFileMonitoringError;
         _saveFileMonitor.Dispose();
