@@ -4,6 +4,7 @@ using ERBossTrackerJP.Save.Exceptions;
 using ERBossTrackerJP.Services.Dialogs;
 using ERBossTrackerJP.Services.Monitoring;
 using ERBossTrackerJP.Services.SaveFiles;
+using ERBossTrackerJP.Services.Settings;
 using ERBossTrackerJP.Services.Tracking;
 using ERBossTrackerJP.ViewModels;
 
@@ -285,17 +286,104 @@ public sealed class MainWindowViewModelTests
         Assert.Equal("停止中", viewModel.MonitoringStatusText);
     }
 
+    [Fact]
+    public async Task InitializeAsync_RestoresValidSaveCharacterLanguageAndMonitoringSetting()
+    {
+        SaveFileCandidate candidate = CreateCandidate("D:\\custom\\ER0000.sl2");
+        var locator = new StubSaveFileLocator(folderCandidates: [candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(1, "First", 40),
+            new CharacterSlot(4, "Restored", 120)));
+        var monitor = new StubSaveFileMonitor();
+        var settingsService = new StubUserSettingsService(
+            new UserSettings(
+                candidate.FilePath,
+                4,
+                DisplayLanguage.English,
+                IsAutoMonitoringEnabled: false));
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            saveFileMonitor: monitor,
+            userSettingsService: settingsService);
+
+        await viewModel.InitializeAsync();
+
+        Assert.Equal("D:\\custom", locator.ReceivedFolderPath);
+        Assert.Equal(candidate, viewModel.SelectedSaveCandidate);
+        Assert.Equal(4, viewModel.SelectedCharacter?.SlotIndex);
+        Assert.Equal(DisplayLanguage.English, viewModel.DisplayLanguage);
+        Assert.False(viewModel.IsAutoMonitoringEnabled);
+        Assert.False(monitor.IsRunning);
+        Assert.Contains(viewModel.Bosses, boss => boss.Name == "Tree Sentinel");
+    }
+
+    [Fact]
+    public async Task InitializeAsync_InvalidSavedPathFallsBackWithoutApplyingSavedSlot()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "Fallback", 20),
+            new CharacterSlot(4, "Unrelated", 80)));
+        var settingsService = new StubUserSettingsService(
+            new UserSettings("D:\\missing\\ER0000.sl2", 4));
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            userSettingsService: settingsService);
+
+        await viewModel.InitializeAsync();
+
+        Assert.Equal(0, viewModel.SelectedCharacter?.SlotIndex);
+        Assert.Equal(candidate.FilePath, settingsService.LastSaved?.SaveFilePath);
+        Assert.Equal(0, settingsService.LastSaved?.CharacterSlotIndex);
+    }
+
+    [Fact]
+    public async Task ChangedUserPreferences_ArePersistedTogether()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "First", 20),
+            new CharacterSlot(3, "Preferred", 90)));
+        var settingsService = new StubUserSettingsService();
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            userSettingsService: settingsService);
+        await viewModel.InitializeAsync();
+
+        viewModel.SelectedCharacter = viewModel.CharacterSlots[1];
+        viewModel.DisplayLanguage = DisplayLanguage.English;
+        viewModel.IsAutoMonitoringEnabled = false;
+
+        Assert.Equal(candidate.FilePath, settingsService.LastSaved?.SaveFilePath);
+        Assert.Equal(3, settingsService.LastSaved?.CharacterSlotIndex);
+        Assert.Equal(DisplayLanguage.English, settingsService.LastSaved?.DisplayLanguage);
+        Assert.False(settingsService.LastSaved?.IsAutoMonitoringEnabled);
+    }
+
     private static MainWindowViewModel CreateViewModel(
         ISaveFileLocator locator,
         ISaveLoadService loadService,
         IFolderPickerService? folderPicker = null,
         ISaveFileMonitor? saveFileMonitor = null,
+        IUserSettingsService? userSettingsService = null,
         ITrackerSnapshotService? trackerSnapshotService = null) =>
         new(
             locator,
             loadService,
             folderPicker ?? new StubFolderPicker(null),
             saveFileMonitor ?? new StubSaveFileMonitor(),
+            userSettingsService ?? new StubUserSettingsService(),
             trackerSnapshotService ?? new StubTrackerSnapshotService(),
             new TrackerDisplayService());
 
@@ -444,6 +532,20 @@ public sealed class MainWindowViewModelTests
             MonitoringError?.Invoke(
                 this,
                 new SaveFileMonitorErrorEventArgs(exception));
+    }
+
+    private sealed class StubUserSettingsService(
+        UserSettings? settings = null) : IUserSettingsService
+    {
+        public UserSettings? LastSaved { get; private set; }
+
+        public UserSettings Load() => settings ?? UserSettings.Default;
+
+        public bool TrySave(UserSettings userSettings)
+        {
+            LastSaved = userSettings;
+            return true;
+        }
     }
 
     private sealed class StubTrackerSnapshotService : ITrackerSnapshotService

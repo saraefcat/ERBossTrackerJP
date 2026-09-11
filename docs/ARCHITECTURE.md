@@ -11,7 +11,7 @@
 | `ERBossTrackerJP.Core` | 言語非依存モデル、進捗スナップショット、出力契約 | なし |
 | `ERBossTrackerJP.Save` | BND4、スロット、イベントフラグの読み取り | Core |
 | `ERBossTrackerJP` | WPF View、ViewModel、Windows固有サービス、構成ルート | Core、Save |
-| `ERBossTrackerJP.Tests` | CoreとSaveの単体テスト | Core、Save |
+| `ERBossTrackerJP.Tests` | Core、Save、WPF側サービスとViewModelの単体テスト | Core、Save、ERBossTrackerJP |
 
 依存方向は次のとおりとする。
 
@@ -36,6 +36,8 @@ SaveLoadService -> TrackerSnapshotService -> BossProgressService
 FileSystemWatcher ----> SaveFileMonitor ----> MainWindowViewModel
 2秒ごとの定期確認 ---------^                      |
                                                    +--> 既存の再読み込み経路
+
+settings.json <----> JsonUserSettingsService <----> MainWindowViewModel
 ```
 
 `SaveLoadService`はメモリスナップショットとキャラクター解析を統合し、公開結果にはパス、更新日時、ファイルサイズ、キャラクター一覧だけを含める。生のセーブデータは`LoadedSaveFile`内部に保持し、同じスナップショットからイベントフラグを読むサービス処理だけが利用する。
@@ -48,6 +50,8 @@ WPFプロジェクトの`TrackerSnapshotService`は、`LoadedSaveFile`から選�
 
 `SaveFileMonitor`は監視対象ファイルだけを`FileSystemWatcher`で監視し、通知漏れに備えて2秒ごとにファイルサイズと最終更新日時も確認する。異なる更新を検出すると750ミリ秒のデバウンスを開始し、その間の追加通知では待機時間を延長する。ViewModelは通知をUIスレッドへ戻し、手動再読み込みと同じ経路を呼び出す。読み込み中に次の更新を検出した場合は1回にまとめて後続読み込みを実行する。
 
+`JsonUserSettingsService`は`%LOCALAPPDATA%\ERBossTrackerJP\settings.json`を境界とし、最後に正常に読み込んだセーブパス、選択キャラクタースロット、表示言語、自動監視設定だけを一時ファイル経由で保存する。設定の破損、未対応スキーマ、読み書き失敗は起動や画面操作を停止させず、既定値または直前のメモリ上の設定を利用する。保存済みパスが現在も同じセーブ候補として検出できた場合だけスロットを復元し、既定検索へフォールバックした別セーブには適用しない。
+
 ## 設計規則
 
 - Viewのコードビハインドには表示固有処理以外を置かない。
@@ -58,7 +62,7 @@ WPFプロジェクトの`TrackerSnapshotService`は、`LoadedSaveFile`から選�
 - `TrackerSnapshot`は構築時にコレクションをコピーし、購読者へ変更可能な一覧を渡さない。
 - 将来のOBS出力は`ITrackerOutput`を実装し、WPFコントロールを読み取らない。
 
-初期画面は起動時に既定場所を探索し、候補があれば最新のセーブからキャラクター一覧と選択キャラクターの進捗を読み込む。見つからない場合はフォルダー参照を案内する。キャラクター選択、地域選択、撃破状態、本編／DLC、名前検索、表示言語の変更はViewModelから`TrackerDisplayService`へ渡し、同じスナップショットを再解析せず表示だけを更新する。再読み込みに失敗してもViewModelは直前の正常なキャラクター一覧と進捗を消去せず、日本語の状態メッセージだけを更新する。
+初期画面は起動時に保存済みパスを先に確認し、有効なら同じセーブとキャラクタースロットを復元する。無効または未保存なら既定場所を探索し、候補があれば最新のセーブからキャラクター一覧と選択キャラクターの進捗を読み込む。見つからない場合はフォルダー参照を案内する。キャラクター選択、地域選択、撃破状態、本編／DLC、名前検索、表示言語の変更はViewModelから`TrackerDisplayService`へ渡し、同じスナップショットを再解析せず表示だけを更新する。再読み込みに失敗してもViewModelは直前の正常なキャラクター一覧と進捗を消去せず、日本語の状態メッセージだけを更新する。
 
 ## ファイル読み込み境界
 

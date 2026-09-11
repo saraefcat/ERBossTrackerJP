@@ -5,6 +5,7 @@ using ERBossTrackerJP.Save.Progress;
 using ERBossTrackerJP.Services.Dialogs;
 using ERBossTrackerJP.Services.Monitoring;
 using ERBossTrackerJP.Services.SaveFiles;
+using ERBossTrackerJP.Services.Settings;
 using ERBossTrackerJP.Services.Tracking;
 using ERBossTrackerJP.ViewModels;
 using ERBossTrackerJP.Views;
@@ -29,6 +30,7 @@ public partial class App : Application
             saveLoadService,
             new FolderPickerService(),
             new SaveFileMonitor(),
+            new JsonUserSettingsService(),
             trackerSnapshotService,
             new TrackerDisplayService());
         var window = new MainWindow

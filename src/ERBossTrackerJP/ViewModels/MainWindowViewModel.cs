@@ -8,6 +8,7 @@ using ERBossTrackerJP.Save.Exceptions;
 using ERBossTrackerJP.Services.Dialogs;
 using ERBossTrackerJP.Services.Monitoring;
 using ERBossTrackerJP.Services.SaveFiles;
+using ERBossTrackerJP.Services.Settings;
 using ERBossTrackerJP.Services.Tracking;
 
 namespace ERBossTrackerJP.ViewModels;
@@ -18,6 +19,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly ISaveLoadService _saveLoadService;
     private readonly IFolderPickerService _folderPickerService;
     private readonly ISaveFileMonitor _saveFileMonitor;
+    private readonly IUserSettingsService _userSettingsService;
     private readonly ITrackerSnapshotService _trackerSnapshotService;
     private readonly TrackerDisplayService _trackerDisplayService;
     private readonly SynchronizationContext? _synchronizationContext;
@@ -45,7 +47,12 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private bool _pendingAutomaticReload;
     private bool _isSynchronizingRegionSelection;
     private bool _isUpdatingRegionOptions;
+    private bool _suppressSettingsSave;
     private bool _disposed;
+    private string? _settingsSaveFilePath;
+    private int? _settingsCharacterSlotIndex;
+    private int? _pendingRestoredCharacterSlotIndex;
+    private UserSettings _lastPersistedSettings = UserSettings.Default;
     private string _monitoringStatusText = "停止中";
     private string _statusMessage = "セーブファイルを検索しています…";
     private string _saveLastWriteTimeText = "未読み込み";
@@ -55,6 +62,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         ISaveLoadService saveLoadService,
         IFolderPickerService folderPickerService,
         ISaveFileMonitor saveFileMonitor,
+        IUserSettingsService userSettingsService,
         ITrackerSnapshotService trackerSnapshotService,
         TrackerDisplayService trackerDisplayService)
     {
@@ -62,6 +70,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         ArgumentNullException.ThrowIfNull(saveLoadService);
         ArgumentNullException.ThrowIfNull(folderPickerService);
         ArgumentNullException.ThrowIfNull(saveFileMonitor);
+        ArgumentNullException.ThrowIfNull(userSettingsService);
         ArgumentNullException.ThrowIfNull(trackerSnapshotService);
         ArgumentNullException.ThrowIfNull(trackerDisplayService);
 
@@ -69,8 +78,26 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         _saveLoadService = saveLoadService;
         _folderPickerService = folderPickerService;
         _saveFileMonitor = saveFileMonitor;
+        _userSettingsService = userSettingsService;
         _trackerSnapshotService = trackerSnapshotService;
         _trackerDisplayService = trackerDisplayService;
+        UserSettings settings = userSettingsService.Load();
+        _displayLanguage = settings.DisplayLanguage is
+            DisplayLanguage.Japanese or DisplayLanguage.English
+                ? settings.DisplayLanguage
+                : DisplayLanguage.Japanese;
+        _isAutoMonitoringEnabled = settings.IsAutoMonitoringEnabled;
+        _settingsSaveFilePath = settings.SaveFilePath;
+        _settingsCharacterSlotIndex = IsValidCharacterSlotIndex(
+            settings.CharacterSlotIndex)
+                ? settings.CharacterSlotIndex
+                : null;
+        _pendingRestoredCharacterSlotIndex = _settingsCharacterSlotIndex;
+        _lastPersistedSettings = new UserSettings(
+            _settingsSaveFilePath,
+            _settingsCharacterSlotIndex,
+            _displayLanguage,
+            _isAutoMonitoringEnabled);
         _synchronizationContext = SynchronizationContext.Current;
         SaveCandidates = new ReadOnlyObservableCollection<SaveFileCandidate>(_saveCandidates);
         CharacterSlots = new ReadOnlyObservableCollection<CharacterSlot>(_characterSlots);
@@ -170,6 +197,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
                 _pendingAutomaticReload = false;
                 _saveFileMonitor.Stop();
                 MonitoringStatusText = "停止中";
+                PersistUserSettings();
                 return;
             }
 
@@ -177,6 +205,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             {
                 ConfigureMonitoring(_loadedSave);
             }
+
+            PersistUserSettings();
         }
     }
 
@@ -244,6 +274,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
             RebuildRegionOptions();
             RefreshDisplay();
+            PersistUserSettings();
         }
     }
 
@@ -358,26 +389,46 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         private set => SetProperty(ref _saveLastWriteTimeText, value);
     }
 
-    public Task InitializeAsync() => RefreshDefaultCandidatesAsync();
+    public Task InitializeAsync() => RunOperationAsync(InitializeCoreAsync);
 
-    public Task RefreshDefaultCandidatesAsync() =>
-        RunOperationAsync(async () =>
+    public Task RefreshDefaultCandidatesAsync()
+    {
+        _pendingRestoredCharacterSlotIndex = null;
+        return RunOperationAsync(RefreshDefaultCandidatesCoreAsync);
+    }
+
+    private async Task InitializeCoreAsync()
+    {
+        if (TryFindSavedCandidate(out IReadOnlyList<SaveFileCandidate> candidates,
+                out SaveFileCandidate? savedCandidate))
         {
-            IReadOnlyList<SaveFileCandidate> candidates =
-                _saveFileLocator.FindDefaultCandidates();
-
-            if (candidates.Count == 0)
-            {
-                ReplaceSaveCandidates([]);
-                StatusMessage =
-                    "既定の保存場所にER0000.sl2が見つかりません。［フォルダー参照］から場所を指定してください。";
-                return;
-            }
-
             ReplaceSaveCandidates(candidates);
-            SelectedSaveCandidate = candidates[0];
+            SelectedSaveCandidate = savedCandidate;
             await LoadSelectedSaveCoreAsync();
-        });
+            return;
+        }
+
+        _pendingRestoredCharacterSlotIndex = null;
+        await RefreshDefaultCandidatesCoreAsync();
+    }
+
+    private async Task RefreshDefaultCandidatesCoreAsync()
+    {
+        IReadOnlyList<SaveFileCandidate> candidates =
+            _saveFileLocator.FindDefaultCandidates();
+
+        if (candidates.Count == 0)
+        {
+            ReplaceSaveCandidates([]);
+            StatusMessage =
+                "既定の保存場所にER0000.sl2が見つかりません。［フォルダー参照］から場所を指定してください。";
+            return;
+        }
+
+        ReplaceSaveCandidates(candidates);
+        SelectedSaveCandidate = candidates[0];
+        await LoadSelectedSaveCoreAsync();
+    }
 
     public async Task BrowseFolderAsync()
     {
@@ -402,6 +453,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
         await RunOperationAsync(async () =>
         {
+            _pendingRestoredCharacterSlotIndex = null;
             IReadOnlyList<SaveFileCandidate> candidates =
                 _saveFileLocator.FindCandidatesInFolder(selectedFolder);
 
@@ -430,36 +482,59 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        int? previousSlotIndex = SelectedCharacter?.SlotIndex;
+        int? previousSlotIndex =
+            SelectedCharacter?.SlotIndex ?? _pendingRestoredCharacterSlotIndex;
         LoadedSaveFile loadedSave = await _saveLoadService.LoadAsync(candidate.FilePath);
+        _pendingRestoredCharacterSlotIndex = null;
         CharacterSlot? nextSelection = previousSlotIndex.HasValue
             ? loadedSave.CharacterSlots.FirstOrDefault(
                 slot => slot.SlotIndex == previousSlotIndex.Value)
             : loadedSave.CharacterSlots.FirstOrDefault();
 
-        _loadedSave = loadedSave;
-        ReplaceCharacterSlots(loadedSave.CharacterSlots);
-        SaveLastWriteTimeText =
-            loadedSave.LastWriteTimeUtc.ToLocalTime().ToString("yyyy/MM/dd HH:mm:ss");
-        ConfigureMonitoring(loadedSave);
+        bool isSameSettingsSave = PathsEqual(
+            _settingsSaveFilePath,
+            loadedSave.SourcePath);
+        _settingsSaveFilePath = loadedSave.SourcePath;
 
-        if (loadedSave.CharacterSlots.Count == 0)
+        if (!isSameSettingsSave)
         {
-            SetSelectedCharacter(null);
-            ClearTrackerSnapshot();
-            StatusMessage = "有効なキャラクターが見つかりませんでした。";
+            _settingsCharacterSlotIndex = null;
         }
-        else if (previousSlotIndex.HasValue && nextSelection is null)
+
+        _suppressSettingsSave = true;
+
+        try
         {
-            SetSelectedCharacter(null);
-            ClearTrackerSnapshot();
-            StatusMessage =
-                "選択中だったキャラクタースロットが無効になりました。別のキャラクターを選択してください。";
+            _loadedSave = loadedSave;
+            ReplaceCharacterSlots(loadedSave.CharacterSlots);
+            SaveLastWriteTimeText =
+                loadedSave.LastWriteTimeUtc.ToLocalTime().ToString("yyyy/MM/dd HH:mm:ss");
+            ConfigureMonitoring(loadedSave);
+
+            if (loadedSave.CharacterSlots.Count == 0)
+            {
+                SetSelectedCharacter(null);
+                ClearTrackerSnapshot();
+                StatusMessage = "有効なキャラクターが見つかりませんでした。";
+            }
+            else if (previousSlotIndex.HasValue && nextSelection is null)
+            {
+                SetSelectedCharacter(null);
+                ClearTrackerSnapshot();
+                StatusMessage =
+                    "選択中だったキャラクタースロットが無効になりました。別のキャラクターを選択してください。";
+            }
+            else
+            {
+                SetSelectedCharacter(nextSelection);
+            }
         }
-        else
+        finally
         {
-            SetSelectedCharacter(nextSelection);
+            _suppressSettingsSave = false;
         }
+
+        PersistUserSettings();
     }
 
     private void SetSelectedCharacter(CharacterSlot? character)
@@ -478,7 +553,9 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             return;
         }
 
+        _settingsCharacterSlotIndex = character.SlotIndex;
         LoadTrackerSnapshot(character);
+        PersistUserSettings();
     }
 
     private void LoadTrackerSnapshot(CharacterSlot character)
@@ -612,6 +689,93 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         OnPropertyChanged(nameof(VisibleBossCountText));
         OnPropertyChanged(nameof(TrackerLastUpdateText));
     }
+
+    private bool TryFindSavedCandidate(
+        out IReadOnlyList<SaveFileCandidate> candidates,
+        out SaveFileCandidate? savedCandidate)
+    {
+        candidates = [];
+        savedCandidate = null;
+
+        if (string.IsNullOrWhiteSpace(_settingsSaveFilePath))
+        {
+            return false;
+        }
+
+        try
+        {
+            string savedPath = Path.GetFullPath(_settingsSaveFilePath);
+            string? directoryPath = Path.GetDirectoryName(savedPath);
+
+            if (string.IsNullOrWhiteSpace(directoryPath))
+            {
+                return false;
+            }
+
+            candidates = _saveFileLocator.FindCandidatesInFolder(directoryPath);
+            savedCandidate = candidates.FirstOrDefault(
+                candidate => PathsEqual(candidate.FilePath, savedPath));
+            return savedCandidate is not null;
+        }
+        catch (Exception exception) when (
+            exception is ArgumentException or NotSupportedException or IOException or
+            UnauthorizedAccessException)
+        {
+            Trace.WriteLine(
+                $"[MainWindowViewModel] Saved path restore failed: {exception}");
+            candidates = [];
+            savedCandidate = null;
+            return false;
+        }
+    }
+
+    private void PersistUserSettings()
+    {
+        if (_suppressSettingsSave || _disposed)
+        {
+            return;
+        }
+
+        var settings = new UserSettings(
+            _settingsSaveFilePath,
+            _settingsCharacterSlotIndex,
+            DisplayLanguage,
+            IsAutoMonitoringEnabled);
+
+        if (settings == _lastPersistedSettings)
+        {
+            return;
+        }
+
+        if (_userSettingsService.TrySave(settings))
+        {
+            _lastPersistedSettings = settings;
+        }
+    }
+
+    private static bool PathsEqual(string? left, string? right)
+    {
+        if (string.IsNullOrWhiteSpace(left) || string.IsNullOrWhiteSpace(right))
+        {
+            return false;
+        }
+
+        try
+        {
+            return string.Equals(
+                Path.GetFullPath(left),
+                Path.GetFullPath(right),
+                StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception exception) when (
+            exception is ArgumentException or NotSupportedException or IOException)
+        {
+            return false;
+        }
+    }
+
+    private static bool IsValidCharacterSlotIndex(int? slotIndex) =>
+        slotIndex is >= 0 and < CharacterSlot.MaximumSlotCount;
 
     private async Task RunOperationAsync(Func<Task> operation)
     {
