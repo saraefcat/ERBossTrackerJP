@@ -9,6 +9,7 @@ using ERBossTrackerJP.Services.Dialogs;
 using ERBossTrackerJP.Services.Monitoring;
 using ERBossTrackerJP.Services.SaveFiles;
 using ERBossTrackerJP.Services.Settings;
+using ERBossTrackerJP.Services.Theming;
 using ERBossTrackerJP.Services.Tracking;
 
 namespace ERBossTrackerJP.ViewModels;
@@ -20,6 +21,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly IFolderPickerService _folderPickerService;
     private readonly ISaveFileMonitor _saveFileMonitor;
     private readonly IUserSettingsService _userSettingsService;
+    private readonly IApplicationThemeService _applicationThemeService;
     private readonly ITrackerSnapshotService _trackerSnapshotService;
     private readonly TrackerDisplayService _trackerDisplayService;
     private readonly SynchronizationContext? _synchronizationContext;
@@ -49,6 +51,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private bool _isUpdatingRegionOptions;
     private bool _suppressSettingsSave;
     private bool _disposed;
+    private ApplicationTheme _applicationTheme = ApplicationTheme.Dark;
     private string? _settingsSaveFilePath;
     private int? _settingsCharacterSlotIndex;
     private int? _pendingRestoredCharacterSlotIndex;
@@ -63,6 +66,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         IFolderPickerService folderPickerService,
         ISaveFileMonitor saveFileMonitor,
         IUserSettingsService userSettingsService,
+        IApplicationThemeService applicationThemeService,
         ITrackerSnapshotService trackerSnapshotService,
         TrackerDisplayService trackerDisplayService)
     {
@@ -71,6 +75,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         ArgumentNullException.ThrowIfNull(folderPickerService);
         ArgumentNullException.ThrowIfNull(saveFileMonitor);
         ArgumentNullException.ThrowIfNull(userSettingsService);
+        ArgumentNullException.ThrowIfNull(applicationThemeService);
         ArgumentNullException.ThrowIfNull(trackerSnapshotService);
         ArgumentNullException.ThrowIfNull(trackerDisplayService);
 
@@ -79,6 +84,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         _folderPickerService = folderPickerService;
         _saveFileMonitor = saveFileMonitor;
         _userSettingsService = userSettingsService;
+        _applicationThemeService = applicationThemeService;
         _trackerSnapshotService = trackerSnapshotService;
         _trackerDisplayService = trackerDisplayService;
         UserSettings settings = userSettingsService.Load();
@@ -87,6 +93,13 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
                 ? settings.DisplayLanguage
                 : DisplayLanguage.Japanese;
         _isAutoMonitoringEnabled = settings.IsAutoMonitoringEnabled;
+        ApplicationTheme requestedTheme = settings.Theme is
+            ApplicationTheme.Dark or ApplicationTheme.Light
+                ? settings.Theme
+                : ApplicationTheme.Dark;
+        _applicationTheme = applicationThemeService.TryApply(requestedTheme)
+            ? requestedTheme
+            : applicationThemeService.CurrentTheme;
         _settingsSaveFilePath = settings.SaveFilePath;
         _settingsCharacterSlotIndex = IsValidCharacterSlotIndex(
             settings.CharacterSlotIndex)
@@ -97,7 +110,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             _settingsSaveFilePath,
             _settingsCharacterSlotIndex,
             _displayLanguage,
-            _isAutoMonitoringEnabled);
+            _isAutoMonitoringEnabled,
+            _applicationTheme);
         _synchronizationContext = SynchronizationContext.Current;
         SaveCandidates = new ReadOnlyObservableCollection<SaveFileCandidate>(_saveCandidates);
         CharacterSlots = new ReadOnlyObservableCollection<CharacterSlot>(_characterSlots);
@@ -206,6 +220,27 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
                 ConfigureMonitoring(_loadedSave);
             }
 
+            PersistUserSettings();
+        }
+    }
+
+    public bool IsDarkMode
+    {
+        get => _applicationTheme == ApplicationTheme.Dark;
+        set
+        {
+            ApplicationTheme requestedTheme = value
+                ? ApplicationTheme.Dark
+                : ApplicationTheme.Light;
+
+            if (_applicationTheme == requestedTheme ||
+                !_applicationThemeService.TryApply(requestedTheme))
+            {
+                return;
+            }
+
+            _applicationTheme = requestedTheme;
+            OnPropertyChanged();
             PersistUserSettings();
         }
     }
@@ -750,7 +785,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             _settingsSaveFilePath,
             _settingsCharacterSlotIndex,
             DisplayLanguage,
-            IsAutoMonitoringEnabled);
+            IsAutoMonitoringEnabled,
+            _applicationTheme);
 
         if (settings == _lastPersistedSettings)
         {

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using ERBossTrackerJP.Core.Models;
+using ERBossTrackerJP.Services.Theming;
 
 namespace ERBossTrackerJP.Services.Settings;
 
@@ -108,7 +109,8 @@ public sealed class JsonUserSettingsService : IUserSettingsService
                 NormalizePath(settings.SaveFilePath),
                 ValidateSlotIndex(settings.CharacterSlotIndex),
                 ToLanguageCode(settings.DisplayLanguage),
-                settings.IsAutoMonitoringEnabled);
+                settings.IsAutoMonitoringEnabled,
+                ToThemeCode(settings.Theme));
             string json = JsonSerializer.Serialize(document, SerializerOptions);
             File.WriteAllText(temporaryPath, json);
             File.Move(temporaryPath, _settingsPath, overwrite: true);
@@ -137,11 +139,17 @@ public sealed class JsonUserSettingsService : IUserSettingsService
             "en" => DisplayLanguage.English,
             _ => DisplayLanguage.Japanese,
         };
+        ApplicationTheme theme = document.Theme switch
+        {
+            "light" => ApplicationTheme.Light,
+            _ => ApplicationTheme.Dark,
+        };
         return new UserSettings(
             NormalizePath(document.SaveFilePath),
             ValidateSlotIndex(document.CharacterSlotIndex),
             language,
-            document.IsAutoMonitoringEnabled ?? true);
+            document.IsAutoMonitoringEnabled ?? true,
+            theme);
     }
 
     private static string? NormalizePath(string? path)
@@ -166,6 +174,12 @@ public sealed class JsonUserSettingsService : IUserSettingsService
         _ => "ja",
     };
 
+    private static string ToThemeCode(ApplicationTheme theme) => theme switch
+    {
+        ApplicationTheme.Light => "light",
+        _ => "dark",
+    };
+
     private static void TryDeleteTemporaryFile(string temporaryPath)
     {
         try
@@ -185,5 +199,6 @@ public sealed class JsonUserSettingsService : IUserSettingsService
         string? SaveFilePath,
         int? CharacterSlotIndex,
         string? DisplayLanguage,
-        bool? IsAutoMonitoringEnabled);
+        bool? IsAutoMonitoringEnabled,
+        string? Theme);
 }

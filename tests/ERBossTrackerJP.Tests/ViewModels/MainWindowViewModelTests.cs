@@ -6,6 +6,7 @@ using ERBossTrackerJP.Services.Dialogs;
 using ERBossTrackerJP.Services.Monitoring;
 using ERBossTrackerJP.Services.SaveFiles;
 using ERBossTrackerJP.Services.Settings;
+using ERBossTrackerJP.Services.Theming;
 using ERBossTrackerJP.Services.Tracking;
 using ERBossTrackerJP.ViewModels;
 using ERBossTrackerJP.Views;
@@ -366,24 +367,50 @@ public sealed class MainWindowViewModelTests
         viewModel.SelectedCharacter = viewModel.CharacterSlots[1];
         viewModel.DisplayLanguage = DisplayLanguage.English;
         viewModel.IsAutoMonitoringEnabled = false;
+        viewModel.IsDarkMode = false;
 
         Assert.Equal(candidate.FilePath, settingsService.LastSaved?.SaveFilePath);
         Assert.Equal(3, settingsService.LastSaved?.CharacterSlotIndex);
         Assert.Equal(DisplayLanguage.English, settingsService.LastSaved?.DisplayLanguage);
         Assert.False(settingsService.LastSaved?.IsAutoMonitoringEnabled);
+        Assert.Equal(ApplicationTheme.Light, settingsService.LastSaved?.Theme);
     }
 
     [Fact]
-    public void MainWindow_ReadOnlyDisplayBindingsAttachAsOneWay()
+    public void Theme_DefaultsToDarkAndSwitchesImmediately()
+    {
+        var settingsService = new StubUserSettingsService();
+        var themeService = new StubApplicationThemeService();
+        var viewModel = CreateViewModel(
+            new StubSaveFileLocator(),
+            new StubSaveLoadService(),
+            userSettingsService: settingsService,
+            applicationThemeService: themeService);
+
+        Assert.True(viewModel.IsDarkMode);
+        Assert.Equal(ApplicationTheme.Dark, themeService.CurrentTheme);
+
+        viewModel.IsDarkMode = false;
+
+        Assert.False(viewModel.IsDarkMode);
+        Assert.Equal(ApplicationTheme.Light, themeService.CurrentTheme);
+        Assert.Equal(ApplicationTheme.Light, settingsService.LastSaved?.Theme);
+    }
+
+    [Fact]
+    public void MainWindow_BindingsAndThemeResourcesWorkAtRuntime()
     {
         Exception? capturedException = null;
         var thread = new Thread(() =>
         {
+            App? application = null;
             MainWindow? window = null;
             MainWindowViewModel? viewModel = null;
 
             try
             {
+                application = new App();
+                application.InitializeComponent();
                 SaveFileCandidate candidate = CreateCandidate(
                     "C:\\saves\\ER0000.sl2");
                 var locator = new StubSaveFileLocator([candidate]);
@@ -391,7 +418,11 @@ public sealed class MainWindowViewModelTests
                 loadService.Enqueue(CreateLoadedSave(
                     candidate.FilePath,
                     new CharacterSlot(0, "Binding Hero", 30)));
-                viewModel = CreateViewModel(locator, loadService);
+                var themeService = new ApplicationThemeService();
+                viewModel = CreateViewModel(
+                    locator,
+                    loadService,
+                    applicationThemeService: themeService);
                 viewModel.InitializeAsync().GetAwaiter().GetResult();
                 window = new MainWindow
                 {
@@ -405,6 +436,19 @@ public sealed class MainWindowViewModelTests
                 window.Dispatcher.Invoke(
                     static () => { },
                     DispatcherPriority.ApplicationIdle);
+
+                var darkBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
+                    application.Resources["AppBackgroundBrush"]);
+                Assert.Equal("#FF101318", darkBackground.Color.ToString());
+
+                viewModel.IsDarkMode = false;
+                window.Dispatcher.Invoke(
+                    static () => { },
+                    DispatcherPriority.ApplicationIdle);
+
+                var lightBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
+                    application.Resources["AppBackgroundBrush"]);
+                Assert.Equal("#FFF7F8FA", lightBackground.Color.ToString());
             }
             catch (Exception exception)
             {
@@ -414,6 +458,7 @@ public sealed class MainWindowViewModelTests
             {
                 window?.Close();
                 viewModel?.Dispose();
+                application?.Shutdown();
                 Dispatcher.CurrentDispatcher.InvokeShutdown();
             }
         })
@@ -435,6 +480,7 @@ public sealed class MainWindowViewModelTests
         IFolderPickerService? folderPicker = null,
         ISaveFileMonitor? saveFileMonitor = null,
         IUserSettingsService? userSettingsService = null,
+        IApplicationThemeService? applicationThemeService = null,
         ITrackerSnapshotService? trackerSnapshotService = null) =>
         new(
             locator,
@@ -442,6 +488,7 @@ public sealed class MainWindowViewModelTests
             folderPicker ?? new StubFolderPicker(null),
             saveFileMonitor ?? new StubSaveFileMonitor(),
             userSettingsService ?? new StubUserSettingsService(),
+            applicationThemeService ?? new StubApplicationThemeService(),
             trackerSnapshotService ?? new StubTrackerSnapshotService(),
             new TrackerDisplayService());
 
@@ -602,6 +649,23 @@ public sealed class MainWindowViewModelTests
         public bool TrySave(UserSettings userSettings)
         {
             LastSaved = userSettings;
+            return true;
+        }
+    }
+
+    private sealed class StubApplicationThemeService : IApplicationThemeService
+    {
+        public ApplicationTheme CurrentTheme { get; private set; } =
+            ApplicationTheme.Dark;
+
+        public bool TryApply(ApplicationTheme theme)
+        {
+            if (theme is not ApplicationTheme.Dark and not ApplicationTheme.Light)
+            {
+                return false;
+            }
+
+            CurrentTheme = theme;
             return true;
         }
     }

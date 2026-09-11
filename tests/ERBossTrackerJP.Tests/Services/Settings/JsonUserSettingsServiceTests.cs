@@ -1,5 +1,6 @@
 using ERBossTrackerJP.Core.Models;
 using ERBossTrackerJP.Services.Settings;
+using ERBossTrackerJP.Services.Theming;
 
 namespace ERBossTrackerJP.Tests.Services.Settings;
 
@@ -18,7 +19,8 @@ public sealed class JsonUserSettingsServiceTests
                 "D:\\EldenRing\\76561198000000000\\ER0000.sl2",
                 4,
                 DisplayLanguage.English,
-                IsAutoMonitoringEnabled: false);
+                IsAutoMonitoringEnabled: false,
+                ApplicationTheme.Light);
 
             bool saved = service.TrySave(expected);
             UserSettings actual = service.Load();
@@ -28,6 +30,7 @@ public sealed class JsonUserSettingsServiceTests
             Assert.Equal(expected, actual);
             Assert.Contains("\"schemaVersion\": 1", json, StringComparison.Ordinal);
             Assert.Contains("\"displayLanguage\": \"en\"", json, StringComparison.Ordinal);
+            Assert.Contains("\"theme\": \"light\"", json, StringComparison.Ordinal);
             Assert.DoesNotContain("eventFlag", json, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("characterName", json, StringComparison.OrdinalIgnoreCase);
             Assert.Empty(Directory.EnumerateFiles(testDirectory, "*.tmp"));
@@ -106,7 +109,8 @@ public sealed class JsonUserSettingsServiceTests
                   "saveFilePath": "   ",
                   "characterSlotIndex": 10,
                   "displayLanguage": "unknown",
-                  "isAutoMonitoringEnabled": false
+                  "isAutoMonitoringEnabled": false,
+                  "theme": "unknown"
                 }
                 """);
             var service = new JsonUserSettingsService(settingsPath);
@@ -117,6 +121,42 @@ public sealed class JsonUserSettingsServiceTests
             Assert.Null(actual.CharacterSlotIndex);
             Assert.Equal(DisplayLanguage.Japanese, actual.DisplayLanguage);
             Assert.False(actual.IsAutoMonitoringEnabled);
+            Assert.Equal(ApplicationTheme.Dark, actual.Theme);
+        }
+        finally
+        {
+            DeleteTestDirectory(testDirectory);
+        }
+    }
+
+    [Fact]
+    public void Load_LegacyDocumentWithoutThemePreservesSettingsAndDefaultsToDark()
+    {
+        string testDirectory = CreateTestDirectory();
+        string settingsPath = Path.Combine(testDirectory, "settings.json");
+
+        try
+        {
+            File.WriteAllText(
+                settingsPath,
+                """
+                {
+                  "schemaVersion": 1,
+                  "saveFilePath": "D:\\EldenRing\\ER0000.sl2",
+                  "characterSlotIndex": 2,
+                  "displayLanguage": "en",
+                  "isAutoMonitoringEnabled": false
+                }
+                """);
+            var service = new JsonUserSettingsService(settingsPath);
+
+            UserSettings actual = service.Load();
+
+            Assert.Equal("D:\\EldenRing\\ER0000.sl2", actual.SaveFilePath);
+            Assert.Equal(2, actual.CharacterSlotIndex);
+            Assert.Equal(DisplayLanguage.English, actual.DisplayLanguage);
+            Assert.False(actual.IsAutoMonitoringEnabled);
+            Assert.Equal(ApplicationTheme.Dark, actual.Theme);
         }
         finally
         {

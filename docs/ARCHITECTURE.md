@@ -39,6 +39,8 @@ FileSystemWatcher ----> SaveFileMonitor ----> MainWindowViewModel
 
 settings.json <----> JsonUserSettingsService <----> MainWindowViewModel
 
+DarkTheme.xaml / LightTheme.xaml <----> ApplicationThemeService <----> MainWindowViewModel
+
 Trace出力 ------> RollingFileTraceListener ------> Logs/ERBossTrackerJP.log
                   2 MiBごとにローテーション ------> .log.1～.log.3
 ```
@@ -53,7 +55,9 @@ WPFプロジェクトの`TrackerSnapshotService`は、`LoadedSaveFile`から選�
 
 `SaveFileMonitor`は監視対象ファイルだけを`FileSystemWatcher`で監視し、通知漏れに備えて2秒ごとにファイルサイズと最終更新日時も確認する。異なる更新を検出すると750ミリ秒のデバウンスを開始し、その間の追加通知では待機時間を延長する。ViewModelは通知をUIスレッドへ戻し、手動再読み込みと同じ経路を呼び出す。読み込み中に次の更新を検出した場合は1回にまとめて後続読み込みを実行する。
 
-`JsonUserSettingsService`は`%LOCALAPPDATA%\ERBossTrackerJP\settings.json`を境界とし、最後に正常に読み込んだセーブパス、選択キャラクタースロット、表示言語、自動監視設定だけを一時ファイル経由で保存する。設定の破損、未対応スキーマ、読み書き失敗は起動や画面操作を停止させず、既定値または直前のメモリ上の設定を利用する。保存済みパスが現在も同じセーブ候補として検出できた場合だけスロットを復元し、既定検索へフォールバックした別セーブには適用しない。
+`JsonUserSettingsService`は`%LOCALAPPDATA%\ERBossTrackerJP\settings.json`を境界とし、最後に正常に読み込んだセーブパス、選択キャラクタースロット、表示言語、自動監視設定、画面テーマを一時ファイル経由で保存する。設定の破損、未対応スキーマ、読み書き失敗は起動や画面操作を停止させず、既定値または直前のメモリ上の設定を利用する。保存済みパスが現在も同じセーブ候補として検出できた場合だけスロットを復元し、既定検索へフォールバックした別セーブには適用しない。既存の設定ファイルにテーマがない場合はダークモードを適用する。
+
+画面配色は`DarkTheme.xaml`と`LightTheme.xaml`の同一キーを持つリソース辞書へ集約する。`ApplicationThemeService`が辞書を差し替え、Viewは`DynamicResource`経由で再描画されるため、ウィンドウを作り直さず即時に切り替えられる。既定辞書はダークテーマとし、タイトルバーはWindowsのDWM属性を表示テーマに合わせる。
 
 `DiagnosticLogService`はアプリ起動時に`RollingFileTraceListener`を登録し、既存の`Trace`出力を`%LOCALAPPDATA%\ERBossTrackerJP\Logs\ERBossTrackerJP.log`へUTF-8で保存する。現行ログが2 MiBを超える前に`.1`から`.3`までローテーションし、各書き込みを即時フラッシュする。ログフォルダー作成、書き込み、ローテーションの失敗はアプリへ伝播させない。起動時にはアプリ・ランタイム・OSバージョンを、終了時には終了コードを記録し、UI、AppDomain、未監視Taskの未処理例外も終了前に記録する。
 
