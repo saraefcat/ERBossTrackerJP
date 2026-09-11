@@ -705,6 +705,20 @@ public sealed class MainWindowViewModelTests
                 Assert.Equal(
                     System.Windows.GridUnitType.Star,
                     obsOutputLayout.RowDefinitions[1].Height.GridUnitType);
+                foreach (int tabIndex in new[] { 1, 2 })
+                {
+                    var tabItem = Assert.IsType<System.Windows.Controls.TabItem>(
+                        tabControl.Items[tabIndex]);
+                    System.Windows.Controls.TextBox[] formatInputs =
+                        FindLogicalDescendants<System.Windows.Controls.TextBox>(tabItem)
+                            .Where(textBox =>
+                                System.Windows.Data.BindingOperations.GetBinding(
+                                    textBox,
+                                    System.Windows.Controls.TextBox.TextProperty)?.Path.Path ==
+                                nameof(MainWindowViewModel.ObsProgressFormatDraft))
+                            .ToArray();
+                    Assert.Single(formatInputs);
+                }
 
                 var darkBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     application.Resources["AppBackgroundBrush"]);
@@ -815,6 +829,27 @@ public sealed class MainWindowViewModelTests
         }
 
         return null;
+    }
+
+    private static IEnumerable<T> FindLogicalDescendants<T>(
+        System.Windows.DependencyObject parent)
+        where T : System.Windows.DependencyObject
+    {
+        foreach (object child in System.Windows.LogicalTreeHelper.GetChildren(parent))
+        {
+            if (child is T match)
+            {
+                yield return match;
+            }
+
+            if (child is System.Windows.DependencyObject dependencyObject)
+            {
+                foreach (T descendant in FindLogicalDescendants<T>(dependencyObject))
+                {
+                    yield return descendant;
+                }
+            }
+        }
     }
 
     private static MainWindowViewModel CreateViewModel(
