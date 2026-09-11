@@ -67,7 +67,7 @@ Assert-ChildPath -CandidatePath $zipPath -ParentPath $releaseRoot
 Assert-ChildPath -CandidatePath $zipChecksumPath -ParentPath $releaseRoot
 Assert-ChildPath -CandidatePath $stagingDirectory -ParentPath $releaseRoot
 
-$gitStatus = @(& git -C $repositoryRoot status --porcelain)
+$gitStatus = @(& git -c "safe.directory=$repositoryRoot" -C $repositoryRoot status --porcelain)
 
 if ($LASTEXITCODE -ne 0) {
     throw 'Unable to inspect the Git working tree.'
@@ -77,7 +77,7 @@ if ($gitStatus.Count -gt 0) {
     throw 'Release creation requires a clean Git working tree.'
 }
 
-$sourceCommit = (& git -C $repositoryRoot rev-parse HEAD).Trim()
+$sourceCommit = (& git -c "safe.directory=$repositoryRoot" -C $repositoryRoot rev-parse HEAD).Trim()
 
 if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($sourceCommit)) {
     throw 'Unable to resolve the source Git commit.'
