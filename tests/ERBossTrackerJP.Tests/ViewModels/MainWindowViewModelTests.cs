@@ -620,6 +620,13 @@ public sealed class MainWindowViewModelTests
                 var darkBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     application.Resources["AppBackgroundBrush"]);
                 Assert.Equal("#FF101318", darkBackground.Color.ToString());
+                var darkInactiveSelection =
+                    Assert.IsType<System.Windows.Media.SolidColorBrush>(
+                        application.Resources[
+                            System.Windows.SystemColors.InactiveSelectionHighlightBrushKey]);
+                Assert.Equal(
+                    "#FF202F42",
+                    darkInactiveSelection.Color.ToString());
                 var comboBox = Assert.IsType<System.Windows.Controls.ComboBox>(
                     FindVisualDescendant<System.Windows.Controls.ComboBox>(window));
                 comboBox.ApplyTemplate();
@@ -652,6 +659,13 @@ public sealed class MainWindowViewModelTests
                 var lightBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     application.Resources["AppBackgroundBrush"]);
                 Assert.Equal("#FFF7F8FA", lightBackground.Color.ToString());
+                var lightInactiveSelection =
+                    Assert.IsType<System.Windows.Media.SolidColorBrush>(
+                        application.Resources[
+                            System.Windows.SystemColors.InactiveSelectionHighlightBrushKey]);
+                Assert.Equal(
+                    "#FFE8EEF5",
+                    lightInactiveSelection.Color.ToString());
                 var lightInputBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     comboBoxBorder.Background);
                 Assert.Equal("#FFFFFFFF", lightInputBackground.Color.ToString());
