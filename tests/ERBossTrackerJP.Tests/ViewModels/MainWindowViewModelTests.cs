@@ -634,6 +634,15 @@ public sealed class MainWindowViewModelTests
                 var darkInputText = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     comboBox.Foreground);
                 Assert.Equal("#FFF3F4F6", darkInputText.Color.ToString());
+                var button = Assert.IsType<System.Windows.Controls.Button>(
+                    FindVisualDescendant<System.Windows.Controls.Button>(window));
+                button.ApplyTemplate();
+                var buttonBorder = Assert.IsType<System.Windows.Controls.Border>(
+                    button.Template.FindName("ButtonBorder", button));
+                var darkButtonBackground =
+                    Assert.IsType<System.Windows.Media.SolidColorBrush>(
+                        buttonBorder.Background);
+                Assert.Equal("#FF252D39", darkButtonBackground.Color.ToString());
 
                 viewModel.IsDarkMode = false;
                 window.Dispatcher.Invoke(
@@ -649,6 +658,10 @@ public sealed class MainWindowViewModelTests
                 var lightInputText = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     comboBox.Foreground);
                 Assert.Equal("#FF1F2937", lightInputText.Color.ToString());
+                var lightButtonBackground =
+                    Assert.IsType<System.Windows.Media.SolidColorBrush>(
+                        buttonBorder.Background);
+                Assert.Equal("#FFF2F4F7", lightButtonBackground.Color.ToString());
             }
             catch (Exception exception)
             {

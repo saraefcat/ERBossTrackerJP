@@ -660,7 +660,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             return Task.CompletedTask;
         }
 
-        ObsOutputStatusText = "テスト出力中…";
+        ObsOutputStatusText = "再出力中…";
         var update = new TrackerOutputUpdate(
             _trackerSnapshot,
             _trackerSnapshot,

@@ -37,6 +37,10 @@
         <Style TargetType="Button">
             <Setter Property="MinHeight"
                     Value="34" />
+            <Setter Property="HorizontalContentAlignment"
+                    Value="Center" />
+            <Setter Property="VerticalContentAlignment"
+                    Value="Center" />
             <Setter Property="Padding"
                     Value="14,6" />
             <Setter Property="Background"
@@ -45,18 +49,53 @@
                     Value="{DynamicResource TextPrimaryBrush}" />
             <Setter Property="BorderBrush"
                     Value="{DynamicResource BorderBrush}" />
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver"
-                         Value="True">
-                    <Setter Property="Background"
-                            Value="{DynamicResource ControlHoverBrush}" />
-                </Trigger>
-                <Trigger Property="IsEnabled"
-                         Value="False">
-                    <Setter Property="Foreground"
-                            Value="{DynamicResource DisabledTextBrush}" />
-                </Trigger>
-            </Style.Triggers>
+            <Setter Property="BorderThickness"
+                    Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="2"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Background"
+                                        Value="{DynamicResource ControlHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed"
+                                     Value="True">
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Background"
+                                        Value="{DynamicResource SelectionBrush}" />
+                                <Setter TargetName="ButtonBorder"
+                                        Property="BorderBrush"
+                                        Value="{DynamicResource AccentBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused"
+                                     Value="True">
+                                <Setter TargetName="ButtonBorder"
+                                        Property="BorderBrush"
+                                        Value="{DynamicResource AccentBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled"
+                                     Value="False">
+                                <Setter Property="Foreground"
+                                        Value="{DynamicResource DisabledTextBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style x:Key="ComboBoxToggleButtonStyle"
                TargetType="ToggleButton">
@@ -329,7 +368,7 @@
             <Setter Property="Background"
                     Value="Transparent" />
             <Setter Property="Padding"
-                    Value="18,10" />
+                    Value="18,7" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TabItem">
@@ -369,49 +408,55 @@
         </Style>
     </Window.Resources>
 
-    <Grid Margin="20">
+    <Grid Margin="14">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0"
-                   Margin="0,0,0,14">
-            <StackPanel DockPanel.Dock="Left">
-                <TextBlock FontSize="26"
+        <Grid Grid.Row="0"
+              Margin="0,0,0,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                <TextBlock FontSize="22"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource TextPrimaryBrush}"
                            Text="ER Boss Tracker JP" />
-                <TextBlock Margin="0,4,0,0"
+                <TextBlock Margin="14,5,0,0"
                            Foreground="{DynamicResource TextMutedBrush}"
                            Text="ELDEN RING ボス撃破状況" />
             </StackPanel>
-            <StackPanel DockPanel.Dock="Right"
-                        HorizontalAlignment="Right">
-                <TextBlock HorizontalAlignment="Right"
-                           FontWeight="SemiBold"
+            <StackPanel Grid.Column="1"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                <TextBlock FontWeight="SemiBold"
                            Foreground="{DynamicResource TextSecondaryBrush}"
                            Text="{Binding MonitoringStatusText}" />
-                <TextBlock HorizontalAlignment="Right"
-                           Margin="0,3,0,0"
-                           Foreground="{DynamicResource TextMutedBrush}"
-                           Text="最終正常更新" />
-                <TextBlock HorizontalAlignment="Right"
-                           FontWeight="SemiBold"
-                           Text="{Binding TrackerLastUpdateText}" />
-                <TextBlock HorizontalAlignment="Right"
-                           Margin="0,5,0,0"
+                <TextBlock Margin="16,0,0,0"
+                           Foreground="{DynamicResource TextMutedBrush}">
+                    <Run Text="最終正常更新: " />
+                    <Run FontWeight="SemiBold"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         Text="{Binding TrackerLastUpdateText, Mode=OneWay}" />
+                </TextBlock>
+                <TextBlock Margin="16,0,0,0"
                            Foreground="{DynamicResource TextSecondaryBrush}">
                     <Run Text="OBS出力: " />
                     <Run FontWeight="SemiBold"
                          Text="{Binding ObsOutputStatusText, Mode=OneWay}" />
                 </TextBlock>
             </StackPanel>
-        </DockPanel>
+        </Grid>
 
         <TabControl Grid.Row="1">
             <TabItem Header="進捗">
-                <Grid Margin="0,14,0,0">
+                <Grid Margin="0,8,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -421,7 +466,8 @@
                     </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Margin="0,0,0,12"
+                Margin="0,0,0,8"
+                Padding="10"
                 Style="{StaticResource PanelBorderStyle}">
             <Grid>
                 <Grid.RowDefinitions>
@@ -471,7 +517,7 @@
                 <TextBlock Grid.Row="1"
                            Grid.Column="0"
                            Grid.ColumnSpan="5"
-                           Margin="0,10,0,0"
+                           Margin="0,6,0,0"
                            Foreground="{DynamicResource TextSecondaryBrush}"
                            Text="{Binding StatusMessage}"
                            TextWrapping="Wrap" />
@@ -479,7 +525,7 @@
         </Border>
 
         <Grid Grid.Row="1"
-              Margin="0,0,0,12">
+              Margin="0,0,0,8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="*" />
@@ -490,6 +536,7 @@
 
             <Border Grid.Column="0"
                     Margin="0,0,10,0"
+                    Padding="10,8"
                     Style="{StaticResource PanelBorderStyle}">
                 <StackPanel>
                     <TextBlock Margin="0,0,0,6"
@@ -516,6 +563,7 @@
             </Border>
 
             <Border Grid.Column="1"
+                    Padding="10,7"
                     Style="{StaticResource SummaryCardStyle}">
                 <StackPanel>
                     <TextBlock Foreground="{DynamicResource TextMutedBrush}"
@@ -528,6 +576,7 @@
                 </StackPanel>
             </Border>
             <Border Grid.Column="2"
+                    Padding="10,7"
                     Style="{StaticResource SummaryCardStyle}">
                 <StackPanel>
                     <TextBlock Foreground="{DynamicResource TextMutedBrush}"
@@ -540,6 +589,7 @@
                 </StackPanel>
             </Border>
             <Border Grid.Column="3"
+                    Padding="10,7"
                     Style="{StaticResource SummaryCardStyle}">
                 <StackPanel>
                     <TextBlock Foreground="{DynamicResource TextMutedBrush}"
@@ -552,6 +602,7 @@
                 </StackPanel>
             </Border>
             <Border Grid.Column="4"
+                    Padding="10,8"
                     Style="{StaticResource PanelBorderStyle}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -578,7 +629,8 @@
         </Grid>
 
         <Border Grid.Row="2"
-                Margin="0,0,0,12"
+                Margin="0,0,0,8"
+                Padding="10"
                 Style="{StaticResource PanelBorderStyle}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -743,7 +795,7 @@
         </Grid>
 
         <DockPanel Grid.Row="4"
-                   Margin="0,10,0,0">
+                   Margin="0,5,0,0">
             <TextBlock DockPanel.Dock="Right"
                        Foreground="{DynamicResource TextMutedBrush}">
                 <Run Text="セーブ更新日時: " />
@@ -756,7 +808,7 @@
             </TabItem>
 
             <TabItem Header="OBS出力">
-                <ScrollViewer Margin="0,14,0,0"
+                <ScrollViewer Margin="0,8,0,0"
                               HorizontalScrollBarVisibility="Disabled"
                               VerticalScrollBarVisibility="Auto">
                     <Grid>
@@ -829,7 +881,7 @@
 
                                     <TextBlock Margin="0,16,0,4"
                                                Foreground="{DynamicResource TextMutedBrush}"
-                                               Text="出力言語" />
+                                               Text="固有名詞の言語（画面とOBS共通）" />
                                     <ComboBox DisplayMemberPath="Label"
                                               ItemsSource="{Binding LanguageOptions}"
                                               SelectedValue="{Binding DisplayLanguage, Mode=TwoWay}"
@@ -894,7 +946,8 @@
                                         <Button DockPanel.Dock="Right"
                                                 MinWidth="120"
                                                 Command="{Binding TestObsOutputCommand}"
-                                                Content="テスト出力" />
+                                                Content="現在値を再出力"
+                                                ToolTip="セーブ更新を待たず、現在の進捗をOBS用ファイルへ書き直します。" />
                                         <TextBlock VerticalAlignment="Center"
                                                    Foreground="{DynamicResource TextMutedBrush}"
                                                    Text="OBSのテキスト（GDI+）ソースから各ファイルを参照できます。"
@@ -925,7 +978,7 @@
             </TabItem>
 
             <TabItem Header="設定">
-                <ScrollViewer Margin="0,14,0,0"
+                <ScrollViewer Margin="0,8,0,0"
                               HorizontalScrollBarVisibility="Disabled"
                               VerticalScrollBarVisibility="Auto">
                     <Grid>
