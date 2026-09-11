@@ -1,10 +1,8 @@
-using ERBossTrackerJP.Core.Models;
-
 namespace ERBossTrackerJP.Core.Outputs;
 
 public interface ITrackerOutput
 {
     ValueTask PublishAsync(
-        TrackerSnapshot snapshot,
+        TrackerOutputUpdate update,
         CancellationToken cancellationToken = default);
 }

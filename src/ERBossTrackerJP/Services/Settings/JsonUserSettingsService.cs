@@ -110,7 +110,9 @@ public sealed class JsonUserSettingsService : IUserSettingsService
                 ValidateSlotIndex(settings.CharacterSlotIndex),
                 ToLanguageCode(settings.DisplayLanguage),
                 settings.IsAutoMonitoringEnabled,
-                ToThemeCode(settings.Theme));
+                ToThemeCode(settings.Theme),
+                settings.IsObsOutputEnabled,
+                NormalizePath(settings.ObsOutputDirectory));
             string json = JsonSerializer.Serialize(document, SerializerOptions);
             File.WriteAllText(temporaryPath, json);
             File.Move(temporaryPath, _settingsPath, overwrite: true);
@@ -149,7 +151,9 @@ public sealed class JsonUserSettingsService : IUserSettingsService
             ValidateSlotIndex(document.CharacterSlotIndex),
             language,
             document.IsAutoMonitoringEnabled ?? true,
-            theme);
+            theme,
+            document.IsObsOutputEnabled ?? false,
+            NormalizePath(document.ObsOutputDirectory));
     }
 
     private static string? NormalizePath(string? path)
@@ -200,5 +204,7 @@ public sealed class JsonUserSettingsService : IUserSettingsService
         int? CharacterSlotIndex,
         string? DisplayLanguage,
         bool? IsAutoMonitoringEnabled,
-        string? Theme);
+        string? Theme,
+        bool? IsObsOutputEnabled,
+        string? ObsOutputDirectory);
 }

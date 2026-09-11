@@ -3,10 +3,12 @@ using System.Diagnostics;
 using System.IO;
 using ERBossTrackerJP.Commands;
 using ERBossTrackerJP.Core.Models;
+using ERBossTrackerJP.Core.Outputs;
 using ERBossTrackerJP.Core.Presentation;
 using ERBossTrackerJP.Save.Exceptions;
 using ERBossTrackerJP.Services.Dialogs;
 using ERBossTrackerJP.Services.Monitoring;
+using ERBossTrackerJP.Services.Outputs;
 using ERBossTrackerJP.Services.SaveFiles;
 using ERBossTrackerJP.Services.Settings;
 using ERBossTrackerJP.Services.Theming;
@@ -22,6 +24,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly ISaveFileMonitor _saveFileMonitor;
     private readonly IUserSettingsService _userSettingsService;
     private readonly IApplicationThemeService _applicationThemeService;
+    private readonly IObsTextFileOutput _obsTextFileOutput;
     private readonly ITrackerSnapshotService _trackerSnapshotService;
     private readonly TrackerDisplayService _trackerDisplayService;
     private readonly SynchronizationContext? _synchronizationContext;
@@ -33,6 +36,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly AsyncRelayCommand _browseFolderCommand;
     private readonly AsyncRelayCommand _refreshDefaultCommand;
     private readonly AsyncRelayCommand _reloadCommand;
+    private readonly AsyncRelayCommand _browseObsOutputFolderCommand;
+    private readonly CancellationTokenSource _obsOutputCancellationSource = new();
     private SaveFileCandidate? _selectedSaveCandidate;
     private CharacterSlot? _selectedCharacter;
     private RegionListItem? _selectedRegion;
@@ -51,12 +56,15 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private bool _isUpdatingRegionOptions;
     private bool _suppressSettingsSave;
     private bool _disposed;
+    private bool _isObsOutputEnabled;
     private ApplicationTheme _applicationTheme = ApplicationTheme.Dark;
+    private string _obsOutputDirectory;
     private string? _settingsSaveFilePath;
     private int? _settingsCharacterSlotIndex;
     private int? _pendingRestoredCharacterSlotIndex;
     private UserSettings _lastPersistedSettings = UserSettings.Default;
     private string _monitoringStatusText = "停止中";
+    private string _obsOutputStatusText = "停止中";
     private string _statusMessage = "セーブファイルを検索しています…";
     private string _saveLastWriteTimeText = "未読み込み";
 
@@ -67,6 +75,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         ISaveFileMonitor saveFileMonitor,
         IUserSettingsService userSettingsService,
         IApplicationThemeService applicationThemeService,
+        IObsTextFileOutput obsTextFileOutput,
         ITrackerSnapshotService trackerSnapshotService,
         TrackerDisplayService trackerDisplayService)
     {
@@ -76,6 +85,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         ArgumentNullException.ThrowIfNull(saveFileMonitor);
         ArgumentNullException.ThrowIfNull(userSettingsService);
         ArgumentNullException.ThrowIfNull(applicationThemeService);
+        ArgumentNullException.ThrowIfNull(obsTextFileOutput);
         ArgumentNullException.ThrowIfNull(trackerSnapshotService);
         ArgumentNullException.ThrowIfNull(trackerDisplayService);
 
@@ -85,6 +95,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         _saveFileMonitor = saveFileMonitor;
         _userSettingsService = userSettingsService;
         _applicationThemeService = applicationThemeService;
+        _obsTextFileOutput = obsTextFileOutput;
         _trackerSnapshotService = trackerSnapshotService;
         _trackerDisplayService = trackerDisplayService;
         UserSettings settings = userSettingsService.Load();
@@ -100,6 +111,15 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         _applicationTheme = applicationThemeService.TryApply(requestedTheme)
             ? requestedTheme
             : applicationThemeService.CurrentTheme;
+        if (settings.ObsOutputDirectory is not null)
+        {
+            _ = obsTextFileOutput.TrySetOutputDirectory(
+                settings.ObsOutputDirectory);
+        }
+
+        _obsOutputDirectory = obsTextFileOutput.OutputDirectory;
+        _isObsOutputEnabled = settings.IsObsOutputEnabled;
+        _obsOutputStatusText = _isObsOutputEnabled ? "進捗待ち" : "停止中";
         _settingsSaveFilePath = settings.SaveFilePath;
         _settingsCharacterSlotIndex = IsValidCharacterSlotIndex(
             settings.CharacterSlotIndex)
@@ -111,7 +131,9 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             _settingsCharacterSlotIndex,
             _displayLanguage,
             _isAutoMonitoringEnabled,
-            _applicationTheme);
+            _applicationTheme,
+            _isObsOutputEnabled,
+            _obsOutputDirectory);
         _synchronizationContext = SynchronizationContext.Current;
         SaveCandidates = new ReadOnlyObservableCollection<SaveFileCandidate>(_saveCandidates);
         CharacterSlots = new ReadOnlyObservableCollection<CharacterSlot>(_characterSlots);
@@ -143,6 +165,9 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         _reloadCommand = new AsyncRelayCommand(
             LoadSelectedSaveAsync,
             () => !IsBusy && SelectedSaveCandidate is not null);
+        _browseObsOutputFolderCommand = new AsyncRelayCommand(
+            BrowseObsOutputFolderAsync,
+            () => !IsBusy);
         _saveFileMonitor.ChangeDetected += OnSaveFileChangeDetected;
         _saveFileMonitor.MonitoringError += OnSaveFileMonitoringError;
     }
@@ -196,6 +221,9 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
     public AsyncRelayCommand ReloadCommand => _reloadCommand;
 
+    public AsyncRelayCommand BrowseObsOutputFolderCommand =>
+        _browseObsOutputFolderCommand;
+
     public bool IsAutoMonitoringEnabled
     {
         get => _isAutoMonitoringEnabled;
@@ -243,6 +271,41 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             OnPropertyChanged();
             PersistUserSettings();
         }
+    }
+
+    public bool IsObsOutputEnabled
+    {
+        get => _isObsOutputEnabled;
+        set
+        {
+            if (!SetProperty(ref _isObsOutputEnabled, value))
+            {
+                return;
+            }
+
+            if (!value)
+            {
+                ObsOutputStatusText = "停止中";
+            }
+            else if (_trackerSnapshot is null)
+            {
+                ObsOutputStatusText = "進捗待ち";
+            }
+            else
+            {
+                QueueObsOutput(_trackerSnapshot, previousSnapshot: null);
+            }
+
+            PersistUserSettings();
+        }
+    }
+
+    public string ObsOutputDirectory => _obsOutputDirectory;
+
+    public string ObsOutputStatusText
+    {
+        get => _obsOutputStatusText;
+        private set => SetProperty(ref _obsOutputStatusText, value);
     }
 
     public string MonitoringStatusText
@@ -309,6 +372,11 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
             RebuildRegionOptions();
             RefreshDisplay();
+            if (_trackerSnapshot is not null && IsObsOutputEnabled)
+            {
+                QueueObsOutput(_trackerSnapshot, _trackerSnapshot);
+            }
+
             PersistUserSettings();
         }
     }
@@ -406,6 +474,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             _browseFolderCommand.NotifyCanExecuteChanged();
             _refreshDefaultCommand.NotifyCanExecuteChanged();
             _reloadCommand.NotifyCanExecuteChanged();
+            _browseObsOutputFolderCommand.NotifyCanExecuteChanged();
             OnPropertyChanged(nameof(IsInteractionEnabled));
         }
     }
@@ -508,6 +577,48 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     }
 
     public Task LoadSelectedSaveAsync() => RunOperationAsync(LoadSelectedSaveCoreAsync);
+
+    public Task BrowseObsOutputFolderAsync()
+    {
+        string? selectedFolder;
+
+        try
+        {
+            selectedFolder = _folderPickerService.SelectFolder(
+                ObsOutputDirectory,
+                "OBSテキストの出力フォルダーを選択してください");
+        }
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException)
+        {
+            Trace.WriteLine(
+                $"[MainWindowViewModel] OBS output folder picker failed: {exception}");
+            ObsOutputStatusText = "出力先を選択できません";
+            return Task.CompletedTask;
+        }
+
+        if (selectedFolder is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        if (!_obsTextFileOutput.TrySetOutputDirectory(selectedFolder))
+        {
+            ObsOutputStatusText = "出力先が無効です";
+            return Task.CompletedTask;
+        }
+
+        _obsOutputDirectory = _obsTextFileOutput.OutputDirectory;
+        OnPropertyChanged(nameof(ObsOutputDirectory));
+
+        if (IsObsOutputEnabled && _trackerSnapshot is not null)
+        {
+            QueueObsOutput(_trackerSnapshot, _trackerSnapshot);
+        }
+
+        PersistUserSettings();
+        return Task.CompletedTask;
+    }
 
     private async Task LoadSelectedSaveCoreAsync()
     {
@@ -614,6 +725,11 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             _trackerSnapshot = _trackerSnapshotService.Create(_loadedSave, character);
             RebuildRegionOptions();
             RefreshDisplay();
+            if (IsObsOutputEnabled)
+            {
+                QueueObsOutput(_trackerSnapshot, previousSnapshot);
+            }
+
             StatusMessage =
                 $"「{character.Name}」のボス進捗を読み込みました。撃破 {Defeated} / {Total}。";
         }
@@ -786,7 +902,9 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             _settingsCharacterSlotIndex,
             DisplayLanguage,
             IsAutoMonitoringEnabled,
-            _applicationTheme);
+            _applicationTheme,
+            IsObsOutputEnabled,
+            ObsOutputDirectory);
 
         if (settings == _lastPersistedSettings)
         {
@@ -988,6 +1106,61 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             action);
     }
 
+    private void QueueObsOutput(
+        TrackerSnapshot snapshot,
+        TrackerSnapshot? previousSnapshot)
+    {
+        if (_disposed || !IsObsOutputEnabled)
+        {
+            return;
+        }
+
+        if (previousSnapshot?.Character.SlotIndex != snapshot.Character.SlotIndex)
+        {
+            previousSnapshot = null;
+        }
+
+        ObsOutputStatusText = "出力中…";
+        var update = new TrackerOutputUpdate(
+            snapshot,
+            previousSnapshot,
+            DisplayLanguage);
+        _ = PublishObsOutputAsync(
+            update,
+            _obsOutputCancellationSource.Token);
+    }
+
+    private async Task PublishObsOutputAsync(
+        TrackerOutputUpdate update,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _obsTextFileOutput.PublishAsync(update, cancellationToken);
+            PostToSynchronizationContext(() =>
+            {
+                if (!_disposed && IsObsOutputEnabled)
+                {
+                    ObsOutputStatusText = "出力済み";
+                }
+            });
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+        }
+        catch (Exception exception)
+        {
+            Trace.WriteLine($"[MainWindowViewModel] OBS output failed: {exception}");
+            PostToSynchronizationContext(() =>
+            {
+                if (!_disposed && IsObsOutputEnabled)
+                {
+                    ObsOutputStatusText = "出力エラー";
+                }
+            });
+        }
+    }
+
     public void Dispose()
     {
         if (_disposed)
@@ -996,6 +1169,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         }
 
         _disposed = true;
+        _obsOutputCancellationSource.Cancel();
         _saveFileMonitor.ChangeDetected -= OnSaveFileChangeDetected;
         _saveFileMonitor.MonitoringError -= OnSaveFileMonitoringError;
         _saveFileMonitor.Dispose();

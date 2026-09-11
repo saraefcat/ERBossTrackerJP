@@ -8,7 +8,9 @@ public sealed record UserSettings(
     int? CharacterSlotIndex = null,
     DisplayLanguage DisplayLanguage = DisplayLanguage.Japanese,
     bool IsAutoMonitoringEnabled = true,
-    ApplicationTheme Theme = ApplicationTheme.Dark)
+    ApplicationTheme Theme = ApplicationTheme.Dark,
+    bool IsObsOutputEnabled = false,
+    string? ObsOutputDirectory = null)
 {
     public static UserSettings Default { get; } = new();
 }

@@ -7,6 +7,7 @@ using ERBossTrackerJP.Save.Progress;
 using ERBossTrackerJP.Services.Diagnostics;
 using ERBossTrackerJP.Services.Dialogs;
 using ERBossTrackerJP.Services.Monitoring;
+using ERBossTrackerJP.Services.Outputs;
 using ERBossTrackerJP.Services.SaveFiles;
 using ERBossTrackerJP.Services.Settings;
 using ERBossTrackerJP.Services.Theming;
@@ -48,6 +49,7 @@ public partial class App : Application
                 new SaveFileMonitor(),
                 new JsonUserSettingsService(),
                 new ApplicationThemeService(),
+                new ObsTextFileOutput(),
                 trackerSnapshotService,
                 new TrackerDisplayService());
             var window = new MainWindow

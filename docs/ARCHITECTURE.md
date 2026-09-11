@@ -2,7 +2,7 @@
 
 ## 目的
 
-セーブ解析、進捗計算、WPF表示、将来のOBS出力を分離し、バイナリ解析をGUIなしでテストできる構造にする。
+セーブ解析、進捗計算、WPF表示、OBS出力を分離し、バイナリ解析と出力をGUIなしでテストできる構造にする。
 
 ## プロジェクト
 
@@ -21,7 +21,7 @@ View -> ViewModel -> Core
           +-------> Save -> Core
 
 TrackerSnapshot -> WPF ViewModel
-                -> 将来のOBS出力アダプター
+                -> TrackerOutputUpdate -> ObsTextFileOutput -> OBSテキストソース
 ```
 
 セーブ読み込みのアプリケーション境界は次のとおりとする。
@@ -39,6 +39,8 @@ FileSystemWatcher ----> SaveFileMonitor ----> MainWindowViewModel
 
 settings.json <----> JsonUserSettingsService <----> MainWindowViewModel
 
+TrackerSnapshot + 前回Snapshot ----> ObsTextFileOutput ----> *.txt / snapshot.json
+
 DarkTheme.xaml / LightTheme.xaml <----> ApplicationThemeService <----> MainWindowViewModel
 
 Trace出力 ------> RollingFileTraceListener ------> Logs/ERBossTrackerJP.log
@@ -55,9 +57,11 @@ WPFプロジェクトの`TrackerSnapshotService`は、`LoadedSaveFile`から選�
 
 `SaveFileMonitor`は監視対象ファイルだけを`FileSystemWatcher`で監視し、通知漏れに備えて2秒ごとにファイルサイズと最終更新日時も確認する。異なる更新を検出すると750ミリ秒のデバウンスを開始し、その間の追加通知では待機時間を延長する。ViewModelは通知をUIスレッドへ戻し、手動再読み込みと同じ経路を呼び出す。読み込み中に次の更新を検出した場合は1回にまとめて後続読み込みを実行する。
 
-`JsonUserSettingsService`は`%LOCALAPPDATA%\ERBossTrackerJP\settings.json`を境界とし、最後に正常に読み込んだセーブパス、選択キャラクタースロット、表示言語、自動監視設定、画面テーマを一時ファイル経由で保存する。設定の破損、未対応スキーマ、読み書き失敗は起動や画面操作を停止させず、既定値または直前のメモリ上の設定を利用する。保存済みパスが現在も同じセーブ候補として検出できた場合だけスロットを復元し、既定検索へフォールバックした別セーブには適用しない。既存の設定ファイルにテーマがない場合はダークモードを適用する。
+`JsonUserSettingsService`は`%LOCALAPPDATA%\ERBossTrackerJP\settings.json`を境界とし、最後に正常に読み込んだセーブパス、選択キャラクタースロット、表示言語、自動監視設定、画面テーマ、OBS出力設定を一時ファイル経由で保存する。設定の破損、未対応スキーマ、読み書き失敗は起動や画面操作を停止させず、既定値または直前のメモリ上の設定を利用する。保存済みパスが現在も同じセーブ候補として検出できた場合だけスロットを復元し、既定検索へフォールバックした別セーブには適用しない。既存の設定ファイルにテーマやOBS設定がない場合はダークモード、OBS出力無効を適用する。
 
 画面配色は`DarkTheme.xaml`と`LightTheme.xaml`の同一キーを持つリソース辞書へ集約する。`ApplicationThemeService`が辞書を差し替え、Viewは`DynamicResource`経由で再描画されるため、ウィンドウを作り直さず即時に切り替えられる。既定辞書はダークテーマとし、タイトルバーはWindowsのDWM属性を表示テーマに合わせる。
+
+`ObsTextFileOutput`はCoreの`ITrackerOutput`を実装し、現在と直前の不変な`TrackerSnapshot`および表示言語を持つ`TrackerOutputUpdate`だけを入力とする。WPFコントロールは参照しない。初回またはキャラクター変更時は直前Snapshotを渡さず基準化し、同じスロットの更新だけで未撃破から撃破へ変わった安定IDを検出する。最後に検出したIDはプロセス内で保持し、言語変更時には現在のSnapshotから名前を再投影する。出力はBOMなしUTF-8で一時ファイルへ書いた後、ファイルごとに置換する。出力失敗は診断ログと画面状態へ反映するが、TrackerSnapshotの更新やセーブ監視を失敗させない。
 
 `DiagnosticLogService`はアプリ起動時に`RollingFileTraceListener`を登録し、既存の`Trace`出力を`%LOCALAPPDATA%\ERBossTrackerJP\Logs\ERBossTrackerJP.log`へUTF-8で保存する。現行ログが2 MiBを超える前に`.1`から`.3`までローテーションし、各書き込みを即時フラッシュする。ログフォルダー作成、書き込み、ローテーションの失敗はアプリへ伝播させない。起動時にはアプリ・ランタイム・OSバージョンを、終了時には終了コードを記録し、UI、AppDomain、未監視Taskの未処理例外も終了前に記録する。
 
@@ -69,7 +73,7 @@ WPFプロジェクトの`TrackerSnapshotService`は、`LoadedSaveFile`から選�
 - バイナリ解析APIは`ReadOnlyMemory<byte>`または`ReadOnlySpan<byte>`を入力とし、ファイルI/Oと分離する。
 - 解析失敗を`false`や未撃破へ変換せず、`SaveParseException`と`SaveParseErrorCode`で追跡する。
 - `TrackerSnapshot`は構築時にコレクションをコピーし、購読者へ変更可能な一覧を渡さない。
-- 将来のOBS出力は`ITrackerOutput`を実装し、WPFコントロールを読み取らない。
+- OBS出力は`ITrackerOutput`を実装し、WPFコントロールを読み取らない。
 
 初期画面は起動時に保存済みパスを先に確認し、有効なら同じセーブとキャラクタースロットを復元する。無効または未保存なら既定場所を探索し、候補があれば最新のセーブからキャラクター一覧と選択キャラクターの進捗を読み込む。見つからない場合はフォルダー参照を案内する。キャラクター選択、地域選択、撃破状態、本編／DLC、名前検索、表示言語の変更はViewModelから`TrackerDisplayService`へ渡し、同じスナップショットを再解析せず表示だけを更新する。再読み込みに失敗してもViewModelは直前の正常なキャラクター一覧と進捗を消去せず、日本語の状態メッセージだけを更新する。
 

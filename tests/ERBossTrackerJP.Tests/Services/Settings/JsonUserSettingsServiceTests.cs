@@ -20,7 +20,9 @@ public sealed class JsonUserSettingsServiceTests
                 4,
                 DisplayLanguage.English,
                 IsAutoMonitoringEnabled: false,
-                ApplicationTheme.Light);
+                ApplicationTheme.Light,
+                IsObsOutputEnabled: true,
+                ObsOutputDirectory: "D:\\OBS");
 
             bool saved = service.TrySave(expected);
             UserSettings actual = service.Load();
@@ -31,6 +33,8 @@ public sealed class JsonUserSettingsServiceTests
             Assert.Contains("\"schemaVersion\": 1", json, StringComparison.Ordinal);
             Assert.Contains("\"displayLanguage\": \"en\"", json, StringComparison.Ordinal);
             Assert.Contains("\"theme\": \"light\"", json, StringComparison.Ordinal);
+            Assert.Contains("\"isObsOutputEnabled\": true", json, StringComparison.Ordinal);
+            Assert.Contains("\"obsOutputDirectory\": \"D:\\\\OBS\"", json, StringComparison.Ordinal);
             Assert.DoesNotContain("eventFlag", json, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("characterName", json, StringComparison.OrdinalIgnoreCase);
             Assert.Empty(Directory.EnumerateFiles(testDirectory, "*.tmp"));
@@ -110,7 +114,9 @@ public sealed class JsonUserSettingsServiceTests
                   "characterSlotIndex": 10,
                   "displayLanguage": "unknown",
                   "isAutoMonitoringEnabled": false,
-                  "theme": "unknown"
+                  "theme": "unknown",
+                  "isObsOutputEnabled": true,
+                  "obsOutputDirectory": "   "
                 }
                 """);
             var service = new JsonUserSettingsService(settingsPath);
@@ -122,6 +128,8 @@ public sealed class JsonUserSettingsServiceTests
             Assert.Equal(DisplayLanguage.Japanese, actual.DisplayLanguage);
             Assert.False(actual.IsAutoMonitoringEnabled);
             Assert.Equal(ApplicationTheme.Dark, actual.Theme);
+            Assert.True(actual.IsObsOutputEnabled);
+            Assert.Null(actual.ObsOutputDirectory);
         }
         finally
         {
@@ -157,6 +165,8 @@ public sealed class JsonUserSettingsServiceTests
             Assert.Equal(DisplayLanguage.English, actual.DisplayLanguage);
             Assert.False(actual.IsAutoMonitoringEnabled);
             Assert.Equal(ApplicationTheme.Dark, actual.Theme);
+            Assert.False(actual.IsObsOutputEnabled);
+            Assert.Null(actual.ObsOutputDirectory);
         }
         finally
         {

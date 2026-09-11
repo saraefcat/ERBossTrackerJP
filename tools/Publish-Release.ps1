@@ -128,6 +128,7 @@ try {
         'RELEASE_NOTES.md',
         'SOURCE_COMMIT.txt',
         'THIRD_PARTY_NOTICES.md',
+        'docs\OBS_OUTPUT.md',
         'docs\REFERENCE_AUDIT.md'
     )
 

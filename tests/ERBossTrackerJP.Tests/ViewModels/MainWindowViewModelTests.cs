@@ -1,9 +1,11 @@
 using System.Windows.Threading;
 using ERBossTrackerJP.Core.Models;
+using ERBossTrackerJP.Core.Outputs;
 using ERBossTrackerJP.Core.Presentation;
 using ERBossTrackerJP.Save.Exceptions;
 using ERBossTrackerJP.Services.Dialogs;
 using ERBossTrackerJP.Services.Monitoring;
+using ERBossTrackerJP.Services.Outputs;
 using ERBossTrackerJP.Services.SaveFiles;
 using ERBossTrackerJP.Services.Settings;
 using ERBossTrackerJP.Services.Theming;
@@ -368,12 +370,15 @@ public sealed class MainWindowViewModelTests
         viewModel.DisplayLanguage = DisplayLanguage.English;
         viewModel.IsAutoMonitoringEnabled = false;
         viewModel.IsDarkMode = false;
+        viewModel.IsObsOutputEnabled = true;
 
         Assert.Equal(candidate.FilePath, settingsService.LastSaved?.SaveFilePath);
         Assert.Equal(3, settingsService.LastSaved?.CharacterSlotIndex);
         Assert.Equal(DisplayLanguage.English, settingsService.LastSaved?.DisplayLanguage);
         Assert.False(settingsService.LastSaved?.IsAutoMonitoringEnabled);
         Assert.Equal(ApplicationTheme.Light, settingsService.LastSaved?.Theme);
+        Assert.True(settingsService.LastSaved?.IsObsOutputEnabled);
+        Assert.Equal("C:\\obs-default", settingsService.LastSaved?.ObsOutputDirectory);
     }
 
     [Fact]
@@ -395,6 +400,117 @@ public sealed class MainWindowViewModelTests
         Assert.False(viewModel.IsDarkMode);
         Assert.Equal(ApplicationTheme.Light, themeService.CurrentTheme);
         Assert.Equal(ApplicationTheme.Light, settingsService.LastSaved?.Theme);
+    }
+
+    [Fact]
+    public async Task InitializeAsync_EnabledObsOutputPublishesInitialBaseline()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "OBS Hero", 75)));
+        var settingsService = new StubUserSettingsService(
+            new UserSettings(
+                IsObsOutputEnabled: true,
+                ObsOutputDirectory: "D:\\stream-overlay"));
+        var obsOutput = new StubObsTextFileOutput();
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            userSettingsService: settingsService,
+            obsTextFileOutput: obsOutput);
+
+        await viewModel.InitializeAsync();
+
+        TrackerOutputUpdate update = Assert.Single(obsOutput.Updates);
+        Assert.Null(update.PreviousSnapshot);
+        Assert.Same(viewModel.TrackerSnapshot, update.Snapshot);
+        Assert.Equal(DisplayLanguage.Japanese, update.DisplayLanguage);
+        Assert.Equal("D:\\stream-overlay", obsOutput.OutputDirectory);
+        Assert.Equal("出力済み", viewModel.ObsOutputStatusText);
+    }
+
+    [Fact]
+    public async Task AutomaticReload_ObsOutputReceivesPreviousSnapshotForDefeatDetection()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "OBS Hero", 75)));
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "OBS Hero", 76)));
+        var settingsService = new StubUserSettingsService(
+            new UserSettings(IsObsOutputEnabled: true));
+        var obsOutput = new StubObsTextFileOutput();
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            userSettingsService: settingsService,
+            obsTextFileOutput: obsOutput);
+        await viewModel.InitializeAsync();
+        TrackerSnapshot initialSnapshot = obsOutput.Updates[0].Snapshot;
+
+        await viewModel.HandleSaveFileChangeDetectedAsync(
+            new SaveFileChangedEventArgs(
+                candidate.FilePath,
+                256,
+                new DateTimeOffset(2026, 9, 11, 9, 30, 0, TimeSpan.Zero)));
+
+        Assert.Equal(2, obsOutput.Updates.Count);
+        Assert.Same(initialSnapshot, obsOutput.Updates[1].PreviousSnapshot);
+        Assert.NotSame(initialSnapshot, obsOutput.Updates[1].Snapshot);
+    }
+
+    [Fact]
+    public async Task BrowseObsOutputFolderAsync_ChangesTargetAndPersistsIt()
+    {
+        var folderPicker = new StubFolderPicker("D:\\OBS");
+        var settingsService = new StubUserSettingsService();
+        var obsOutput = new StubObsTextFileOutput();
+        var viewModel = CreateViewModel(
+            new StubSaveFileLocator(),
+            new StubSaveLoadService(),
+            folderPicker,
+            userSettingsService: settingsService,
+            obsTextFileOutput: obsOutput);
+
+        await viewModel.BrowseObsOutputFolderAsync();
+
+        Assert.Equal("C:\\obs-default", folderPicker.ReceivedInitialDirectory);
+        Assert.Contains("OBSテキスト", folderPicker.ReceivedTitle, StringComparison.Ordinal);
+        Assert.Equal("D:\\OBS", viewModel.ObsOutputDirectory);
+        Assert.Equal("D:\\OBS", settingsService.LastSaved?.ObsOutputDirectory);
+    }
+
+    [Fact]
+    public async Task EnablingObsOutput_WriteFailureKeepsTrackerAndReportsError()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "OBS Hero", 75)));
+        var obsOutput = new StubObsTextFileOutput
+        {
+            NextException = new IOException("write failed"),
+        };
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            obsTextFileOutput: obsOutput);
+        await viewModel.InitializeAsync();
+        TrackerSnapshot snapshot = viewModel.TrackerSnapshot!;
+
+        viewModel.IsObsOutputEnabled = true;
+
+        Assert.Same(snapshot, viewModel.TrackerSnapshot);
+        Assert.Equal("出力エラー", viewModel.ObsOutputStatusText);
     }
 
     [Fact]
@@ -528,6 +644,7 @@ public sealed class MainWindowViewModelTests
         ISaveFileMonitor? saveFileMonitor = null,
         IUserSettingsService? userSettingsService = null,
         IApplicationThemeService? applicationThemeService = null,
+        IObsTextFileOutput? obsTextFileOutput = null,
         ITrackerSnapshotService? trackerSnapshotService = null) =>
         new(
             locator,
@@ -536,6 +653,7 @@ public sealed class MainWindowViewModelTests
             saveFileMonitor ?? new StubSaveFileMonitor(),
             userSettingsService ?? new StubUserSettingsService(),
             applicationThemeService ?? new StubApplicationThemeService(),
+            obsTextFileOutput ?? new StubObsTextFileOutput(),
             trackerSnapshotService ?? new StubTrackerSnapshotService(),
             new TrackerDisplayService());
 
@@ -622,9 +740,14 @@ public sealed class MainWindowViewModelTests
     {
         public string? ReceivedInitialDirectory { get; private set; }
 
-        public string? SelectFolder(string? initialDirectory = null)
+        public string? ReceivedTitle { get; private set; }
+
+        public string? SelectFolder(
+            string? initialDirectory = null,
+            string? title = null)
         {
             ReceivedInitialDirectory = initialDirectory;
+            ReceivedTitle = title;
             return selectedFolder;
         }
     }
@@ -714,6 +837,38 @@ public sealed class MainWindowViewModelTests
 
             CurrentTheme = theme;
             return true;
+        }
+    }
+
+    private sealed class StubObsTextFileOutput : IObsTextFileOutput
+    {
+        public string DefaultOutputDirectory { get; } = "C:\\obs-default";
+
+        public string OutputDirectory { get; private set; } = "C:\\obs-default";
+
+        public List<TrackerOutputUpdate> Updates { get; } = [];
+
+        public Exception? NextException { get; set; }
+
+        public bool TrySetOutputDirectory(string outputDirectory)
+        {
+            OutputDirectory = outputDirectory;
+            return true;
+        }
+
+        public ValueTask PublishAsync(
+            TrackerOutputUpdate update,
+            CancellationToken cancellationToken = default)
+        {
+            if (NextException is not null)
+            {
+                Exception exception = NextException;
+                NextException = null;
+                return ValueTask.FromException(exception);
+            }
+
+            Updates.Add(update);
+            return ValueTask.CompletedTask;
         }
     }
 

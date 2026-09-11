@@ -32,6 +32,9 @@
     <None Include="..\..\docs\REFERENCE_AUDIT.md"
           Link="docs\REFERENCE_AUDIT.md"
           CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\..\docs\OBS_OUTPUT.md"
+          Link="docs\OBS_OUTPUT.md"
+          CopyToPublishDirectory="PreserveNewest" />
     <None Include="..\..\RELEASE_NOTES.md"
           Link="RELEASE_NOTES.md"
           CopyToPublishDirectory="PreserveNewest" />

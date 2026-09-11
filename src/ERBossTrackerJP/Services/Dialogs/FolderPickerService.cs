@@ -5,11 +5,15 @@ namespace ERBossTrackerJP.Services.Dialogs;
 
 public sealed class FolderPickerService : IFolderPickerService
 {
-    public string? SelectFolder(string? initialDirectory = null)
+    public string? SelectFolder(
+        string? initialDirectory = null,
+        string? title = null)
     {
         var dialog = new OpenFolderDialog
         {
-            Title = "ELDEN RINGのセーブフォルダーを選択してください",
+            Title = string.IsNullOrWhiteSpace(title)
+                ? "ELDEN RINGのセーブフォルダーを選択してください"
+                : title,
             Multiselect = false,
         };
 
