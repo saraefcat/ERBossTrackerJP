@@ -525,13 +525,18 @@
                           IsEnabled="{Binding IsInteractionEnabled}"
                           Content="自動監視" />
 
-                <TextBlock Grid.Row="1"
+                <DockPanel Grid.Row="1"
                            Grid.Column="0"
                            Grid.ColumnSpan="5"
-                           Margin="0,6,0,0"
-                           Foreground="{DynamicResource TextSecondaryBrush}"
-                           Text="{Binding StatusMessage}"
-                           TextWrapping="Wrap" />
+                           Margin="0,6,0,0">
+                    <TextBlock DockPanel.Dock="Right"
+                               Margin="16,0,0,0"
+                               Foreground="{DynamicResource TextMutedBrush}"
+                               Text="セーブファイルは読み取り専用で扱います。" />
+                    <TextBlock Foreground="{DynamicResource TextSecondaryBrush}"
+                               Text="{Binding StatusMessage}"
+                               TextWrapping="Wrap" />
+                </DockPanel>
             </Grid>
         </Border>
 
@@ -805,16 +810,13 @@
             </Border>
         </Grid>
 
-        <DockPanel Grid.Row="4"
-                   Margin="0,5,0,0">
-            <TextBlock DockPanel.Dock="Right"
-                       Foreground="{DynamicResource TextMutedBrush}">
+        <TextBlock Grid.Row="4"
+                   Margin="0,5,0,0"
+                   HorizontalAlignment="Right"
+                   Foreground="{DynamicResource TextMutedBrush}">
                 <Run Text="セーブ更新日時: " />
                 <Run Text="{Binding SaveLastWriteTimeText, Mode=OneWay}" />
-            </TextBlock>
-            <TextBlock Foreground="{DynamicResource TextMutedBrush}"
-                       Text="セーブファイルは読み取り専用で扱います。" />
-        </DockPanel>
+        </TextBlock>
                 </Grid>
             </TabItem>
 
