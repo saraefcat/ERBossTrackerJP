@@ -440,6 +440,20 @@ public sealed class MainWindowViewModelTests
                 var darkBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     application.Resources["AppBackgroundBrush"]);
                 Assert.Equal("#FF101318", darkBackground.Color.ToString());
+                var comboBox = Assert.IsType<System.Windows.Controls.ComboBox>(
+                    FindVisualDescendant<System.Windows.Controls.ComboBox>(window));
+                comboBox.ApplyTemplate();
+                var toggleButton = Assert.IsType<System.Windows.Controls.Primitives.ToggleButton>(
+                    comboBox.Template.FindName("DropDownToggle", comboBox));
+                toggleButton.ApplyTemplate();
+                var comboBoxBorder = Assert.IsType<System.Windows.Controls.Border>(
+                    toggleButton.Template.FindName("ToggleBorder", toggleButton));
+                var darkInputBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
+                    comboBoxBorder.Background);
+                Assert.Equal("#FF11161D", darkInputBackground.Color.ToString());
+                var darkInputText = Assert.IsType<System.Windows.Media.SolidColorBrush>(
+                    comboBox.Foreground);
+                Assert.Equal("#FFF3F4F6", darkInputText.Color.ToString());
 
                 viewModel.IsDarkMode = false;
                 window.Dispatcher.Invoke(
@@ -449,6 +463,12 @@ public sealed class MainWindowViewModelTests
                 var lightBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     application.Resources["AppBackgroundBrush"]);
                 Assert.Equal("#FFF7F8FA", lightBackground.Color.ToString());
+                var lightInputBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
+                    comboBoxBorder.Background);
+                Assert.Equal("#FFFFFFFF", lightInputBackground.Color.ToString());
+                var lightInputText = Assert.IsType<System.Windows.Media.SolidColorBrush>(
+                    comboBox.Foreground);
+                Assert.Equal("#FF1F2937", lightInputText.Color.ToString());
             }
             catch (Exception exception)
             {
@@ -472,6 +492,33 @@ public sealed class MainWindowViewModelTests
 
         Assert.True(completed, "WPF binding verification did not complete in time.");
         Assert.Null(capturedException);
+    }
+
+    private static T? FindVisualDescendant<T>(
+        System.Windows.DependencyObject parent)
+        where T : System.Windows.DependencyObject
+    {
+        int childCount = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
+
+        for (int index = 0; index < childCount; index++)
+        {
+            System.Windows.DependencyObject child =
+                System.Windows.Media.VisualTreeHelper.GetChild(parent, index);
+
+            if (child is T match)
+            {
+                return match;
+            }
+
+            T? descendant = FindVisualDescendant<T>(child);
+
+            if (descendant is not null)
+            {
+                return descendant;
+            }
+        }
+
+        return null;
     }
 
     private static MainWindowViewModel CreateViewModel(
