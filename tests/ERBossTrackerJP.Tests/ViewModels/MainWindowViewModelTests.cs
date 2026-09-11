@@ -56,6 +56,7 @@ public sealed class MainWindowViewModelTests
         Assert.Equal(1, viewModel.Defeated);
         Assert.Equal(2, viewModel.Remaining);
         Assert.Contains("ボス進捗を読み込みました", viewModel.StatusMessage, StringComparison.Ordinal);
+        Assert.False(viewModel.IsProgressStatusMessageVisible);
         Assert.NotEqual("未読み込み", viewModel.SaveLastWriteTimeText);
         Assert.NotNull(viewModel.LoadedSave);
         Assert.NotNull(viewModel.TrackerSnapshot);
@@ -107,6 +108,7 @@ public sealed class MainWindowViewModelTests
         Assert.Same(previousCharacter, viewModel.SelectedCharacter);
         Assert.Same(successfulLoad, viewModel.LoadedSave);
         Assert.Contains("一時的に読み取れません", viewModel.StatusMessage, StringComparison.Ordinal);
+        Assert.True(viewModel.IsProgressStatusMessageVisible);
     }
 
     [Fact]

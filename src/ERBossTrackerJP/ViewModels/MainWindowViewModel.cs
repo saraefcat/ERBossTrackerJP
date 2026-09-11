@@ -72,6 +72,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private string _obsLastOutputTimeText = "未出力";
     private IReadOnlyList<string> _latestObsBossIds = [];
     private string _statusMessage = "セーブファイルを検索しています…";
+    private bool _isProgressStatusMessageVisible = true;
     private string _saveLastWriteTimeText = "未読み込み";
 
     public MainWindowViewModel(
@@ -567,7 +568,19 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     public string StatusMessage
     {
         get => _statusMessage;
-        private set => SetProperty(ref _statusMessage, value);
+        private set
+        {
+            if (SetProperty(ref _statusMessage, value))
+            {
+                IsProgressStatusMessageVisible = true;
+            }
+        }
+    }
+
+    public bool IsProgressStatusMessageVisible
+    {
+        get => _isProgressStatusMessageVisible;
+        private set => SetProperty(ref _isProgressStatusMessageVisible, value);
     }
 
     public string SaveLastWriteTimeText
@@ -882,6 +895,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
             StatusMessage =
                 $"「{character.Name}」のボス進捗を読み込みました。撃破 {Defeated} / {Total}。";
+            IsProgressStatusMessageVisible = false;
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
