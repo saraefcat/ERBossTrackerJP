@@ -329,6 +329,9 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
     public string ObsOutputDirectory => _obsOutputDirectory;
 
+    public string ObsRecommendedProgressFilePath =>
+        Path.Combine(ObsOutputDirectory, ObsTextFileOutput.ProgressFileName);
+
     public string ObsProgressFormatDraft
     {
         get => _obsProgressFormatDraft;
@@ -520,13 +523,14 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
                 Defeated,
                 Remaining,
                 Total,
-                ProgressPercentage)),
-        new(ObsTextFileOutput.DefeatedFileName, Defeated.ToString()),
-        new(ObsTextFileOutput.RemainingFileName, Remaining.ToString()),
-        new(ObsTextFileOutput.TotalFileName, Total.ToString()),
-        new(ObsTextFileOutput.PercentageFileName, ProgressPercentageText),
-        new(ObsTextFileOutput.LatestBossFileName, GetLatestObsBossPreview()),
-        new(ObsTextFileOutput.SnapshotFileName, $"ボス情報 {Total}件"),
+                ProgressPercentage),
+            "進捗を1行表示（推奨）"),
+        new(ObsTextFileOutput.DefeatedFileName, Defeated.ToString(), "撃破数だけ"),
+        new(ObsTextFileOutput.RemainingFileName, Remaining.ToString(), "未撃破数だけ"),
+        new(ObsTextFileOutput.TotalFileName, Total.ToString(), "総数だけ"),
+        new(ObsTextFileOutput.PercentageFileName, ProgressPercentageText, "進捗率だけ"),
+        new(ObsTextFileOutput.LatestBossFileName, GetLatestObsBossPreview(), "最新撃破ボス"),
+        new(ObsTextFileOutput.SnapshotFileName, $"ボス情報 {Total}件", "外部連携用（OBS対象外）"),
     ];
 
     public string ApplicationVersionText =>
@@ -689,6 +693,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
         _obsOutputDirectory = _obsTextFileOutput.OutputDirectory;
         OnPropertyChanged(nameof(ObsOutputDirectory));
+        OnPropertyChanged(nameof(ObsRecommendedProgressFilePath));
 
         if (IsObsOutputEnabled && _trackerSnapshot is not null)
         {
@@ -1446,4 +1451,4 @@ public sealed record ContentFilterOption(GameContent? Value, string Label);
 
 public sealed record RegionFilterOption(string? RegionId, string Label);
 
-public sealed record ObsPreviewItem(string FileName, string Contents);
+public sealed record ObsPreviewItem(string FileName, string Contents, string Usage);

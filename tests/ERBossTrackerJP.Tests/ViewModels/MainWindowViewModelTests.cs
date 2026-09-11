@@ -484,6 +484,7 @@ public sealed class MainWindowViewModelTests
         Assert.Equal("C:\\obs-default", folderPicker.ReceivedInitialDirectory);
         Assert.Contains("OBSテキスト", folderPicker.ReceivedTitle, StringComparison.Ordinal);
         Assert.Equal("D:\\OBS", viewModel.ObsOutputDirectory);
+        Assert.Equal("D:\\OBS\\progress.txt", viewModel.ObsRecommendedProgressFilePath);
         Assert.Equal("D:\\OBS", settingsService.LastSaved?.ObsOutputDirectory);
     }
 
@@ -529,7 +530,8 @@ public sealed class MainWindowViewModelTests
         Assert.Contains(
             viewModel.ObsPreviewItems,
             item => item.FileName == ObsTextFileOutput.ProgressFileName &&
-                    item.Contents == "1 / 3 (33.3%)");
+                    item.Contents == "1 / 3 (33.3%)" &&
+                    item.Usage.Contains("推奨", StringComparison.Ordinal));
         Assert.Contains(
             viewModel.ObsPreviewItems,
             item => item.FileName == ObsTextFileOutput.LatestBossFileName &&

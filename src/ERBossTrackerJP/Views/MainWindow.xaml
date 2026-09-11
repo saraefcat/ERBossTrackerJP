@@ -890,6 +890,17 @@
                                                 Content="出力先を選択" />
                                     </Grid>
 
+                                    <TextBlock Margin="0,14,0,4"
+                                               Foreground="{DynamicResource TextMutedBrush}"
+                                               Text="OBSで読み込む推奨ファイル" />
+                                    <TextBox IsReadOnly="True"
+                                             Text="{Binding ObsRecommendedProgressFilePath, Mode=OneWay}"
+                                             ToolTip="{Binding ObsRecommendedProgressFilePath}" />
+                                    <TextBlock Margin="0,5,0,0"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               Text="通常の進捗表示では、OBSの［テキスト（GDI+）］で［ファイルから読み取り］にこのファイルを指定します。"
+                                               TextWrapping="Wrap" />
+
                                     <TextBlock Margin="0,16,0,4"
                                                Foreground="{DynamicResource TextMutedBrush}"
                                                Text="固有名詞の言語（画面とOBS共通）" />
@@ -905,7 +916,10 @@
                                                FontWeight="SemiBold"
                                                Text="出力ファイル" />
                                     <UniformGrid Columns="2">
-                                        <TextBlock Margin="0,4" Text="✓ progress.txt" />
+                                        <TextBlock Margin="0,4"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AccentBrush}"
+                                                   Text="★ progress.txt（推奨）" />
                                         <TextBlock Margin="0,4" Text="✓ defeated.txt" />
                                         <TextBlock Margin="0,4" Text="✓ remaining.txt" />
                                         <TextBlock Margin="0,4" Text="✓ total.txt" />
@@ -937,16 +951,19 @@
                                                    Text="現在の内容" />
                                         <TextBlock FontSize="17"
                                                    FontWeight="SemiBold"
-                                                   Text="ライブプレビュー" />
+                                                   Text="OBS出力ファイルのプレビュー" />
                                     </DockPanel>
                                     <DataGrid Grid.Row="1"
                                               MinHeight="300"
                                               BorderThickness="0"
                                               ItemsSource="{Binding ObsPreviewItems}">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Width="150"
+                                            <DataGridTextColumn Width="145"
                                                                 Header="ファイル名"
                                                                 Binding="{Binding FileName, Mode=OneWay}" />
+                                            <DataGridTextColumn Width="190"
+                                                                Header="用途"
+                                                                Binding="{Binding Usage, Mode=OneWay}" />
                                             <DataGridTextColumn Width="*"
                                                                 Header="現在の内容"
                                                                 Binding="{Binding Contents, Mode=OneWay}" />
@@ -974,7 +991,7 @@
                             <StackPanel>
                                 <TextBlock FontSize="17"
                                            FontWeight="SemiBold"
-                                           Text="進捗表示書式" />
+                                           Text="progress.txt の表示書式" />
                                 <TextBlock Margin="0,5,0,0"
                                            Foreground="{DynamicResource TextMutedBrush}"
                                            Text="使用可能: {defeated}  {remaining}  {total}  {percentage}（%記号は書式側へ入力）"
