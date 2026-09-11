@@ -819,15 +819,12 @@
             </TabItem>
 
             <TabItem Header="OBS出力">
-                <ScrollViewer Margin="0,8,0,0"
-                              HorizontalScrollBarVisibility="Disabled"
-                              VerticalScrollBarVisibility="Auto">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+                <Grid Margin="0,8,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
                         <Border Grid.Row="0"
                                 Margin="0,0,0,12"
@@ -909,28 +906,6 @@
                                               SelectedValue="{Binding DisplayLanguage, Mode=TwoWay}"
                                               SelectedValuePath="Value" />
 
-                                    <Separator Margin="0,18"
-                                               Background="{DynamicResource BorderBrush}" />
-                                    <TextBlock Margin="0,0,0,10"
-                                               FontSize="17"
-                                               FontWeight="SemiBold"
-                                               Text="出力ファイル" />
-                                    <UniformGrid Columns="2">
-                                        <TextBlock Margin="0,4"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource AccentBrush}"
-                                                   Text="★ progress.txt（推奨）" />
-                                        <TextBlock Margin="0,4" Text="✓ defeated.txt" />
-                                        <TextBlock Margin="0,4" Text="✓ remaining.txt" />
-                                        <TextBlock Margin="0,4" Text="✓ total.txt" />
-                                        <TextBlock Margin="0,4" Text="✓ percentage.txt" />
-                                        <TextBlock Margin="0,4" Text="✓ latest_boss.txt" />
-                                        <TextBlock Margin="0,4" Text="✓ snapshot.json" />
-                                    </UniformGrid>
-                                    <TextBlock Margin="0,10,0,0"
-                                               Foreground="{DynamicResource TextMutedBrush}"
-                                               Text="現在はすべてのファイルを自動生成します。"
-                                               TextWrapping="Wrap" />
                                 </StackPanel>
                             </Border>
 
@@ -954,7 +929,6 @@
                                                    Text="OBS出力ファイルのプレビュー" />
                                     </DockPanel>
                                     <DataGrid Grid.Row="1"
-                                              MinHeight="300"
                                               BorderThickness="0"
                                               ItemsSource="{Binding ObsPreviewItems}">
                                         <DataGrid.Columns>
@@ -978,7 +952,7 @@
                                                 ToolTip="セーブ更新を待たず、現在の進捗をOBS用ファイルへ書き直します。" />
                                         <TextBlock VerticalAlignment="Center"
                                                    Foreground="{DynamicResource TextMutedBrush}"
-                                                   Text="OBSのテキスト（GDI+）ソースから各ファイルを参照できます。"
+                                                   Text="通常は progress.txt を指定します。他のファイルは数値を個別表示するときに使用します。"
                                                    TextWrapping="Wrap" />
                                     </DockPanel>
                                 </Grid>
@@ -1016,8 +990,7 @@
                                            TextWrapping="Wrap" />
                             </StackPanel>
                         </Border>
-                    </Grid>
-                </ScrollViewer>
+                </Grid>
             </TabItem>
 
             <TabItem Header="設定">

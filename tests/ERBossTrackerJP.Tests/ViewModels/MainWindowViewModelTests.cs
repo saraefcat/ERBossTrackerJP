@@ -696,6 +696,13 @@ public sealed class MainWindowViewModelTests
                         .Cast<System.Windows.Controls.TabItem>()
                         .Select(item => item.Header?.ToString() ?? string.Empty)
                         .ToArray());
+                var obsOutputTab = Assert.IsType<System.Windows.Controls.TabItem>(
+                    tabControl.Items[1]);
+                var obsOutputLayout = Assert.IsType<System.Windows.Controls.Grid>(
+                    obsOutputTab.Content);
+                Assert.Equal(
+                    System.Windows.GridUnitType.Star,
+                    obsOutputLayout.RowDefinitions[1].Height.GridUnitType);
 
                 var darkBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     application.Resources["AppBackgroundBrush"]);
