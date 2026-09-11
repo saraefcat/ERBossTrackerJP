@@ -514,6 +514,60 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public async Task ObsPreviewItems_ShowCurrentTrackerValues()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "Preview Hero", 75)));
+        var viewModel = CreateViewModel(locator, loadService);
+
+        await viewModel.InitializeAsync();
+
+        Assert.Contains(
+            viewModel.ObsPreviewItems,
+            item => item.FileName == ObsTextFileOutput.ProgressFileName &&
+                    item.Contents == "1 / 3 (33.3%)");
+        Assert.Contains(
+            viewModel.ObsPreviewItems,
+            item => item.FileName == ObsTextFileOutput.LatestBossFileName &&
+                    item.Contents == "—");
+        Assert.Contains(
+            viewModel.ObsPreviewItems,
+            item => item.FileName == ObsTextFileOutput.SnapshotFileName &&
+                    item.Contents == "ボス情報 3件");
+    }
+
+    [Fact]
+    public async Task TestObsOutputAsync_PublishesCurrentSnapshotAgain()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "OBS Hero", 75)));
+        var obsOutput = new StubObsTextFileOutput();
+        var settingsService = new StubUserSettingsService(
+            new UserSettings(IsObsOutputEnabled: true));
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            userSettingsService: settingsService,
+            obsTextFileOutput: obsOutput);
+        await viewModel.InitializeAsync();
+
+        await viewModel.TestObsOutputAsync();
+
+        Assert.Equal(2, obsOutput.Updates.Count);
+        Assert.Same(viewModel.TrackerSnapshot, obsOutput.Updates[1].Snapshot);
+        Assert.Same(viewModel.TrackerSnapshot, obsOutput.Updates[1].PreviousSnapshot);
+        Assert.NotEqual("未出力", viewModel.ObsLastOutputTimeText);
+    }
+
+    [Fact]
     public void MainWindow_BindingsAndThemeResourcesWorkAtRuntime()
     {
         Exception? capturedException = null;
@@ -552,6 +606,16 @@ public sealed class MainWindowViewModelTests
                 window.Dispatcher.Invoke(
                     static () => { },
                     DispatcherPriority.ApplicationIdle);
+
+                var tabControl = Assert.IsType<System.Windows.Controls.TabControl>(
+                    FindVisualDescendant<System.Windows.Controls.TabControl>(window));
+                Assert.Equal(3, tabControl.Items.Count);
+                Assert.Equal(
+                    new[] { "進捗", "OBS出力", "設定" },
+                    tabControl.Items
+                        .Cast<System.Windows.Controls.TabItem>()
+                        .Select(item => item.Header?.ToString() ?? string.Empty)
+                        .ToArray());
 
                 var darkBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     application.Resources["AppBackgroundBrush"]);

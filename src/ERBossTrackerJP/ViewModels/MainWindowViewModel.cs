@@ -37,6 +37,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly AsyncRelayCommand _refreshDefaultCommand;
     private readonly AsyncRelayCommand _reloadCommand;
     private readonly AsyncRelayCommand _browseObsOutputFolderCommand;
+    private readonly AsyncRelayCommand _testObsOutputCommand;
     private readonly CancellationTokenSource _obsOutputCancellationSource = new();
     private SaveFileCandidate? _selectedSaveCandidate;
     private CharacterSlot? _selectedCharacter;
@@ -65,6 +66,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private UserSettings _lastPersistedSettings = UserSettings.Default;
     private string _monitoringStatusText = "停止中";
     private string _obsOutputStatusText = "停止中";
+    private string _obsLastOutputTimeText = "未出力";
+    private IReadOnlyList<string> _latestObsBossIds = [];
     private string _statusMessage = "セーブファイルを検索しています…";
     private string _saveLastWriteTimeText = "未読み込み";
 
@@ -168,6 +171,9 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         _browseObsOutputFolderCommand = new AsyncRelayCommand(
             BrowseObsOutputFolderAsync,
             () => !IsBusy);
+        _testObsOutputCommand = new AsyncRelayCommand(
+            TestObsOutputAsync,
+            () => !IsBusy && IsObsOutputEnabled && _trackerSnapshot is not null);
         _saveFileMonitor.ChangeDetected += OnSaveFileChangeDetected;
         _saveFileMonitor.MonitoringError += OnSaveFileMonitoringError;
     }
@@ -223,6 +229,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
     public AsyncRelayCommand BrowseObsOutputFolderCommand =>
         _browseObsOutputFolderCommand;
+
+    public AsyncRelayCommand TestObsOutputCommand => _testObsOutputCommand;
 
     public bool IsAutoMonitoringEnabled
     {
@@ -283,6 +291,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
                 return;
             }
 
+            _testObsOutputCommand.NotifyCanExecuteChanged();
+
             if (!value)
             {
                 ObsOutputStatusText = "停止中";
@@ -306,6 +316,12 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     {
         get => _obsOutputStatusText;
         private set => SetProperty(ref _obsOutputStatusText, value);
+    }
+
+    public string ObsLastOutputTimeText
+    {
+        get => _obsLastOutputTimeText;
+        private set => SetProperty(ref _obsLastOutputTimeText, value);
     }
 
     public string MonitoringStatusText
@@ -372,6 +388,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
             RebuildRegionOptions();
             RefreshDisplay();
+            OnPropertyChanged(nameof(ObsPreviewItems));
             if (_trackerSnapshot is not null && IsObsOutputEnabled)
             {
                 QueueObsOutput(_trackerSnapshot, _trackerSnapshot);
@@ -455,6 +472,21 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
     public string ProgressPercentageText => $"{ProgressPercentage:F1}%";
 
+    public IReadOnlyList<ObsPreviewItem> ObsPreviewItems =>
+    [
+        new(ObsTextFileOutput.ProgressFileName,
+            $"{Defeated} / {Total} ({ProgressPercentageText})"),
+        new(ObsTextFileOutput.DefeatedFileName, Defeated.ToString()),
+        new(ObsTextFileOutput.RemainingFileName, Remaining.ToString()),
+        new(ObsTextFileOutput.TotalFileName, Total.ToString()),
+        new(ObsTextFileOutput.PercentageFileName, ProgressPercentageText),
+        new(ObsTextFileOutput.LatestBossFileName, GetLatestObsBossPreview()),
+        new(ObsTextFileOutput.SnapshotFileName, $"ボス情報 {Total}件"),
+    ];
+
+    public string ApplicationVersionText =>
+        $"バージョン {typeof(MainWindowViewModel).Assembly.GetName().Version?.ToString(3) ?? "不明"}";
+
     public string VisibleBossCountText => $"{_bosses.Count}件表示";
 
     public string TrackerLastUpdateText => _trackerSnapshot is null
@@ -475,6 +507,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             _refreshDefaultCommand.NotifyCanExecuteChanged();
             _reloadCommand.NotifyCanExecuteChanged();
             _browseObsOutputFolderCommand.NotifyCanExecuteChanged();
+            _testObsOutputCommand.NotifyCanExecuteChanged();
             OnPropertyChanged(nameof(IsInteractionEnabled));
         }
     }
@@ -618,6 +651,23 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
         PersistUserSettings();
         return Task.CompletedTask;
+    }
+
+    public Task TestObsOutputAsync()
+    {
+        if (_trackerSnapshot is null || !IsObsOutputEnabled)
+        {
+            return Task.CompletedTask;
+        }
+
+        ObsOutputStatusText = "テスト出力中…";
+        var update = new TrackerOutputUpdate(
+            _trackerSnapshot,
+            _trackerSnapshot,
+            DisplayLanguage);
+        return PublishObsOutputAsync(
+            update,
+            _obsOutputCancellationSource.Token);
     }
 
     private async Task LoadSelectedSaveCoreAsync()
@@ -830,6 +880,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private void ClearTrackerSnapshot()
     {
         _trackerSnapshot = null;
+        _latestObsBossIds = [];
         _regionFilterId = null;
         OnPropertyChanged(nameof(RegionFilterId));
         OnPropertyChanged(nameof(SelectedRegionOption));
@@ -849,6 +900,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         OnPropertyChanged(nameof(ProgressPercentageText));
         OnPropertyChanged(nameof(VisibleBossCountText));
         OnPropertyChanged(nameof(TrackerLastUpdateText));
+        OnPropertyChanged(nameof(ObsPreviewItems));
+        _testObsOutputCommand.NotifyCanExecuteChanged();
     }
 
     private bool TryFindSavedCandidate(
@@ -1118,7 +1171,29 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         if (previousSnapshot?.Character.SlotIndex != snapshot.Character.SlotIndex)
         {
             previousSnapshot = null;
+            _latestObsBossIds = [];
         }
+
+        if (previousSnapshot is not null)
+        {
+            HashSet<string> previouslyDefeated = previousSnapshot.Bosses
+                .Where(progress => progress.IsDefeated)
+                .Select(progress => progress.Boss.Id)
+                .ToHashSet(StringComparer.Ordinal);
+            string[] newlyDefeated = snapshot.Bosses
+                .Where(progress =>
+                    progress.IsDefeated &&
+                    !previouslyDefeated.Contains(progress.Boss.Id))
+                .Select(progress => progress.Boss.Id)
+                .ToArray();
+
+            if (newlyDefeated.Length > 0)
+            {
+                _latestObsBossIds = newlyDefeated;
+            }
+        }
+
+        OnPropertyChanged(nameof(ObsPreviewItems));
 
         ObsOutputStatusText = "出力中…";
         var update = new TrackerOutputUpdate(
@@ -1142,6 +1217,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
                 if (!_disposed && IsObsOutputEnabled)
                 {
                     ObsOutputStatusText = "出力済み";
+                    ObsLastOutputTimeText = DateTimeOffset.Now.ToString("HH:mm:ss");
                 }
             });
         }
@@ -1159,6 +1235,24 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
                 }
             });
         }
+    }
+
+    private string GetLatestObsBossPreview()
+    {
+        if (_trackerSnapshot is null || _latestObsBossIds.Count == 0)
+        {
+            return "—";
+        }
+
+        string[] names = _trackerSnapshot.Bosses
+            .Where(progress => _latestObsBossIds.Contains(
+                progress.Boss.Id,
+                StringComparer.Ordinal))
+            .Select(progress => DisplayLanguage == DisplayLanguage.English
+                ? progress.Boss.NameEn
+                : progress.Boss.NameJa)
+            .ToArray();
+        return names.Length == 0 ? "—" : string.Join(" / ", names);
     }
 
     public void Dispose()
@@ -1255,3 +1349,5 @@ public sealed record CompletionFilterOption(BossCompletionFilter Value, string L
 public sealed record ContentFilterOption(GameContent? Value, string Label);
 
 public sealed record RegionFilterOption(string? RegionId, string Label);
+
+public sealed record ObsPreviewItem(string FileName, string Contents);
