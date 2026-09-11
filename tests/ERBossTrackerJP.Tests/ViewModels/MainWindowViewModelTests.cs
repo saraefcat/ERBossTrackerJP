@@ -1,3 +1,4 @@
+using System.Windows.Threading;
 using ERBossTrackerJP.Core.Models;
 using ERBossTrackerJP.Core.Presentation;
 using ERBossTrackerJP.Save.Exceptions;
@@ -7,6 +8,7 @@ using ERBossTrackerJP.Services.SaveFiles;
 using ERBossTrackerJP.Services.Settings;
 using ERBossTrackerJP.Services.Tracking;
 using ERBossTrackerJP.ViewModels;
+using ERBossTrackerJP.Views;
 
 namespace ERBossTrackerJP.Tests.ViewModels;
 
@@ -369,6 +371,62 @@ public sealed class MainWindowViewModelTests
         Assert.Equal(3, settingsService.LastSaved?.CharacterSlotIndex);
         Assert.Equal(DisplayLanguage.English, settingsService.LastSaved?.DisplayLanguage);
         Assert.False(settingsService.LastSaved?.IsAutoMonitoringEnabled);
+    }
+
+    [Fact]
+    public void MainWindow_ReadOnlyDisplayBindingsAttachAsOneWay()
+    {
+        Exception? capturedException = null;
+        var thread = new Thread(() =>
+        {
+            MainWindow? window = null;
+            MainWindowViewModel? viewModel = null;
+
+            try
+            {
+                SaveFileCandidate candidate = CreateCandidate(
+                    "C:\\saves\\ER0000.sl2");
+                var locator = new StubSaveFileLocator([candidate]);
+                var loadService = new StubSaveLoadService();
+                loadService.Enqueue(CreateLoadedSave(
+                    candidate.FilePath,
+                    new CharacterSlot(0, "Binding Hero", 30)));
+                viewModel = CreateViewModel(locator, loadService);
+                viewModel.InitializeAsync().GetAwaiter().GetResult();
+                window = new MainWindow
+                {
+                    DataContext = viewModel,
+                    ShowActivated = false,
+                    ShowInTaskbar = false,
+                    WindowState = System.Windows.WindowState.Minimized,
+                };
+
+                window.Show();
+                window.Dispatcher.Invoke(
+                    static () => { },
+                    DispatcherPriority.ApplicationIdle);
+            }
+            catch (Exception exception)
+            {
+                capturedException = exception;
+            }
+            finally
+            {
+                window?.Close();
+                viewModel?.Dispose();
+                Dispatcher.CurrentDispatcher.InvokeShutdown();
+            }
+        })
+        {
+            IsBackground = true,
+        };
+        thread.SetApartmentState(ApartmentState.STA);
+
+        thread.Start();
+        bool completed = thread.Join(TimeSpan.FromSeconds(10));
+
+        Assert.True(completed, "WPF binding verification did not complete in time.");
+        Assert.Null(capturedException);
     }
 
     private static MainWindowViewModel CreateViewModel(

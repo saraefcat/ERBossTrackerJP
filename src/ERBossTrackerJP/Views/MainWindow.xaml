@@ -196,12 +196,12 @@
                             <DataTemplate>
                                 <TextBlock>
                                     <Run Text="スロット " />
-                                    <Run Text="{Binding SlotNumber}" />
+                                    <Run Text="{Binding SlotNumber, Mode=OneWay}" />
                                     <Run Text="  " />
                                     <Run FontWeight="SemiBold"
-                                         Text="{Binding Name}" />
+                                         Text="{Binding Name, Mode=OneWay}" />
                                     <Run Text="  Lv." />
-                                    <Run Text="{Binding Level}" />
+                                    <Run Text="{Binding Level, Mode=OneWay}" />
                                 </TextBlock>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
@@ -266,7 +266,7 @@
                     <ProgressBar Grid.Row="1"
                                  Height="14"
                                  Maximum="100"
-                                 Value="{Binding ProgressPercentage}" />
+                                 Value="{Binding ProgressPercentage, Mode=OneWay}" />
                 </Grid>
             </Border>
         </Grid>
@@ -357,13 +357,13 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Width="*"
                                                 Header="地域"
-                                                Binding="{Binding Name}" />
+                                                Binding="{Binding Name, Mode=OneWay}" />
                             <DataGridTextColumn Width="62"
                                                 Header="撃破"
-                                                Binding="{Binding Defeated}" />
+                                                Binding="{Binding Defeated, Mode=OneWay}" />
                             <DataGridTextColumn Width="62"
                                                 Header="総数"
-                                                Binding="{Binding Total}" />
+                                                Binding="{Binding Total, Mode=OneWay}" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -418,18 +418,18 @@
                             <DataGridTextColumn Width="2*"
                                                 MinWidth="180"
                                                 Header="ボス名"
-                                                Binding="{Binding Name}" />
+                                                Binding="{Binding Name, Mode=OneWay}" />
                             <DataGridTextColumn Width="1.4*"
                                                 MinWidth="140"
                                                 Header="地域"
-                                                Binding="{Binding Region}" />
+                                                Binding="{Binding Region, Mode=OneWay}" />
                             <DataGridTextColumn Width="1.6*"
                                                 MinWidth="160"
                                                 Header="場所"
-                                                Binding="{Binding Location}" />
+                                                Binding="{Binding Location, Mode=OneWay}" />
                             <DataGridTextColumn Width="70"
                                                 Header="区分"
-                                                Binding="{Binding ContentText}" />
+                                                Binding="{Binding ContentText, Mode=OneWay}" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -441,7 +441,7 @@
             <TextBlock DockPanel.Dock="Right"
                        Foreground="#667085">
                 <Run Text="セーブ更新日時: " />
-                <Run Text="{Binding SaveLastWriteTimeText}" />
+                <Run Text="{Binding SaveLastWriteTimeText, Mode=OneWay}" />
             </TextBlock>
             <TextBlock Foreground="#667085"
                        Text="セーブファイルは読み取り専用で扱います。" />
