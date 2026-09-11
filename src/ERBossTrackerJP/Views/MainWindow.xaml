@@ -1001,137 +1001,196 @@
             </TabItem>
 
             <TabItem Header="設定">
-                <ScrollViewer Margin="0,8,0,0"
-                              HorizontalScrollBarVisibility="Disabled"
-                              VerticalScrollBarVisibility="Auto">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
+                <Grid Margin="0,8,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.85*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="1.15*" />
+                    </Grid.ColumnDefinitions>
 
-                        <Border Grid.Row="0"
-                                Grid.Column="0"
-                                Style="{StaticResource PanelBorderStyle}">
-                            <StackPanel>
-                                <TextBlock Margin="0,0,0,16"
-                                           FontSize="17"
-                                           FontWeight="SemiBold"
-                                           Text="表示設定" />
-                                <CheckBox Content="ダークモード"
-                                          IsChecked="{Binding IsDarkMode, Mode=TwoWay}" />
-                                <TextBlock Margin="0,16,0,4"
-                                           Foreground="{DynamicResource TextMutedBrush}"
-                                           Text="固有名詞" />
-                                <ComboBox DisplayMemberPath="Label"
-                                          ItemsSource="{Binding LanguageOptions}"
-                                          SelectedValue="{Binding DisplayLanguage, Mode=TwoWay}"
-                                          SelectedValuePath="Value" />
-                            </StackPanel>
-                        </Border>
+                    <Border Grid.Row="0"
+                            Grid.Column="0"
+                            Style="{StaticResource PanelBorderStyle}">
+                        <StackPanel>
+                            <TextBlock Margin="0,0,0,12"
+                                       FontSize="17"
+                                       FontWeight="SemiBold"
+                                       Text="表示設定" />
+                            <CheckBox Content="ダークモード"
+                                      IsChecked="{Binding IsDarkMode, Mode=TwoWay}" />
+                            <TextBlock Margin="0,12,0,4"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       Text="固有名詞" />
+                            <ComboBox DisplayMemberPath="Label"
+                                      ItemsSource="{Binding LanguageOptions}"
+                                      SelectedValue="{Binding DisplayLanguage, Mode=TwoWay}"
+                                      SelectedValuePath="Value" />
+                        </StackPanel>
+                    </Border>
 
-                        <Border Grid.Row="0"
-                                Grid.Column="2"
-                                Style="{StaticResource PanelBorderStyle}">
-                            <StackPanel>
-                                <TextBlock Margin="0,0,0,16"
-                                           FontSize="17"
-                                           FontWeight="SemiBold"
-                                           Text="セーブファイルと監視" />
-                                <TextBlock Margin="0,0,0,4"
-                                           Foreground="{DynamicResource TextMutedBrush}"
-                                           Text="現在のセーブファイル" />
-                                <TextBox IsReadOnly="True"
-                                         Text="{Binding SelectedSaveCandidate.FilePath, Mode=OneWay}"
-                                         ToolTip="{Binding SelectedSaveCandidate.FilePath}" />
-                                <WrapPanel Margin="0,10,0,0">
-                                    <Button Margin="0,0,8,0"
-                                            Command="{Binding BrowseFolderCommand}"
-                                            Content="フォルダーを変更" />
-                                    <Button Command="{Binding RefreshDefaultCommand}"
-                                            Content="既定場所を再検索" />
-                                </WrapPanel>
-                                <CheckBox Margin="0,16,0,0"
-                                          Content="自動監視"
-                                          IsChecked="{Binding IsAutoMonitoringEnabled, Mode=TwoWay}"
-                                          IsEnabled="{Binding IsInteractionEnabled}" />
-                                <TextBlock Margin="0,8,0,0"
-                                           Foreground="{DynamicResource TextMutedBrush}"
-                                           Text="セーブ更新を検出すると進捗を自動で再読み込みします。"
-                                           TextWrapping="Wrap" />
-                                <TextBlock Margin="0,8,0,0"
-                                           Foreground="{DynamicResource TextMutedBrush}"
-                                           Text="セーブファイルは読み取り専用で扱います。"
-                                           TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Border>
+                    <Border Grid.Row="0"
+                            Grid.Column="2"
+                            Style="{StaticResource PanelBorderStyle}">
+                        <StackPanel>
+                            <TextBlock Margin="0,0,0,10"
+                                       FontSize="17"
+                                       FontWeight="SemiBold"
+                                       Text="セーブファイルと監視" />
+                            <TextBlock Margin="0,0,0,4"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       Text="セーブファイル" />
+                            <ComboBox DisplayMemberPath="FilePath"
+                                      IsEnabled="{Binding IsInteractionEnabled}"
+                                      ItemsSource="{Binding SaveCandidates}"
+                                      SelectedItem="{Binding SelectedSaveCandidate, Mode=TwoWay}"
+                                      ToolTip="{Binding SelectedSaveCandidate.FilePath}" />
+                            <WrapPanel Margin="0,8,0,0">
+                                <Button MinWidth="88"
+                                        Margin="0,0,8,0"
+                                        Command="{Binding ReloadCommand}"
+                                        Content="再読み込み" />
+                                <Button Margin="0,0,8,0"
+                                        Command="{Binding BrowseFolderCommand}"
+                                        Content="フォルダー変更" />
+                                <Button Command="{Binding RefreshDefaultCommand}"
+                                        Content="既定場所を再検索" />
+                            </WrapPanel>
+                            <TextBlock Margin="0,10,0,4"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       Text="キャラクター" />
+                            <ComboBox ItemsSource="{Binding CharacterSlots}"
+                                      IsEnabled="{Binding IsInteractionEnabled}"
+                                      SelectedItem="{Binding SelectedCharacter, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <Run Text="スロット " />
+                                            <Run Text="{Binding SlotNumber, Mode=OneWay}" />
+                                            <Run Text="  " />
+                                            <Run FontWeight="SemiBold"
+                                                 Text="{Binding Name, Mode=OneWay}" />
+                                            <Run Text="  Lv." />
+                                            <Run Text="{Binding Level, Mode=OneWay}" />
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <CheckBox Margin="0,10,0,0"
+                                      Content="自動監視"
+                                      IsChecked="{Binding IsAutoMonitoringEnabled, Mode=TwoWay}"
+                                      IsEnabled="{Binding IsInteractionEnabled}" />
+                            <TextBlock Margin="0,6,0,0"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       Text="セーブ更新を検出すると自動で再読み込みします。セーブファイルは読み取り専用で扱います。"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
 
-                        <Border Grid.Row="1"
-                                Grid.Column="0"
-                                Grid.ColumnSpan="3"
-                                Margin="0,12,0,0"
-                                Style="{StaticResource PanelBorderStyle}">
+                    <Border Grid.Row="1"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="3"
+                            Margin="0,12,0,0"
+                            Style="{StaticResource PanelBorderStyle}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0"
+                                       FontSize="17"
+                                       FontWeight="SemiBold"
+                                       Text="OBS出力設定" />
+                            <Grid Grid.Row="1"
+                                  Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="0.9*" />
+                                    <ColumnDefinition Width="20" />
+                                    <ColumnDefinition Width="1.1*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <CheckBox Content="OBSテキスト出力を有効にする"
+                                              IsChecked="{Binding IsObsOutputEnabled, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsInteractionEnabled}" />
+                                    <TextBlock Margin="0,10,0,4"
+                                               Foreground="{DynamicResource TextMutedBrush}"
+                                               Text="出力先" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Grid.Column="0"
+                                                 Margin="0,0,8,0"
+                                                 IsReadOnly="True"
+                                                 Text="{Binding ObsOutputDirectory, Mode=OneWay}"
+                                                 ToolTip="{Binding ObsOutputDirectory}" />
+                                        <Button Grid.Column="1"
+                                                MinWidth="104"
+                                                Command="{Binding BrowseObsOutputFolderCommand}"
+                                                Content="出力先を選択" />
+                                    </Grid>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Foreground="{DynamicResource TextMutedBrush}"
+                                               Text="progress.txt の表示書式" />
+                                    <TextBlock Margin="0,4,0,0"
+                                               Foreground="{DynamicResource TextMutedBrush}"
+                                               Text="使用可能: {defeated}  {remaining}  {total}  {percentage}"
+                                               TextWrapping="Wrap" />
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Grid.Column="0"
+                                                 Margin="0,0,8,0"
+                                                 MaxLength="256"
+                                                 Text="{Binding ObsProgressFormatDraft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        <Button Grid.Column="1"
+                                                MinWidth="112"
+                                                Command="{Binding ApplyObsProgressFormatCommand}"
+                                                Content="書式を適用" />
+                                    </Grid>
+                                    <TextBlock Margin="0,5,0,0"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               Text="{Binding ObsProgressFormatStatusText}"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="2"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="3"
+                            Margin="0,12,0,0"
+                            Style="{StaticResource PanelBorderStyle}">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Right"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       Text="適用または変更した内容は自動的に保存されます。" />
                             <StackPanel>
                                 <TextBlock FontSize="17"
                                            FontWeight="SemiBold"
-                                           Text="OBS表示設定" />
-                                <TextBlock Margin="0,10,0,4"
-                                           Foreground="{DynamicResource TextMutedBrush}"
-                                           Text="progress.txt の表示書式" />
-                                <TextBlock Foreground="{DynamicResource TextMutedBrush}"
-                                           Text="使用可能: {defeated}  {remaining}  {total}  {percentage}（%記号は書式側へ入力）"
-                                           TextWrapping="Wrap" />
-                                <Grid Margin="0,10,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBox Grid.Column="0"
-                                             Margin="0,0,8,0"
-                                             MaxLength="256"
-                                             Text="{Binding ObsProgressFormatDraft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <Button Grid.Column="1"
-                                            MinWidth="112"
-                                            Command="{Binding ApplyObsProgressFormatCommand}"
-                                            Content="書式を適用" />
-                                </Grid>
-                                <TextBlock Margin="0,7,0,0"
-                                           Foreground="{DynamicResource TextSecondaryBrush}"
-                                           Text="{Binding ObsProgressFormatStatusText}"
-                                           TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Border>
-
-                        <Border Grid.Row="2"
-                                Grid.Column="0"
-                                Grid.ColumnSpan="3"
-                                Margin="0,12,0,0"
-                                Style="{StaticResource PanelBorderStyle}">
-                            <DockPanel>
-                                <TextBlock DockPanel.Dock="Right"
-                                           VerticalAlignment="Center"
-                                           Foreground="{DynamicResource TextMutedBrush}"
-                                           Text="適用または変更した内容は自動的に保存されます。" />
-                                <StackPanel>
-                                    <TextBlock FontSize="17"
-                                               FontWeight="SemiBold"
-                                               Text="アプリ情報" />
-                                    <TextBlock Margin="0,8,0,0"
-                                               FontWeight="SemiBold"
+                                           Text="アプリ情報" />
+                                <StackPanel Margin="0,6,0,0"
+                                            Orientation="Horizontal">
+                                    <TextBlock FontWeight="SemiBold"
                                                Text="ER Boss Tracker JP" />
-                                    <TextBlock Foreground="{DynamicResource TextMutedBrush}"
+                                    <TextBlock Margin="12,0,0,0"
+                                               Foreground="{DynamicResource TextMutedBrush}"
                                                Text="{Binding ApplicationVersionText}" />
                                 </StackPanel>
-                            </DockPanel>
-                        </Border>
-                    </Grid>
-                </ScrollViewer>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                </Grid>
             </TabItem>
         </TabControl>
     </Grid>

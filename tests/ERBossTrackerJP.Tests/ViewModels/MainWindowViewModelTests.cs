@@ -705,20 +705,81 @@ public sealed class MainWindowViewModelTests
                 Assert.Equal(
                     System.Windows.GridUnitType.Star,
                     obsOutputLayout.RowDefinitions[1].Height.GridUnitType);
-                foreach (int tabIndex in new[] { 1, 2 })
-                {
-                    var tabItem = Assert.IsType<System.Windows.Controls.TabItem>(
-                        tabControl.Items[tabIndex]);
-                    System.Windows.Controls.TextBox[] formatInputs =
-                        FindLogicalDescendants<System.Windows.Controls.TextBox>(tabItem)
-                            .Where(textBox =>
-                                System.Windows.Data.BindingOperations.GetBinding(
-                                    textBox,
-                                    System.Windows.Controls.TextBox.TextProperty)?.Path.Path ==
-                                nameof(MainWindowViewModel.ObsProgressFormatDraft))
-                            .ToArray();
-                    Assert.Single(formatInputs);
-                }
+                var progressTab = Assert.IsType<System.Windows.Controls.TabItem>(
+                    tabControl.Items[0]);
+                var settingsTab = Assert.IsType<System.Windows.Controls.TabItem>(
+                    tabControl.Items[2]);
+                var settingsLayout = Assert.IsType<System.Windows.Controls.Grid>(
+                    settingsTab.Content);
+                settingsLayout.Measure(new System.Windows.Size(1252, 620));
+                Assert.True(
+                    settingsLayout.DesiredSize.Height <= 620,
+                    $"Settings layout requires {settingsLayout.DesiredSize.Height:F1} DIPs.");
+
+                AssertSingleBinding<System.Windows.Controls.ComboBox>(
+                    progressTab,
+                    System.Windows.Controls.Primitives.Selector.SelectedItemProperty,
+                    nameof(MainWindowViewModel.SelectedSaveCandidate));
+                AssertSingleBinding<System.Windows.Controls.ComboBox>(
+                    settingsTab,
+                    System.Windows.Controls.Primitives.Selector.SelectedItemProperty,
+                    nameof(MainWindowViewModel.SelectedSaveCandidate));
+                AssertSingleBinding<System.Windows.Controls.ComboBox>(
+                    progressTab,
+                    System.Windows.Controls.Primitives.Selector.SelectedItemProperty,
+                    nameof(MainWindowViewModel.SelectedCharacter));
+                AssertSingleBinding<System.Windows.Controls.ComboBox>(
+                    settingsTab,
+                    System.Windows.Controls.Primitives.Selector.SelectedItemProperty,
+                    nameof(MainWindowViewModel.SelectedCharacter));
+                AssertSingleBinding<System.Windows.Controls.CheckBox>(
+                    progressTab,
+                    System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty,
+                    nameof(MainWindowViewModel.IsAutoMonitoringEnabled));
+                AssertSingleBinding<System.Windows.Controls.CheckBox>(
+                    settingsTab,
+                    System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty,
+                    nameof(MainWindowViewModel.IsAutoMonitoringEnabled));
+                AssertSingleBinding<System.Windows.Controls.CheckBox>(
+                    settingsTab,
+                    System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty,
+                    nameof(MainWindowViewModel.IsDarkMode));
+                AssertSingleBinding<System.Windows.Controls.ComboBox>(
+                    progressTab,
+                    System.Windows.Controls.Primitives.Selector.SelectedValueProperty,
+                    nameof(MainWindowViewModel.DisplayLanguage));
+                AssertSingleBinding<System.Windows.Controls.ComboBox>(
+                    obsOutputTab,
+                    System.Windows.Controls.Primitives.Selector.SelectedValueProperty,
+                    nameof(MainWindowViewModel.DisplayLanguage));
+                AssertSingleBinding<System.Windows.Controls.ComboBox>(
+                    settingsTab,
+                    System.Windows.Controls.Primitives.Selector.SelectedValueProperty,
+                    nameof(MainWindowViewModel.DisplayLanguage));
+                AssertSingleBinding<System.Windows.Controls.CheckBox>(
+                    obsOutputTab,
+                    System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty,
+                    nameof(MainWindowViewModel.IsObsOutputEnabled));
+                AssertSingleBinding<System.Windows.Controls.CheckBox>(
+                    settingsTab,
+                    System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty,
+                    nameof(MainWindowViewModel.IsObsOutputEnabled));
+                AssertSingleBinding<System.Windows.Controls.TextBox>(
+                    obsOutputTab,
+                    System.Windows.Controls.TextBox.TextProperty,
+                    nameof(MainWindowViewModel.ObsOutputDirectory));
+                AssertSingleBinding<System.Windows.Controls.TextBox>(
+                    settingsTab,
+                    System.Windows.Controls.TextBox.TextProperty,
+                    nameof(MainWindowViewModel.ObsOutputDirectory));
+                AssertSingleBinding<System.Windows.Controls.TextBox>(
+                    obsOutputTab,
+                    System.Windows.Controls.TextBox.TextProperty,
+                    nameof(MainWindowViewModel.ObsProgressFormatDraft));
+                AssertSingleBinding<System.Windows.Controls.TextBox>(
+                    settingsTab,
+                    System.Windows.Controls.TextBox.TextProperty,
+                    nameof(MainWindowViewModel.ObsProgressFormatDraft));
 
                 var darkBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     application.Resources["AppBackgroundBrush"]);
@@ -850,6 +911,22 @@ public sealed class MainWindowViewModelTests
                 }
             }
         }
+    }
+
+    private static void AssertSingleBinding<T>(
+        System.Windows.DependencyObject root,
+        System.Windows.DependencyProperty targetProperty,
+        string sourcePath)
+        where T : System.Windows.DependencyObject
+    {
+        T[] matches = FindLogicalDescendants<T>(root)
+            .Where(control =>
+                System.Windows.Data.BindingOperations.GetBinding(
+                    control,
+                    targetProperty)?.Path.Path == sourcePath)
+            .ToArray();
+
+        Assert.Single(matches);
     }
 
     private static MainWindowViewModel CreateViewModel(
