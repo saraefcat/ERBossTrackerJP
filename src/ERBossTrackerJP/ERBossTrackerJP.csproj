@@ -6,11 +6,35 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <AssemblyTitle>ER Boss Tracker JP</AssemblyTitle>
+    <Product>ER Boss Tracker JP</Product>
+    <Authors>ER Boss Tracker JP contributors</Authors>
+    <Description>PC版ELDEN RINGのセーブファイルからボス撃破状況を表示します。</Description>
+    <NeutralLanguage>ja-JP</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ERBossTrackerJP.Core\ERBossTrackerJP.Core.csproj" />
     <ProjectReference Include="..\ERBossTrackerJP.Save\ERBossTrackerJP.Save.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE"
+          Link="LICENSE"
+          CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\..\README.md"
+          Link="README.md"
+          CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\..\THIRD_PARTY_NOTICES.md"
+          Link="THIRD_PARTY_NOTICES.md"
+          CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\..\docs\REFERENCE_AUDIT.md"
+          Link="docs\REFERENCE_AUDIT.md"
+          CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\..\RELEASE_NOTES.md"
+          Link="RELEASE_NOTES.md"
+          CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

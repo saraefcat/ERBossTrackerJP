@@ -70,6 +70,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
+## Microsoft .NET
+
+- Product: Microsoft .NET 10
+- Usage: win-x64自己完結版へ.NETランタイムとWPFランタイムを同梱
+- Distribution terms: 発行に使用した.NET SDK付属の`LICENSE.txt`
+- Third-party notices: 発行に使用した.NET SDK付属の`ThirdPartyNotices.txt`
+- Redistributed notices: 配布物の`DOTNET_LICENSE.txt`および`DOTNET_THIRD_PARTY_NOTICES.txt`
+
+発行スクリプトは、実際に使用する`dotnet`実行ファイルと同じディレクトリから上記2ファイルを取得し、改変せず配布物へコピーする。これにより、自己完結版へ含まれるランタイムに対応した配布条件と第三者通知を同梱する。
+
 ## Additional format research
 
 次の成果物はセーブ形式の相互確認資料です。現時点でこれらのソースコードは取り込んでいません。コードまたはデータを取り込む場合は、その時点で各リビジョンとライセンスを改めて確認します。

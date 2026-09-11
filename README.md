@@ -14,6 +14,24 @@ PC版ELDEN RINGのセーブファイルを読み取り、キャラクターご�
 - OBS出力と死亡カウントは初期版の対象外
 - 実在するユーザーのセーブファイルをリポジトリへ含めない
 
+## 動作条件
+
+- Windows 10 version 1809以降またはWindows 11
+- x64環境
+- PC Steam版ELDEN RINGの標準セーブ`ER0000.sl2`
+
+自己完結版には.NETランタイムが含まれるため、利用者が.NET SDKやVisual Studioをインストールする必要はありません。
+
+## 使い方
+
+1. `ERBossTrackerJP-v0.1.0-win-x64.zip`を任意のフォルダーへ完全に展開します。
+2. `ERBossTrackerJP.exe`を起動します。
+3. 標準のセーブ場所が見つかれば、自動的に最新の`ER0000.sl2`を読み込みます。
+4. 見つからない場合は［フォルダー参照］から`ER0000.sl2`のあるフォルダー、アカウントフォルダーを含む`EldenRing`フォルダー、またはその親フォルダーを指定します。
+5. 追跡するキャラクターを選択します。ゲームのセーブ更新は自動的に画面へ反映されます。
+
+本アプリはコード署名されていないポータブル版です。Windowsが発行元に関する警告を表示する場合があります。入手元と、同梱の`SHA256SUMS.txt`またはZIP横の`.sha256.txt`を確認してから実行してください。
+
 ## リポジトリ構成
 
 ```text
@@ -31,7 +49,7 @@ docs/
 └─ SAVE_PARSER_DESIGN.md
 ```
 
-## ビルド
+## ソースからのビルド
 
 .NET 10 SDKが必要です。
 
@@ -40,6 +58,16 @@ dotnet restore ERBossTrackerJP.sln
 dotnet build ERBossTrackerJP.sln -c Release
 dotnet test ERBossTrackerJP.sln -c Release
 ```
+
+## 配布物の作成
+
+次のスクリプトはクリーンなGit作業ツリーを確認し、Releaseテストを実行してから、win-x64自己完結・単一EXEの配布物をGit管理外の`..\outputs\releases`へ生成します。配布物の`SOURCE_COMMIT.txt`には発行元コミットが記録されます。
+
+```powershell
+.\tools\Publish-Release.ps1
+```
+
+版番号を変更する場合は、例えば`.\tools\Publish-Release.ps1 -Version 0.1.1`と指定します。生成物にはREADME、[リリースノート](RELEASE_NOTES.md)、LICENSE、第三者通知、ファイルごとのSHA-256一覧が含まれます。
 
 ## 安全性
 
@@ -82,6 +110,13 @@ dotnet test ERBossTrackerJP.sln -c Release
 ログが2 MiBを超える前にローテーションし、`ERBossTrackerJP.log.1`から`.3`までの3世代を保持します。現行ログと合わせた使用量の目安は最大約8 MiBです。ログを作成できない場合でもアプリとセーブ監視は継続します。
 
 セーブのバイト列、イベントフラグ、キャラクター名は記録しません。セーブファイルのパス、OS・ランタイム情報、例外の詳細は含まれるため、第三者へ渡す前に内容を確認してください。
+
+## 既知の制限
+
+- Seamless Co-opの`.co2`には対応していません。
+- セーブデータの変更や、撃破状態の手動編集は行えません。
+- OBS向け出力と死亡カウントは初期版の対象外です。
+- インストーラーとコード署名はありません。
 
 ## ライセンス
 
