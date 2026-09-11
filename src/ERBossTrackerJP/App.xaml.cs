@@ -1,6 +1,10 @@
 using System.Windows;
+using ERBossTrackerJP.Core.Bosses;
+using ERBossTrackerJP.Core.Presentation;
+using ERBossTrackerJP.Save.Progress;
 using ERBossTrackerJP.Services.Dialogs;
 using ERBossTrackerJP.Services.SaveFiles;
+using ERBossTrackerJP.Services.Tracking;
 using ERBossTrackerJP.ViewModels;
 using ERBossTrackerJP.Views;
 
@@ -12,10 +16,17 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        var saveLoadService = new SaveLoadService();
+        var trackerSnapshotService = new TrackerSnapshotService(
+            saveLoadService,
+            new BossProgressService(),
+            EmbeddedBossDefinitions.Load());
         var viewModel = new MainWindowViewModel(
             new SaveFileLocator(),
-            new SaveLoadService(),
-            new FolderPickerService());
+            saveLoadService,
+            new FolderPickerService(),
+            trackerSnapshotService,
+            new TrackerDisplayService());
         var window = new MainWindow
         {
             DataContext = viewModel,

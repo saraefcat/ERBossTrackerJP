@@ -5,35 +5,113 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="{Binding Title}"
-        Width="960"
-        Height="600"
-        MinWidth="720"
-        MinHeight="480"
+        Width="1280"
+        Height="800"
+        MinWidth="960"
+        MinHeight="640"
+        Background="#F7F8FA"
         WindowStartupLocation="CenterScreen">
-    <Grid Margin="24">
+    <Window.Resources>
+        <Style x:Key="PanelBorderStyle"
+               TargetType="Border">
+            <Setter Property="Background"
+                    Value="White" />
+            <Setter Property="BorderBrush"
+                    Value="#D8DCE2" />
+            <Setter Property="BorderThickness"
+                    Value="1" />
+            <Setter Property="CornerRadius"
+                    Value="7" />
+            <Setter Property="Padding"
+                    Value="14" />
+        </Style>
+        <Style x:Key="SummaryCardStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource PanelBorderStyle}">
+            <Setter Property="Margin"
+                    Value="0,0,10,0" />
+            <Setter Property="Padding"
+                    Value="14,10" />
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="MinHeight"
+                    Value="34" />
+            <Setter Property="Padding"
+                    Value="14,6" />
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="MinHeight"
+                    Value="34" />
+            <Setter Property="VerticalContentAlignment"
+                    Value="Center" />
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="MinHeight"
+                    Value="34" />
+            <Setter Property="Padding"
+                    Value="8,5" />
+            <Setter Property="VerticalContentAlignment"
+                    Value="Center" />
+        </Style>
+        <Style TargetType="DataGrid">
+            <Setter Property="AutoGenerateColumns"
+                    Value="False" />
+            <Setter Property="CanUserAddRows"
+                    Value="False" />
+            <Setter Property="CanUserDeleteRows"
+                    Value="False" />
+            <Setter Property="GridLinesVisibility"
+                    Value="Horizontal" />
+            <Setter Property="HorizontalGridLinesBrush"
+                    Value="#E5E7EB" />
+            <Setter Property="HeadersVisibility"
+                    Value="Column" />
+            <Setter Property="IsReadOnly"
+                    Value="True" />
+            <Setter Property="RowHeaderWidth"
+                    Value="0" />
+            <Setter Property="RowHeight"
+                    Value="30" />
+            <Setter Property="AlternatingRowBackground"
+                    Value="#F8FAFC" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0"
-                    Margin="0,0,0,20">
-            <TextBlock FontSize="26"
-                       FontWeight="SemiBold"
-                       Text="ER Boss Tracker JP" />
-            <TextBlock Margin="0,6,0,0"
-                       Foreground="#606060"
-                       Text="ELDEN RING セーブファイルの読み取り確認" />
-        </StackPanel>
+        <DockPanel Grid.Row="0"
+                   Margin="0,0,0,14">
+            <StackPanel DockPanel.Dock="Left">
+                <TextBlock FontSize="26"
+                           FontWeight="SemiBold"
+                           Foreground="#1F2937"
+                           Text="ER Boss Tracker JP" />
+                <TextBlock Margin="0,4,0,0"
+                           Foreground="#667085"
+                           Text="ELDEN RING ボス撃破状況" />
+            </StackPanel>
+            <StackPanel DockPanel.Dock="Right"
+                        HorizontalAlignment="Right">
+                <TextBlock HorizontalAlignment="Right"
+                           Foreground="#667085"
+                           Text="最終正常更新" />
+                <TextBlock HorizontalAlignment="Right"
+                           FontWeight="SemiBold"
+                           Text="{Binding TrackerLastUpdateText}" />
+            </StackPanel>
+        </DockPanel>
 
         <Border Grid.Row="1"
-                Margin="0,0,0,16"
-                Padding="16"
-                BorderBrush="#D4D4D4"
-                BorderThickness="1"
-                CornerRadius="6">
+                Margin="0,0,0,12"
+                Style="{StaticResource PanelBorderStyle}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -48,87 +126,311 @@
 
                 <ComboBox Grid.Row="0"
                           Grid.Column="0"
-                          MinHeight="34"
-                          Margin="0,0,12,0"
-                          ItemsSource="{Binding SaveCandidates}"
-                          SelectedItem="{Binding SelectedSaveCandidate, Mode=TwoWay}"
+                          Margin="0,0,10,0"
+                          DisplayMemberPath="FilePath"
                           IsEnabled="{Binding IsInteractionEnabled}"
-                          DisplayMemberPath="FilePath" />
+                          ItemsSource="{Binding SaveCandidates}"
+                          SelectedItem="{Binding SelectedSaveCandidate, Mode=TwoWay}" />
                 <Button Grid.Row="0"
                         Grid.Column="1"
                         MinWidth="96"
                         Margin="0,0,8,0"
-                        Padding="12,6"
                         Command="{Binding ReloadCommand}"
-                        Content="読み込み" />
+                        Content="再読み込み" />
                 <Button Grid.Row="0"
                         Grid.Column="2"
                         MinWidth="110"
                         Margin="0,0,8,0"
-                        Padding="12,6"
                         Command="{Binding BrowseFolderCommand}"
                         Content="フォルダー参照" />
                 <Button Grid.Row="0"
                         Grid.Column="3"
                         MinWidth="120"
-                        Padding="12,6"
                         Command="{Binding RefreshDefaultCommand}"
                         Content="既定場所を再検索" />
 
                 <TextBlock Grid.Row="1"
                            Grid.Column="0"
                            Grid.ColumnSpan="4"
-                           Margin="0,12,0,0"
-                           TextWrapping="Wrap"
-                           Text="{Binding StatusMessage}" />
+                           Margin="0,10,0,0"
+                           Foreground="#344054"
+                           Text="{Binding StatusMessage}"
+                           TextWrapping="Wrap" />
             </Grid>
         </Border>
 
-        <Border Grid.Row="2"
-                Padding="16"
-                BorderBrush="#D4D4D4"
-                BorderThickness="1"
-                CornerRadius="6">
+        <Grid Grid.Row="2"
+              Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Margin="0,0,10,0"
+                    Style="{StaticResource PanelBorderStyle}">
+                <StackPanel>
+                    <TextBlock Margin="0,0,0,6"
+                               Foreground="#667085"
+                               Text="キャラクター" />
+                    <ComboBox ItemsSource="{Binding CharacterSlots}"
+                              IsEnabled="{Binding IsInteractionEnabled}"
+                              SelectedItem="{Binding SelectedCharacter, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="スロット " />
+                                    <Run Text="{Binding SlotNumber}" />
+                                    <Run Text="  " />
+                                    <Run FontWeight="SemiBold"
+                                         Text="{Binding Name}" />
+                                    <Run Text="  Lv." />
+                                    <Run Text="{Binding Level}" />
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1"
+                    Style="{StaticResource SummaryCardStyle}">
+                <StackPanel>
+                    <TextBlock Foreground="#667085"
+                               Text="撃破済み" />
+                    <TextBlock Margin="0,3,0,0"
+                               FontSize="24"
+                               FontWeight="SemiBold"
+                               Foreground="#16794E"
+                               Text="{Binding Defeated}" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="2"
+                    Style="{StaticResource SummaryCardStyle}">
+                <StackPanel>
+                    <TextBlock Foreground="#667085"
+                               Text="未撃破" />
+                    <TextBlock Margin="0,3,0,0"
+                               FontSize="24"
+                               FontWeight="SemiBold"
+                               Foreground="#B45309"
+                               Text="{Binding Remaining}" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="3"
+                    Style="{StaticResource SummaryCardStyle}">
+                <StackPanel>
+                    <TextBlock Foreground="#667085"
+                               Text="総数" />
+                    <TextBlock Margin="0,3,0,0"
+                               FontSize="24"
+                               FontWeight="SemiBold"
+                               Foreground="#1F4E78"
+                               Text="{Binding Total}" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="4"
+                    Style="{StaticResource PanelBorderStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <DockPanel Grid.Row="0"
+                               Margin="0,0,0,8">
+                        <TextBlock DockPanel.Dock="Right"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Foreground="#1F4E78"
+                                   Text="{Binding ProgressPercentageText}" />
+                        <TextBlock VerticalAlignment="Center"
+                                   Foreground="#667085"
+                                   Text="進捗率" />
+                    </DockPanel>
+                    <ProgressBar Grid.Row="1"
+                                 Height="14"
+                                 Maximum="100"
+                                 Value="{Binding ProgressPercentage}" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="3"
+                Margin="0,0,0,12"
+                Style="{StaticResource PanelBorderStyle}">
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="1.5*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0"
-                           Margin="0,0,0,10"
-                           FontSize="18"
-                           FontWeight="SemiBold"
-                           Text="キャラクター" />
-                <ListView Grid.Row="1"
-                          ItemsSource="{Binding CharacterSlots}"
-                          IsEnabled="{Binding IsInteractionEnabled}"
-                          SelectedItem="{Binding SelectedCharacter, Mode=TwoWay}">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Width="100"
-                                            Header="スロット"
-                                            DisplayMemberBinding="{Binding SlotNumber}" />
-                            <GridViewColumn Width="320"
-                                            Header="名前"
-                                            DisplayMemberBinding="{Binding Name}" />
-                            <GridViewColumn Width="120"
-                                            Header="レベル"
-                                            DisplayMemberBinding="{Binding Level}" />
-                        </GridView>
-                    </ListView.View>
-                </ListView>
+                <StackPanel Grid.Column="0"
+                            Margin="0,0,12,0">
+                    <TextBlock Margin="0,0,0,4"
+                               Foreground="#667085"
+                               Text="ボス名検索" />
+                    <TextBox Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1"
+                            Margin="0,0,12,0">
+                    <TextBlock Margin="0,0,0,4"
+                               Foreground="#667085"
+                               Text="撃破状態" />
+                    <ComboBox DisplayMemberPath="Label"
+                              ItemsSource="{Binding CompletionOptions}"
+                              SelectedValue="{Binding CompletionFilter, Mode=TwoWay}"
+                              SelectedValuePath="Value" />
+                </StackPanel>
+                <StackPanel Grid.Column="2"
+                            Margin="0,0,12,0">
+                    <TextBlock Margin="0,0,0,4"
+                               Foreground="#667085"
+                               Text="対象" />
+                    <ComboBox DisplayMemberPath="Label"
+                              ItemsSource="{Binding ContentOptions}"
+                              SelectedItem="{Binding SelectedContentOption, Mode=TwoWay}" />
+                </StackPanel>
+                <StackPanel Grid.Column="3"
+                            Margin="0,0,12,0">
+                    <TextBlock Margin="0,0,0,4"
+                               Foreground="#667085"
+                               Text="地域" />
+                    <ComboBox DisplayMemberPath="Label"
+                              ItemsSource="{Binding RegionOptions}"
+                              SelectedItem="{Binding SelectedRegionOption, Mode=TwoWay}" />
+                </StackPanel>
+                <StackPanel Grid.Column="4">
+                    <TextBlock Margin="0,0,0,4"
+                               Foreground="#667085"
+                               Text="固有名詞" />
+                    <ComboBox DisplayMemberPath="Label"
+                              ItemsSource="{Binding LanguageOptions}"
+                              SelectedValue="{Binding DisplayLanguage, Mode=TwoWay}"
+                              SelectedValuePath="Value" />
+                </StackPanel>
             </Grid>
         </Border>
 
-        <DockPanel Grid.Row="3"
-                   Margin="0,12,0,0">
+        <Grid Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="330" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Padding="0"
+                    Style="{StaticResource PanelBorderStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0"
+                               Margin="14,12,14,10"
+                               FontSize="17"
+                               FontWeight="SemiBold"
+                               Text="地域別進捗" />
+                    <DataGrid Grid.Row="1"
+                              BorderThickness="0"
+                              ItemsSource="{Binding Regions}"
+                              SelectedItem="{Binding SelectedRegion, Mode=TwoWay}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Width="*"
+                                                Header="地域"
+                                                Binding="{Binding Name}" />
+                            <DataGridTextColumn Width="62"
+                                                Header="撃破"
+                                                Binding="{Binding Defeated}" />
+                            <DataGridTextColumn Width="62"
+                                                Header="総数"
+                                                Binding="{Binding Total}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2"
+                    Padding="0"
+                    Style="{StaticResource PanelBorderStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <DockPanel Grid.Row="0"
+                               Margin="14,12,14,10">
+                        <TextBlock DockPanel.Dock="Right"
+                                   VerticalAlignment="Center"
+                                   Foreground="#667085"
+                                   Text="{Binding VisibleBossCountText}" />
+                        <TextBlock FontSize="17"
+                                   FontWeight="SemiBold"
+                                   Text="ボス一覧" />
+                    </DockPanel>
+                    <DataGrid Grid.Row="1"
+                              BorderThickness="0"
+                              ItemsSource="{Binding Bosses}">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="88"
+                                                    Header="状態">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding StatusText}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground"
+                                                            Value="#B45309" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsDefeated}"
+                                                                     Value="True">
+                                                            <Setter Property="Foreground"
+                                                                    Value="#16794E" />
+                                                            <Setter Property="FontWeight"
+                                                                    Value="SemiBold" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Width="2*"
+                                                MinWidth="180"
+                                                Header="ボス名"
+                                                Binding="{Binding Name}" />
+                            <DataGridTextColumn Width="1.4*"
+                                                MinWidth="140"
+                                                Header="地域"
+                                                Binding="{Binding Region}" />
+                            <DataGridTextColumn Width="1.6*"
+                                                MinWidth="160"
+                                                Header="場所"
+                                                Binding="{Binding Location}" />
+                            <DataGridTextColumn Width="70"
+                                                Header="区分"
+                                                Binding="{Binding ContentText}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <DockPanel Grid.Row="5"
+                   Margin="0,10,0,0">
             <TextBlock DockPanel.Dock="Right"
-                       Foreground="#606060">
+                       Foreground="#667085">
                 <Run Text="セーブ更新日時: " />
                 <Run Text="{Binding SaveLastWriteTimeText}" />
             </TextBlock>
-            <TextBlock Foreground="#606060"
+            <TextBlock Foreground="#667085"
                        Text="セーブファイルは読み取り専用で扱います。" />
         </DockPanel>
     </Grid>

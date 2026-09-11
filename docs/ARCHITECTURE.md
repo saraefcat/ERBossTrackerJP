@@ -29,11 +29,16 @@ TrackerSnapshot -> WPF ViewModel
 ```text
 SaveFileLocator -> SaveLoadService -> SaveFileSnapshotReader
                                   -> EldenRingSaveReader
+
+SaveLoadService -> TrackerSnapshotService -> BossProgressService
+                                      |----> EmbeddedBossDefinitions
 ```
 
 `SaveLoadService`はメモリスナップショットとキャラクター解析を統合し、公開結果にはパス、更新日時、ファイルサイズ、キャラクター一覧だけを含める。生のセーブデータは`LoadedSaveFile`内部に保持し、同じスナップショットからイベントフラグを読むサービス処理だけが利用する。
 
 `BossProgressService`は選択スロットから取得したイベントフラグ、検証済みのボス定義、組み込みBSTマップを結合する。ボスを安定した表示順で判定し、地域別集計を含む不変の`TrackerSnapshot`を一度に生成する。判定途中の解析エラーでは部分的なスナップショットを公開しない。
+
+WPFプロジェクトの`TrackerSnapshotService`は、`LoadedSaveFile`から選択スロットのイベントフラグを取得し、組み込みボス定義と`BossProgressService`へ渡すアプリケーション境界である。ViewModelはセーブ内部のバイト列やBSTマップを扱わず、完成した`TrackerSnapshot`だけを受け取る。
 
 `TrackerDisplayService`は`TrackerSnapshot`を変更せず、選択言語に応じたボス名・地域名・場所名を持つ表示モデルへ投影する。撃破状態、地域、本編／DLC、現在の表示言語におけるボス名検索を組み合わせ、言語を切り替えても安定ID、フラグID、撃破状態、集計、元の表示順を維持する。
 
@@ -47,7 +52,7 @@ SaveFileLocator -> SaveLoadService -> SaveFileSnapshotReader
 - `TrackerSnapshot`は構築時にコレクションをコピーし、購読者へ変更可能な一覧を渡さない。
 - 将来のOBS出力は`ITrackerOutput`を実装し、WPFコントロールを読み取らない。
 
-初期画面は起動時に既定場所を探索し、候補があれば最新のセーブからキャラクター一覧を読み込む。見つからない場合はフォルダー参照を案内する。再読み込みに失敗してもViewModelは直前の正常なキャラクター一覧を消去せず、日本語の状態メッセージだけを更新する。
+初期画面は起動時に既定場所を探索し、候補があれば最新のセーブからキャラクター一覧と選択キャラクターの進捗を読み込む。見つからない場合はフォルダー参照を案内する。キャラクター選択、地域選択、撃破状態、本編／DLC、名前検索、表示言語の変更はViewModelから`TrackerDisplayService`へ渡し、同じスナップショットを再解析せず表示だけを更新する。再読み込みに失敗してもViewModelは直前の正常なキャラクター一覧と進捗を消去せず、日本語の状態メッセージだけを更新する。
 
 ## ファイル読み込み境界
 

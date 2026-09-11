@@ -1,6 +1,9 @@
 using ERBossTrackerJP.Core.Models;
+using ERBossTrackerJP.Core.Presentation;
+using ERBossTrackerJP.Save.Exceptions;
 using ERBossTrackerJP.Services.Dialogs;
 using ERBossTrackerJP.Services.SaveFiles;
+using ERBossTrackerJP.Services.Tracking;
 using ERBossTrackerJP.ViewModels;
 
 namespace ERBossTrackerJP.Tests.ViewModels;
@@ -42,9 +45,13 @@ public sealed class MainWindowViewModelTests
         Assert.Equal(newest.FilePath, loadService.LastFilePath);
         Assert.Equal(2, viewModel.CharacterSlots.Count);
         Assert.Equal(1, viewModel.SelectedCharacter?.SlotIndex);
-        Assert.Equal("キャラクターを2件読み込みました。", viewModel.StatusMessage);
+        Assert.Equal(3, viewModel.Total);
+        Assert.Equal(1, viewModel.Defeated);
+        Assert.Equal(2, viewModel.Remaining);
+        Assert.Contains("ボス進捗を読み込みました", viewModel.StatusMessage, StringComparison.Ordinal);
         Assert.NotEqual("未読み込み", viewModel.SaveLastWriteTimeText);
         Assert.NotNull(viewModel.LoadedSave);
+        Assert.NotNull(viewModel.TrackerSnapshot);
     }
 
     [Fact]
@@ -119,11 +126,109 @@ public sealed class MainWindowViewModelTests
         Assert.Contains("無効になりました", viewModel.StatusMessage, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task LoadSelectedSaveAsync_KeepsPreviousProgressWhenSameSlotParsingFails()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(2, "Kept Progress", 100)));
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(2, "Kept Progress", 101)));
+        var trackerService = new StubTrackerSnapshotService();
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            trackerSnapshotService: trackerService);
+        await viewModel.InitializeAsync();
+        TrackerSnapshot previousSnapshot = viewModel.TrackerSnapshot!;
+        BossListItem[] previousBosses = viewModel.Bosses.ToArray();
+        trackerService.NextException = new SaveParseException(
+            SaveParseErrorCode.EventFlagSectionNotFound,
+            "missing event flags");
+
+        await viewModel.LoadSelectedSaveAsync();
+
+        Assert.Same(previousSnapshot, viewModel.TrackerSnapshot);
+        Assert.Equal(previousBosses, viewModel.Bosses);
+        Assert.Contains("解析できません", viewModel.StatusMessage, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task FiltersAndLanguage_RefreshBossesWithoutReadingSaveAgain()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "Filter Hero", 90)));
+        var trackerService = new StubTrackerSnapshotService();
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            trackerSnapshotService: trackerService);
+
+        await viewModel.InitializeAsync();
+
+        Assert.Equal(3, viewModel.Bosses.Count);
+        Assert.Contains(viewModel.Bosses, boss => boss.Name == "ツリーガード");
+        Assert.Equal(1, trackerService.CallCount);
+
+        viewModel.CompletionFilter = BossCompletionFilter.Undefeated;
+        viewModel.ContentFilter = GameContent.ShadowOfTheErdtree;
+
+        BossListItem dlcBoss = Assert.Single(viewModel.Bosses);
+        Assert.Equal("神獣獅子舞", dlcBoss.Name);
+        Assert.Equal("未撃破", dlcBoss.StatusText);
+
+        viewModel.DisplayLanguage = DisplayLanguage.English;
+        viewModel.SearchText = "Divine Beast";
+
+        BossListItem englishBoss = Assert.Single(viewModel.Bosses);
+        Assert.Equal("Divine Beast Dancing Lion", englishBoss.Name);
+        Assert.Contains(
+            viewModel.RegionOptions,
+            option => option.Label == "Gravesite Plain");
+        Assert.Equal(1, trackerService.CallCount);
+    }
+
+    [Fact]
+    public async Task SelectingRegion_RestrictsBossListToThatRegion()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "Region Hero", 40)));
+        var viewModel = CreateViewModel(locator, loadService);
+        await viewModel.InitializeAsync();
+        RegionListItem selectedRegion = Assert.Single(
+            viewModel.Regions,
+            region => region.RegionId == "limgrave");
+
+        viewModel.SelectedRegion = selectedRegion;
+
+        BossListItem boss = Assert.Single(viewModel.Bosses);
+        Assert.Equal("limgrave", boss.RegionId);
+        Assert.Equal("limgrave", viewModel.RegionFilterId);
+    }
+
     private static MainWindowViewModel CreateViewModel(
         ISaveFileLocator locator,
         ISaveLoadService loadService,
-        IFolderPickerService? folderPicker = null) =>
-        new(locator, loadService, folderPicker ?? new StubFolderPicker(null));
+        IFolderPickerService? folderPicker = null,
+        ITrackerSnapshotService? trackerSnapshotService = null) =>
+        new(
+            locator,
+            loadService,
+            folderPicker ?? new StubFolderPicker(null),
+            trackerSnapshotService ?? new StubTrackerSnapshotService(),
+            new TrackerDisplayService());
 
     private static SaveFileCandidate CreateCandidate(string filePath) =>
         new(
@@ -213,5 +318,100 @@ public sealed class MainWindowViewModelTests
             ReceivedInitialDirectory = initialDirectory;
             return selectedFolder;
         }
+    }
+
+    private sealed class StubTrackerSnapshotService : ITrackerSnapshotService
+    {
+        public int CallCount { get; private set; }
+
+        public Exception? NextException { get; set; }
+
+        public TrackerSnapshot Create(
+            LoadedSaveFile loadedSave,
+            CharacterSlot character)
+        {
+            CallCount++;
+
+            if (NextException is not null)
+            {
+                Exception exception = NextException;
+                NextException = null;
+                throw exception;
+            }
+
+            BossDefinition treeSentinel = CreateBoss(
+                "tree-sentinel",
+                "Tree Sentinel",
+                "ツリーガード",
+                "limgrave",
+                "Limgrave",
+                "リムグレイブ",
+                GameContent.BaseGame,
+                0);
+            BossDefinition margit = CreateBoss(
+                "margit",
+                "Margit, the Fell Omen",
+                "忌み鬼、マルギット",
+                "stormveil_castle",
+                "Stormveil Castle",
+                "ストームヴィル城",
+                GameContent.BaseGame,
+                1);
+            BossDefinition dancingLion = CreateBoss(
+                "dancing-lion",
+                "Divine Beast Dancing Lion",
+                "神獣獅子舞",
+                "gravesite_plain",
+                "Gravesite Plain",
+                "墓地平原",
+                GameContent.ShadowOfTheErdtree,
+                2);
+
+            return new TrackerSnapshot(
+                loadedSave.LastWriteTimeUtc,
+                character,
+                [
+                    new BossProgress(treeSentinel, true),
+                    new BossProgress(margit, false),
+                    new BossProgress(dancingLion, false),
+                ],
+                [
+                    new RegionProgress("limgrave", "Limgrave", "リムグレイブ", 1, 1),
+                    new RegionProgress(
+                        "stormveil_castle",
+                        "Stormveil Castle",
+                        "ストームヴィル城",
+                        0,
+                        1),
+                    new RegionProgress(
+                        "gravesite_plain",
+                        "Gravesite Plain",
+                        "墓地平原",
+                        0,
+                        1),
+                ]);
+        }
+
+        private static BossDefinition CreateBoss(
+            string id,
+            string nameEn,
+            string nameJa,
+            string regionId,
+            string regionEn,
+            string regionJa,
+            GameContent content,
+            int sortOrder) =>
+            new(
+                id,
+                (uint)(1000 + sortOrder),
+                nameEn,
+                nameJa,
+                regionId,
+                regionEn,
+                regionJa,
+                $"{regionEn} location",
+                $"{regionJa}の場所",
+                content,
+                sortOrder);
     }
 }
