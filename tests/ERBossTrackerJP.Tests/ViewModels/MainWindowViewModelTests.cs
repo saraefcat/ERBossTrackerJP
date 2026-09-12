@@ -1396,24 +1396,30 @@ public sealed class MainWindowViewModelTests
 
                 var lightBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     application.Resources["AppBackgroundBrush"]);
-                Assert.Equal("#FFF7F8FA", lightBackground.Color.ToString());
+                Assert.Equal("#FFE9EDF2", lightBackground.Color.ToString());
+                var lightSurface = Assert.IsType<System.Windows.Media.SolidColorBrush>(
+                    application.Resources["SurfaceBrush"]);
+                Assert.Equal("#FFF7F8FA", lightSurface.Color.ToString());
+                var lightBorder = Assert.IsType<System.Windows.Media.SolidColorBrush>(
+                    application.Resources["BorderBrush"]);
+                Assert.Equal("#FFC6CED8", lightBorder.Color.ToString());
                 var lightInactiveSelection =
                     Assert.IsType<System.Windows.Media.SolidColorBrush>(
                         application.Resources[
                             System.Windows.SystemColors.InactiveSelectionHighlightBrushKey]);
                 Assert.Equal(
-                    "#FFE8EEF5",
+                    "#FFDCE5EE",
                     lightInactiveSelection.Color.ToString());
                 var lightInputBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     comboBoxBorder.Background);
-                Assert.Equal("#FFFFFFFF", lightInputBackground.Color.ToString());
+                Assert.Equal("#FFF1F4F7", lightInputBackground.Color.ToString());
                 var lightInputText = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     comboBox.Foreground);
-                Assert.Equal("#FF1F2937", lightInputText.Color.ToString());
+                Assert.Equal("#FF202833", lightInputText.Color.ToString());
                 var lightButtonBackground =
                     Assert.IsType<System.Windows.Media.SolidColorBrush>(
                         buttonBorder.Background);
-                Assert.Equal("#FFF2F4F7", lightButtonBackground.Color.ToString());
+                Assert.Equal("#FFE2E7ED", lightButtonBackground.Color.ToString());
             }
             catch (Exception exception)
             {
