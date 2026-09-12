@@ -50,14 +50,17 @@ public sealed class EventFlagSectionReader
 
         ReadOnlyMemory<byte> slotData = entryData[ChecksumSize..];
         long absoluteSlotDataOffset = (long)entry.DataOffset + ChecksumSize;
-        int eventFlagOffset = FindEventFlagOffset(slotData.Span, absoluteSlotDataOffset);
+        (int eventFlagOffset, uint totalDeathCount) = FindEventFlagOffset(
+            slotData.Span,
+            absoluteSlotDataOffset);
 
         return new EventFlagSection(
             slotData.Slice(eventFlagOffset, EventFlagSectionSize),
-            eventFlagOffset);
+            eventFlagOffset,
+            totalDeathCount);
     }
 
-    private static int FindEventFlagOffset(
+    private static (int EventFlagOffset, uint TotalDeathCount) FindEventFlagOffset(
         ReadOnlySpan<byte> slotData,
         long absoluteSlotDataOffset)
     {
@@ -132,12 +135,12 @@ public sealed class EventFlagSectionReader
         cursor.Skip(8 + 7000 * 16, "GaitemGameData");
         cursor.SkipSizedBlob(MaximumVariableBlobSize, "TutorialData");
         cursor.Skip(3, "GameMan fields");
-        cursor.Skip(4, "total death count");
+        uint totalDeathCount = cursor.ReadUInt32("total death count");
         cursor.Skip(22, "online and character state");
 
         int eventFlagOffset = cursor.Position;
         cursor.Skip(EventFlagSectionSize, "event flags");
-        return eventFlagOffset;
+        return (eventFlagOffset, totalDeathCount);
     }
 
     private ref struct SlotCursor

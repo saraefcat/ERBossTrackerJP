@@ -5,5 +5,8 @@ namespace ERBossTrackerJP.Services.Tracking;
 
 public interface ITrackerSnapshotService
 {
-    TrackerSnapshot Create(LoadedSaveFile loadedSave, CharacterSlot character);
+    TrackerSnapshot Create(
+        LoadedSaveFile loadedSave,
+        CharacterSlot character,
+        uint deathCountOffset = 0);
 }

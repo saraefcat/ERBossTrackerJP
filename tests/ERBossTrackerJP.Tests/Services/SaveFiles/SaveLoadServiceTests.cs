@@ -37,7 +37,7 @@ public sealed class SaveLoadServiceTests
     }
 
     [Fact]
-    public async Task ReadEventFlags_UsesTheAlreadyLoadedMemorySnapshot()
+    public async Task ReadCharacterData_UsesTheAlreadyLoadedMemorySnapshot()
     {
         byte[] saveBytes = [10, 20, 30];
         byte[] eventFlags = [0x80, 0x01];
@@ -46,13 +46,14 @@ public sealed class SaveLoadServiceTests
                 "C:\\saves\\ER0000.sl2",
                 saveBytes,
                 DateTimeOffset.UtcNow));
-        var saveReader = new StubSaveReader([], eventFlags);
+        var saveReader = new StubSaveReader([], eventFlags, totalDeathCount: 321);
         var service = new SaveLoadService(snapshotReader, saveReader);
         LoadedSaveFile loadedSave = await service.LoadAsync("selected.sl2");
 
-        ReadOnlyMemory<byte> result = service.ReadEventFlags(loadedSave, 4);
+        EventFlagSection result = service.ReadCharacterData(loadedSave, 4);
 
-        Assert.Equal(eventFlags, result.ToArray());
+        Assert.Equal(eventFlags, result.Bytes.ToArray());
+        Assert.Equal(321u, result.TotalDeathCount);
         Assert.Equal(saveBytes, saveReader.EventFlagData.ToArray());
         Assert.Equal(4, saveReader.EventFlagSlotIndex);
         Assert.Equal(1, snapshotReader.CallCount);
@@ -155,10 +156,12 @@ public sealed class SaveLoadServiceTests
 
         public StubSaveReader(
             IReadOnlyList<CharacterSlot> characterSlots,
-            ReadOnlyMemory<byte> eventFlags = default)
+            ReadOnlyMemory<byte> eventFlags = default,
+            uint totalDeathCount = 0)
         {
             _characterSlots = characterSlots;
             _eventFlags = eventFlags;
+            TotalDeathCount = totalDeathCount;
         }
 
         public StubSaveReader(Exception characterException)
@@ -174,6 +177,8 @@ public sealed class SaveLoadServiceTests
         public ReadOnlyMemory<byte> EventFlagData { get; private set; }
 
         public int? EventFlagSlotIndex { get; private set; }
+
+        public uint TotalDeathCount { get; }
 
         public IReadOnlyList<CharacterSlot> ReadCharacterSlots(ReadOnlyMemory<byte> saveData)
         {
@@ -194,7 +199,7 @@ public sealed class SaveLoadServiceTests
         {
             EventFlagData = saveData;
             EventFlagSlotIndex = slotIndex;
-            return new EventFlagSection(_eventFlags, 123);
+            return new EventFlagSection(_eventFlags, 123, TotalDeathCount);
         }
     }
 }

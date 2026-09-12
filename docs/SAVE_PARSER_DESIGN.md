@@ -83,7 +83,7 @@ PC版では通常12エントリーを持つが、12という期待値を検証�
 | 29 | GaitemGameData | `8 + 7000*16` bytes |
 | 30 | TutorialData | 8-byte header。`+4`のsize分を後続データとして読む |
 | 31 | GameMan bytes | 3 bytes |
-| 32 | Total death count | 4 bytes。初期版では値を利用しない |
+| 32 | Total death count | 4 bytesの符号なし整数として読み取り、選択キャラクターのセーブ内死亡数に使用 |
 | 33–39 | Online／character state | 22 bytes |
 | 40 | Event flags | `0x1BF99F` bytes |
 

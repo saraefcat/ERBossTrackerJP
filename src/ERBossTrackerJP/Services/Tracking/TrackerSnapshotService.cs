@@ -1,5 +1,6 @@
 using ERBossTrackerJP.Core.Models;
 using ERBossTrackerJP.Save.Progress;
+using ERBossTrackerJP.Save.Reading;
 using ERBossTrackerJP.Services.SaveFiles;
 
 namespace ERBossTrackerJP.Services.Tracking;
@@ -31,7 +32,10 @@ public sealed class TrackerSnapshotService : ITrackerSnapshotService
         _bossDefinitions = Array.AsReadOnly(bossDefinitions.ToArray());
     }
 
-    public TrackerSnapshot Create(LoadedSaveFile loadedSave, CharacterSlot character)
+    public TrackerSnapshot Create(
+        LoadedSaveFile loadedSave,
+        CharacterSlot character,
+        uint deathCountOffset = 0)
     {
         ArgumentNullException.ThrowIfNull(loadedSave);
         ArgumentNullException.ThrowIfNull(character);
@@ -44,13 +48,15 @@ public sealed class TrackerSnapshotService : ITrackerSnapshotService
                 nameof(character));
         }
 
-        ReadOnlyMemory<byte> eventFlags = _saveLoadService.ReadEventFlags(
+        EventFlagSection characterData = _saveLoadService.ReadCharacterData(
             loadedSave,
             character.SlotIndex);
         return _bossProgressService.CreateSnapshot(
             loadedSave.LastWriteTimeUtc,
             character,
-            eventFlags,
-            _bossDefinitions);
+            characterData.Bytes,
+            _bossDefinitions,
+            characterData.TotalDeathCount,
+            deathCountOffset);
     }
 }

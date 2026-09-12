@@ -3,6 +3,7 @@ using ERBossTrackerJP.Core.Models;
 using ERBossTrackerJP.Core.Outputs;
 using ERBossTrackerJP.Core.Presentation;
 using ERBossTrackerJP.Save.Exceptions;
+using ERBossTrackerJP.Save.Reading;
 using ERBossTrackerJP.Services.Dialogs;
 using ERBossTrackerJP.Services.Monitoring;
 using ERBossTrackerJP.Services.Outputs;
@@ -384,6 +385,95 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public async Task DeathCountOffset_IsRestoredAppliedAndStoredPerCharacter()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator(
+            defaultCandidates: [candidate],
+            folderCandidates: [candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "First", 20),
+            new CharacterSlot(3, "NG+", 90)));
+        var settingsService = new StubUserSettingsService(
+            new UserSettings(
+                candidate.FilePath,
+                3,
+                DeathCountOffsets:
+                [
+                    new DeathCountOffsetSetting(candidate.FilePath, 3, 200),
+                ]));
+        var snapshotService = new StubTrackerSnapshotService();
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            userSettingsService: settingsService,
+            trackerSnapshotService: snapshotService);
+
+        await viewModel.InitializeAsync();
+
+        Assert.Equal(1_048u, viewModel.SaveDeathCount);
+        Assert.Equal(200u, viewModel.DeathCountOffset);
+        Assert.Equal(1_248ul, viewModel.CumulativeDeathCount);
+        Assert.Equal("1,248", viewModel.CumulativeDeathCountText);
+        Assert.Equal("200", viewModel.DeathCountOffsetDraft);
+        Assert.Equal(200u, snapshotService.LastDeathCountOffset);
+
+        viewModel.DeathCountOffsetDraft = "350";
+        Assert.True(viewModel.IsDeathCountOffsetStatusVisible);
+        await viewModel.ApplyDeathCountOffsetAsync();
+
+        Assert.Equal(350u, viewModel.DeathCountOffset);
+        Assert.Equal(1_398ul, viewModel.CumulativeDeathCount);
+        Assert.False(viewModel.IsDeathCountOffsetStatusVisible);
+        DeathCountOffsetSetting savedOffset = Assert.Single(
+            settingsService.LastSaved!.DeathCountOffsets!);
+        Assert.Equal(candidate.FilePath, savedOffset.SaveFilePath);
+        Assert.Equal(3, savedOffset.CharacterSlotIndex);
+        Assert.Equal(350u, savedOffset.Offset);
+
+        viewModel.SelectedCharacter = viewModel.CharacterSlots[0];
+
+        Assert.Equal(0u, viewModel.DeathCountOffset);
+        Assert.Equal("0", viewModel.DeathCountOffsetDraft);
+        Assert.Equal(1_048ul, viewModel.CumulativeDeathCount);
+    }
+
+    [Fact]
+    public async Task DeathCountOffset_ZeroClearsStoredOffset()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator(
+            defaultCandidates: [candidate],
+            folderCandidates: [candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "First", 20)));
+        var settingsService = new StubUserSettingsService(
+            new UserSettings(
+                candidate.FilePath,
+                0,
+                DeathCountOffsets:
+                [
+                    new DeathCountOffsetSetting(candidate.FilePath, 0, 200),
+                ]));
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            userSettingsService: settingsService);
+
+        await viewModel.InitializeAsync();
+        viewModel.DeathCountOffsetDraft = "0";
+        await viewModel.ApplyDeathCountOffsetAsync();
+
+        Assert.Equal(0u, viewModel.DeathCountOffset);
+        Assert.Equal(1_048ul, viewModel.CumulativeDeathCount);
+        Assert.Empty(settingsService.LastSaved!.DeathCountOffsets!);
+    }
+
+    [Fact]
     public void SettingsSaveFailure_IsShownAndClearedAfterSuccessfulRetry()
     {
         var settingsService = new StubUserSettingsService
@@ -554,6 +644,7 @@ public sealed class MainWindowViewModelTests
         Assert.Contains("OBSテキスト", folderPicker.ReceivedTitle, StringComparison.Ordinal);
         Assert.Equal("D:\\OBS", viewModel.ObsOutputDirectory);
         Assert.Equal("D:\\OBS\\progress.txt", viewModel.ObsRecommendedProgressFilePath);
+        Assert.Equal("D:\\OBS\\deaths.txt", viewModel.ObsRecommendedDeathFilePath);
         Assert.Equal("D:\\OBS", settingsService.LastSaved?.ObsOutputDirectory);
     }
 
@@ -605,6 +696,11 @@ public sealed class MainWindowViewModelTests
             viewModel.ObsPreviewItems,
             item => item.FileName == ObsTextFileOutput.LatestBossFileName &&
                     item.Contents == "—");
+        Assert.Contains(
+            viewModel.ObsPreviewItems,
+            item => item.FileName == ObsTextFileOutput.DeathsFileName &&
+                    item.Contents == "1,048" &&
+                    item.Usage.Contains("オフセット反映", StringComparison.Ordinal));
         Assert.Contains(
             viewModel.ObsPreviewItems,
             item => item.FileName == ObsTextFileOutput.SnapshotFileName &&
@@ -857,19 +953,24 @@ public sealed class MainWindowViewModelTests
                     FindLogicalDescendants<System.Windows.Controls.TextBlock>(
                         obsBasicSettingsPanel),
                     textBlock => textBlock.Text.StartsWith(
-                        "通常はこの progress.txt を",
+                        "OBSの［テキスト（GDI+）］で",
                         StringComparison.Ordinal));
+                Assert.Contains("［ファイルから読み取り］", recommendedFileGuidance.Text);
                 Assert.Contains(
-                    "他のファイルは数値を個別表示するときに使用します。",
-                    recommendedFileGuidance.Text,
-                    StringComparison.Ordinal);
+                    FindLogicalDescendants<System.Windows.Controls.TextBlock>(
+                        obsBasicSettingsPanel),
+                    textBlock => textBlock.Text == "ボス進捗");
+                Assert.Contains(
+                    FindLogicalDescendants<System.Windows.Controls.TextBlock>(
+                        obsBasicSettingsPanel),
+                    textBlock => textBlock.Text == "累計死亡数");
                 var obsPreviewPanel = Assert.Single(
                     obsOutputContentLayout.Children
                         .OfType<System.Windows.Controls.Border>(),
                     border => System.Windows.Controls.Grid.GetColumn(border) == 2);
                 var obsPreviewLayout = Assert.IsType<System.Windows.Controls.Grid>(
                     obsPreviewPanel.Child);
-                Assert.Equal(3, obsPreviewLayout.RowDefinitions.Count);
+                Assert.Equal(4, obsPreviewLayout.RowDefinitions.Count);
                 Assert.Equal(
                     System.Windows.GridUnitType.Auto,
                     obsPreviewLayout.RowDefinitions[2].Height.GridUnitType);
@@ -888,7 +989,7 @@ public sealed class MainWindowViewModelTests
                     System.Windows.VerticalAlignment.Top,
                     obsPreviewTable.VerticalAlignment);
                 Assert.Equal(
-                    new System.Windows.Thickness(14, 0, 14, 14),
+                    new System.Windows.Thickness(14, 0, 14, 6),
                     obsPreviewTable.Margin);
                 Assert.Equal(
                     new System.Windows.Thickness(1),
@@ -938,6 +1039,37 @@ public sealed class MainWindowViewModelTests
                     tabControl.Items[0]);
                 var settingsTab = Assert.IsType<System.Windows.Controls.TabItem>(
                     tabControl.Items[2]);
+                var progressLayout = Assert.IsType<System.Windows.Controls.Grid>(
+                    progressTab.Content);
+                var progressSummaryLayout = Assert.Single(
+                    progressLayout.Children
+                        .OfType<System.Windows.Controls.Grid>(),
+                    grid => System.Windows.Controls.Grid.GetRow(grid) == 1);
+                string[] expectedSummaryOrder =
+                [
+                    "累計死亡数",
+                    "撃破済み",
+                    "未撃破",
+                    "総数",
+                    "進捗率",
+                ];
+                for (int index = 0; index < expectedSummaryOrder.Length; index++)
+                {
+                    string label = expectedSummaryOrder[index];
+                    var summaryPanel = Assert.Single(
+                        progressSummaryLayout.Children
+                            .OfType<System.Windows.Controls.Border>(),
+                        border => FindLogicalDescendants<
+                            System.Windows.Controls.TextBlock>(border)
+                            .Any(textBlock => textBlock.Text == label));
+                    Assert.Equal(
+                        index,
+                        System.Windows.Controls.Grid.GetColumn(summaryPanel));
+                }
+                progressLayout.Measure(new System.Windows.Size(1252, 620));
+                Assert.True(
+                    progressLayout.DesiredSize.Height <= 620,
+                    $"Progress layout requires {progressLayout.DesiredSize.Height:F1} DIPs.");
                 var progressBrowseFolderButton = Assert.Single(
                     FindLogicalDescendants<System.Windows.Controls.Button>(progressTab),
                     button => System.Windows.Data.BindingOperations.GetBinding(
@@ -966,6 +1098,14 @@ public sealed class MainWindowViewModelTests
                     settingsSavePanel,
                     System.Windows.Controls.Primitives.Selector.SelectedItemProperty,
                     nameof(MainWindowViewModel.SelectedSaveCandidate));
+                AssertSingleBinding<System.Windows.Controls.TextBox>(
+                    settingsSavePanel,
+                    System.Windows.Controls.TextBox.TextProperty,
+                    nameof(MainWindowViewModel.DeathCountOffsetDraft));
+                AssertSingleBinding<System.Windows.Controls.Button>(
+                    settingsSavePanel,
+                    System.Windows.Controls.Button.CommandProperty,
+                    nameof(MainWindowViewModel.ApplyDeathCountOffsetCommand));
                 var settingsDisplayPanel = Assert.Single(
                     settingsLayout.Children
                         .OfType<System.Windows.Controls.Border>(),
@@ -1314,7 +1454,7 @@ public sealed class MainWindowViewModelTests
             };
         }
 
-        public ReadOnlyMemory<byte> ReadEventFlags(
+        public EventFlagSection ReadCharacterData(
             LoadedSaveFile loadedSave,
             int slotIndex) =>
             throw new NotSupportedException();
@@ -1494,11 +1634,15 @@ public sealed class MainWindowViewModelTests
 
         public Exception? NextException { get; set; }
 
+        public uint LastDeathCountOffset { get; private set; }
+
         public TrackerSnapshot Create(
             LoadedSaveFile loadedSave,
-            CharacterSlot character)
+            CharacterSlot character,
+            uint deathCountOffset = 0)
         {
             CallCount++;
+            LastDeathCountOffset = deathCountOffset;
 
             if (NextException is not null)
             {
@@ -1557,7 +1701,9 @@ public sealed class MainWindowViewModelTests
                         "墓地平原",
                         0,
                         1),
-                ]);
+                ],
+                saveDeathCount: 1_048,
+                deathCountOffset);
         }
 
         private static BossDefinition CreateBoss(

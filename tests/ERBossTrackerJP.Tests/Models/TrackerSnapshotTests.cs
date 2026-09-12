@@ -24,11 +24,16 @@ public sealed class TrackerSnapshotTests
             DateTimeOffset.UnixEpoch,
             new CharacterSlot(0, "Tarnished", 1),
             [new BossProgress(definition, true), new BossProgress(definition, false)],
-            []);
+            [],
+            saveDeathCount: 1_048,
+            deathCountOffset: 200);
 
         Assert.Equal(1, snapshot.Defeated);
         Assert.Equal(2, snapshot.Total);
         Assert.Equal(1, snapshot.Remaining);
         Assert.Equal(50d, snapshot.ProgressPercentage);
+        Assert.Equal(1_048u, snapshot.SaveDeathCount);
+        Assert.Equal(200u, snapshot.DeathCountOffset);
+        Assert.Equal(1_248ul, snapshot.CumulativeDeathCount);
     }
 }

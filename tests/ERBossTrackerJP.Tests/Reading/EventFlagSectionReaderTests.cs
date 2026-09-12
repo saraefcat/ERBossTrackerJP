@@ -16,7 +16,7 @@ public sealed class EventFlagSectionReaderTests
     [Fact]
     public void Read_ReturnsCurrentVersionEventFlagsAndSlotRelativeOffset()
     {
-        BuiltSlot slot = BuildValidSlot(version: 82);
+        BuiltSlot slot = BuildValidSlot(version: 82, totalDeathCount: 1_248);
         Bnd4Container container = ReadContainer(slot.Bytes);
 
         EventFlagSection section = _reader.Read(container, 0);
@@ -24,6 +24,7 @@ public sealed class EventFlagSectionReaderTests
         Assert.Equal(slot.EventFlagOffset, section.Offset);
         Assert.Equal(216712, section.Offset);
         Assert.Equal(EventFlagSectionReader.EventFlagSectionSize, section.Bytes.Length);
+        Assert.Equal(1_248u, section.TotalDeathCount);
         Assert.Equal(0xA5, section.Bytes.Span[0]);
         Assert.Equal(0x5A, section.Bytes.Span[^1]);
     }
@@ -157,8 +158,13 @@ public sealed class EventFlagSectionReaderTests
     private Bnd4Container ReadContainer(byte[] entryData) =>
         _bnd4Reader.Read(CreateBnd4(entryData));
 
-    private static BuiltSlot BuildValidSlot(uint version) =>
-        BuildSlot(version: version, stopAfter: StopAfter.EventFlags);
+    private static BuiltSlot BuildValidSlot(
+        uint version,
+        uint totalDeathCount = 0) =>
+        BuildSlot(
+            version: version,
+            totalDeathCount: totalDeathCount,
+            stopAfter: StopAfter.EventFlags);
 
     private static BuiltSlot BuildSlot(
         uint version = 82,
@@ -166,6 +172,7 @@ public sealed class EventFlagSectionReaderTests
         uint regionCount = 2,
         uint menuSize = 17,
         uint tutorialSize = 9,
+        uint totalDeathCount = 0,
         StopAfter stopAfter = StopAfter.EventFlags)
     {
         using var stream = new MemoryStream();
@@ -266,7 +273,9 @@ public sealed class EventFlagSectionReaderTests
         }
 
         Skip(stream, checked((int)tutorialSize));
-        Skip(stream, 3 + 4 + 22);
+        Skip(stream, 3);
+        writer.Write(totalDeathCount);
+        Skip(stream, 22);
         int eventFlagOffset = SlotPosition(stream);
         Skip(stream, EventFlagSectionReader.EventFlagSectionSize);
         stream.Position = EventFlagSectionReader.ChecksumSize + eventFlagOffset;

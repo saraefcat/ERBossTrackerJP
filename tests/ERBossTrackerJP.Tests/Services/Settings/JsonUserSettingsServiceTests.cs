@@ -72,6 +72,54 @@ public sealed class JsonUserSettingsServiceTests
     }
 
     [Fact]
+    public void TrySaveAndLoad_RoundTripsCharacterSpecificDeathCountOffsets()
+    {
+        string testDirectory = CreateTestDirectory();
+        string settingsPath = Path.Combine(testDirectory, "settings.json");
+
+        try
+        {
+            var service = new JsonUserSettingsService(settingsPath);
+            var settings = new UserSettings(
+                SaveFilePath: "D:\\EldenRing\\ER0000.sl2",
+                CharacterSlotIndex: 4,
+                DeathCountOffsets:
+                [
+                    new DeathCountOffsetSetting(
+                        "D:\\EldenRing\\ER0000.sl2",
+                        4,
+                        1_234),
+                    new DeathCountOffsetSetting(
+                        "D:\\EldenRing\\ER0000.sl2",
+                        7,
+                        99),
+                ]);
+
+            Assert.True(service.TrySave(settings));
+            UserSettings actual = service.Load();
+
+            Assert.Collection(
+                actual.DeathCountOffsets!,
+                offset => Assert.Equal(
+                    new DeathCountOffsetSetting(
+                        "D:\\EldenRing\\ER0000.sl2",
+                        4,
+                        1_234),
+                    offset),
+                offset => Assert.Equal(
+                    new DeathCountOffsetSetting(
+                        "D:\\EldenRing\\ER0000.sl2",
+                        7,
+                        99),
+                    offset));
+        }
+        finally
+        {
+            DeleteTestDirectory(testDirectory);
+        }
+    }
+
+    [Fact]
     public void Load_UnsupportedSchemaReturnsDefaults()
     {
         string testDirectory = CreateTestDirectory();
@@ -137,6 +185,7 @@ public sealed class JsonUserSettingsServiceTests
             Assert.True(actual.IsObsOutputEnabled);
             Assert.Null(actual.ObsOutputDirectory);
             Assert.Null(actual.ObsProgressFormat);
+            Assert.Null(actual.DeathCountOffsets);
         }
         finally
         {
@@ -175,6 +224,7 @@ public sealed class JsonUserSettingsServiceTests
             Assert.False(actual.IsObsOutputEnabled);
             Assert.Null(actual.ObsOutputDirectory);
             Assert.Null(actual.ObsProgressFormat);
+            Assert.Null(actual.DeathCountOffsets);
         }
         finally
         {

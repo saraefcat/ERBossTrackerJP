@@ -1,5 +1,7 @@
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
 using ERBossTrackerJP.Services.Theming;
 using ERBossTrackerJP.ViewModels;
 
@@ -57,6 +59,25 @@ public partial class MainWindow : Window
             ? ApplicationTheme.Dark
             : ApplicationTheme.Light;
         WindowThemeHelper.TryApply(this, theme);
+    }
+
+    private void CopyPathButton_Click(
+        object sender,
+        RoutedEventArgs eventArgs)
+    {
+        if (sender is Button { Tag: string path } &&
+            !string.IsNullOrWhiteSpace(path))
+        {
+            try
+            {
+                Clipboard.SetText(path);
+            }
+            catch (ExternalException exception)
+            {
+                System.Diagnostics.Trace.WriteLine(
+                    $"[MainWindow] Clipboard copy failed: {exception}");
+            }
+        }
     }
 
     private void OnClosed(object? sender, EventArgs eventArgs)

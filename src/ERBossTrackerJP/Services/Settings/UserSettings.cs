@@ -11,7 +11,8 @@ public sealed record UserSettings(
     ApplicationTheme Theme = ApplicationTheme.Dark,
     bool IsObsOutputEnabled = false,
     string? ObsOutputDirectory = null,
-    string? ObsProgressFormat = null)
+    string? ObsProgressFormat = null,
+    IReadOnlyList<DeathCountOffsetSetting>? DeathCountOffsets = null)
 {
     public static UserSettings Default { get; } = new();
 }

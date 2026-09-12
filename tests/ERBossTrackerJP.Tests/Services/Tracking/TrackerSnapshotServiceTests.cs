@@ -1,5 +1,6 @@
 using ERBossTrackerJP.Core.Models;
 using ERBossTrackerJP.Save.Progress;
+using ERBossTrackerJP.Save.Reading;
 using ERBossTrackerJP.Services.SaveFiles;
 using ERBossTrackerJP.Services.Tracking;
 
@@ -12,7 +13,9 @@ public sealed class TrackerSnapshotServiceTests
     {
         var character = new CharacterSlot(3, "Tracked Hero", 125);
         LoadedSaveFile loadedSave = CreateLoadedSave(character);
-        var saveLoadService = new StubSaveLoadService(new byte[] { 0x80, 0x01 });
+        var saveLoadService = new StubSaveLoadService(
+            new byte[] { 0x80, 0x01 },
+            totalDeathCount: 456);
         var progressService = new StubBossProgressService();
         BossDefinition definition = CreateBossDefinition();
         var definitions = new List<BossDefinition> { definition };
@@ -22,7 +25,10 @@ public sealed class TrackerSnapshotServiceTests
             definitions);
         definitions.Clear();
 
-        TrackerSnapshot snapshot = service.Create(loadedSave, character);
+        TrackerSnapshot snapshot = service.Create(
+            loadedSave,
+            character,
+            deathCountOffset: 123);
 
         Assert.Same(progressService.Result, snapshot);
         Assert.Same(loadedSave, saveLoadService.ReceivedLoadedSave);
@@ -31,6 +37,8 @@ public sealed class TrackerSnapshotServiceTests
         Assert.Equal(loadedSave.LastWriteTimeUtc, progressService.ReceivedUpdatedAt);
         Assert.Same(character, progressService.ReceivedCharacter);
         Assert.Same(definition, Assert.Single(progressService.ReceivedDefinitions!));
+        Assert.Equal(456u, progressService.ReceivedSaveDeathCount);
+        Assert.Equal(123u, progressService.ReceivedDeathCountOffset);
     }
 
     [Fact]
@@ -71,7 +79,9 @@ public sealed class TrackerSnapshotServiceTests
             GameContent.BaseGame,
             0);
 
-    private sealed class StubSaveLoadService(ReadOnlyMemory<byte> eventFlags) : ISaveLoadService
+    private sealed class StubSaveLoadService(
+        ReadOnlyMemory<byte> eventFlags,
+        uint totalDeathCount = 0) : ISaveLoadService
     {
         public LoadedSaveFile? ReceivedLoadedSave { get; private set; }
 
@@ -82,13 +92,13 @@ public sealed class TrackerSnapshotServiceTests
             CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
 
-        public ReadOnlyMemory<byte> ReadEventFlags(
+        public EventFlagSection ReadCharacterData(
             LoadedSaveFile loadedSave,
             int slotIndex)
         {
             ReceivedLoadedSave = loadedSave;
             ReceivedSlotIndex = slotIndex;
-            return eventFlags;
+            return new EventFlagSection(eventFlags, 123, totalDeathCount);
         }
     }
 
@@ -114,16 +124,24 @@ public sealed class TrackerSnapshotServiceTests
 
         public IReadOnlyList<BossDefinition>? ReceivedDefinitions { get; private set; }
 
+        public uint? ReceivedSaveDeathCount { get; private set; }
+
+        public uint? ReceivedDeathCountOffset { get; private set; }
+
         public TrackerSnapshot CreateSnapshot(
             DateTimeOffset updatedAt,
             CharacterSlot character,
             ReadOnlyMemory<byte> eventFlags,
-            IReadOnlyList<BossDefinition> bossDefinitions)
+            IReadOnlyList<BossDefinition> bossDefinitions,
+            uint saveDeathCount = 0,
+            uint deathCountOffset = 0)
         {
             ReceivedUpdatedAt = updatedAt;
             ReceivedCharacter = character;
             ReceivedEventFlags = eventFlags;
             ReceivedDefinitions = bossDefinitions;
+            ReceivedSaveDeathCount = saveDeathCount;
+            ReceivedDeathCountOffset = deathCountOffset;
             return Result;
         }
     }

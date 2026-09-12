@@ -114,7 +114,8 @@ public sealed class JsonUserSettingsService : IUserSettingsService
                 ToThemeCode(settings.Theme),
                 settings.IsObsOutputEnabled,
                 NormalizePath(settings.ObsOutputDirectory),
-                NormalizeObsProgressFormat(settings.ObsProgressFormat));
+                NormalizeObsProgressFormat(settings.ObsProgressFormat),
+                NormalizeDeathCountOffsets(settings.DeathCountOffsets));
             string json = JsonSerializer.Serialize(document, SerializerOptions);
             File.WriteAllText(temporaryPath, json);
             File.Move(temporaryPath, _settingsPath, overwrite: true);
@@ -156,7 +157,8 @@ public sealed class JsonUserSettingsService : IUserSettingsService
             theme,
             document.IsObsOutputEnabled ?? false,
             NormalizePath(document.ObsOutputDirectory),
-            NormalizeObsProgressFormat(document.ObsProgressFormat));
+            NormalizeObsProgressFormat(document.ObsProgressFormat),
+            NormalizeDeathCountOffsets(document.DeathCountOffsets));
     }
 
     private static string? NormalizePath(string? path)
@@ -174,6 +176,42 @@ public sealed class JsonUserSettingsService : IUserSettingsService
         ObsProgressTextFormatter.TryValidate(format, out _)
             ? format
             : null;
+
+    private static IReadOnlyList<DeathCountOffsetSetting>? NormalizeDeathCountOffsets(
+        IReadOnlyList<DeathCountOffsetSetting>? offsets)
+    {
+        if (offsets is null)
+        {
+            return null;
+        }
+
+        var normalized = new List<DeathCountOffsetSetting>();
+
+        foreach (DeathCountOffsetSetting? offset in offsets)
+        {
+            string? saveFilePath = NormalizePath(offset?.SaveFilePath);
+
+            if (saveFilePath is null ||
+                ValidateSlotIndex(offset?.CharacterSlotIndex) is not int slotIndex ||
+                offset!.Offset == 0)
+            {
+                continue;
+            }
+
+            normalized.RemoveAll(existing =>
+                existing.CharacterSlotIndex == slotIndex &&
+                string.Equals(
+                    existing.SaveFilePath,
+                    saveFilePath,
+                    StringComparison.OrdinalIgnoreCase));
+            normalized.Add(new DeathCountOffsetSetting(
+                saveFilePath,
+                slotIndex,
+                offset.Offset));
+        }
+
+        return normalized;
+    }
 
     private static int? ValidateSlotIndex(int? slotIndex) =>
         slotIndex is >= 0 and < CharacterSlot.MaximumSlotCount
@@ -216,5 +254,6 @@ public sealed class JsonUserSettingsService : IUserSettingsService
         string? Theme,
         bool? IsObsOutputEnabled,
         string? ObsOutputDirectory,
-        string? ObsProgressFormat);
+        string? ObsProgressFormat,
+        IReadOnlyList<DeathCountOffsetSetting>? DeathCountOffsets);
 }

@@ -4,4 +4,10 @@ namespace ERBossTrackerJP.Save.Reading;
 /// <param name="Offset">
 /// The event flag offset relative to the slot data after its 16-byte checksum.
 /// </param>
-public readonly record struct EventFlagSection(ReadOnlyMemory<byte> Bytes, int Offset);
+/// <param name="TotalDeathCount">
+/// The character's total death count stored immediately before the event flags.
+/// </param>
+public readonly record struct EventFlagSection(
+    ReadOnlyMemory<byte> Bytes,
+    int Offset,
+    uint TotalDeathCount = 0);

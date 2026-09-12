@@ -26,7 +26,9 @@ public sealed class BossProgressService : IBossProgressService
         DateTimeOffset updatedAt,
         CharacterSlot character,
         ReadOnlyMemory<byte> eventFlags,
-        IReadOnlyList<BossDefinition> bossDefinitions)
+        IReadOnlyList<BossDefinition> bossDefinitions,
+        uint saveDeathCount = 0,
+        uint deathCountOffset = 0)
     {
         ArgumentNullException.ThrowIfNull(character);
         ArgumentNullException.ThrowIfNull(bossDefinitions);
@@ -66,7 +68,13 @@ public sealed class BossProgressService : IBossProgressService
             .Select(static accumulator => accumulator.ToProgress())
             .ToArray();
 
-        return new TrackerSnapshot(updatedAt, character, bosses, regions);
+        return new TrackerSnapshot(
+            updatedAt,
+            character,
+            bosses,
+            regions,
+            saveDeathCount,
+            deathCountOffset);
     }
 
     private static BossDefinition[] CopyAndOrderDefinitions(

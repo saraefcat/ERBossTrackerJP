@@ -1,3 +1,5 @@
+using ERBossTrackerJP.Save.Reading;
+
 namespace ERBossTrackerJP.Services.SaveFiles;
 
 public interface ISaveLoadService
@@ -6,5 +8,5 @@ public interface ISaveLoadService
         string filePath,
         CancellationToken cancellationToken = default);
 
-    ReadOnlyMemory<byte> ReadEventFlags(LoadedSaveFile loadedSave, int slotIndex);
+    EventFlagSection ReadCharacterData(LoadedSaveFile loadedSave, int slotIndex);
 }

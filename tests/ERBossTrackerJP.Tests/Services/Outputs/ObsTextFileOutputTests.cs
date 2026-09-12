@@ -38,6 +38,11 @@ public sealed class ObsTextFileOutputTests
                     outputDirectory,
                     ObsTextFileOutput.RemainingFileName)));
             Assert.Equal(
+                "1,248",
+                File.ReadAllText(Path.Combine(
+                    outputDirectory,
+                    ObsTextFileOutput.DeathsFileName)));
+            Assert.Equal(
                 "2",
                 File.ReadAllText(Path.Combine(
                     outputDirectory,
@@ -58,8 +63,13 @@ public sealed class ObsTextFileOutputTests
 
             using JsonDocument document = JsonDocument.Parse(File.ReadAllText(
                 Path.Combine(outputDirectory, ObsTextFileOutput.SnapshotFileName)));
-            Assert.Equal(1, document.RootElement.GetProperty("schemaVersion").GetInt32());
+            Assert.Equal(2, document.RootElement.GetProperty("schemaVersion").GetInt32());
             Assert.Equal("ja", document.RootElement.GetProperty("displayLanguage").GetString());
+            Assert.Equal(1_048u, document.RootElement.GetProperty("saveDeathCount").GetUInt32());
+            Assert.Equal(200u, document.RootElement.GetProperty("deathCountOffset").GetUInt32());
+            Assert.Equal(
+                1_248ul,
+                document.RootElement.GetProperty("cumulativeDeathCount").GetUInt64());
             Assert.Equal(2, document.RootElement.GetProperty("bosses").GetArrayLength());
             Assert.Equal(
                 "Tarnished",
@@ -368,7 +378,9 @@ public sealed class ObsTextFileOutputTests
                     "リムグレイブ",
                     (firstBossDefeated ? 1 : 0) + (secondBossDefeated ? 1 : 0),
                     2),
-            ]);
+            ],
+            saveDeathCount: 1_048,
+            deathCountOffset: 200);
     }
 
     private static string CreateTestDirectory()

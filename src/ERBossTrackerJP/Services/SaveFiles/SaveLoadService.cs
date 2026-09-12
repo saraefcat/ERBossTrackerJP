@@ -37,13 +37,12 @@ public sealed class SaveLoadService : ISaveLoadService
         return new LoadedSaveFile(snapshot, characterSlots);
     }
 
-    public ReadOnlyMemory<byte> ReadEventFlags(LoadedSaveFile loadedSave, int slotIndex)
+    public EventFlagSection ReadCharacterData(LoadedSaveFile loadedSave, int slotIndex)
     {
         ArgumentNullException.ThrowIfNull(loadedSave);
 
-        EventFlagSection section = _saveReader.ReadEventFlags(
+        return _saveReader.ReadEventFlags(
             loadedSave.Bytes,
             slotIndex);
-        return section.Bytes;
     }
 }

@@ -8,5 +8,7 @@ public interface IBossProgressService
         DateTimeOffset updatedAt,
         CharacterSlot character,
         ReadOnlyMemory<byte> eventFlags,
-        IReadOnlyList<BossDefinition> bossDefinitions);
+        IReadOnlyList<BossDefinition> bossDefinitions,
+        uint saveDeathCount = 0,
+        uint deathCountOffset = 0);
 }

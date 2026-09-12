@@ -483,90 +483,29 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="1.1*" />
+                    <ColumnDefinition Width="18" />
+                    <ColumnDefinition Width="0.9*" />
                 </Grid.ColumnDefinitions>
 
-                <ComboBox Grid.Row="0"
-                          Grid.Column="0"
-                          Margin="0,0,10,0"
-                          DisplayMemberPath="FilePath"
-                          IsEnabled="{Binding IsInteractionEnabled}"
-                          ItemsSource="{Binding SaveCandidates}"
-                          SelectedItem="{Binding SelectedSaveCandidate, Mode=TwoWay}" />
-                <Button Grid.Row="0"
-                        Grid.Column="1"
-                        MinWidth="96"
-                        Margin="0,0,8,0"
-                        Command="{Binding ReloadCommand}"
-                        Content="再読み込み" />
-                <Button Grid.Row="0"
-                        Grid.Column="2"
-                        MinWidth="110"
-                        Margin="0,0,8,0"
-                        Command="{Binding BrowseFolderCommand}"
-                        Content="フォルダーを選択" />
-                <Button Grid.Row="0"
-                        Grid.Column="3"
-                        MinWidth="120"
-                        Margin="0,0,14,0"
-                        Command="{Binding RefreshDefaultCommand}"
-                        Content="既定場所を再検索" />
-                <CheckBox Grid.Row="0"
-                          Grid.Column="4"
-                          VerticalAlignment="Center"
-                          IsChecked="{Binding IsAutoMonitoringEnabled, Mode=TwoWay}"
-                          IsEnabled="{Binding IsInteractionEnabled}"
-                          Content="自動監視" />
-
-                <DockPanel Grid.Row="1"
-                           Grid.Column="0"
-                           Grid.ColumnSpan="5"
-                           Margin="0,6,0,0">
-                    <TextBlock DockPanel.Dock="Right"
-                               Margin="16,0,0,0"
+                <StackPanel Grid.Row="0"
+                            Grid.Column="0">
+                    <TextBlock Margin="0,0,0,4"
                                Foreground="{DynamicResource TextMutedBrush}"
-                               Text="セーブファイルは読み取り専用で扱います。" />
-                    <TextBlock Foreground="{DynamicResource TextSecondaryBrush}"
-                               Text="{Binding StatusMessage}"
-                               TextWrapping="Wrap">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsProgressStatusMessageVisible}"
-                                                 Value="False">
-                                        <Setter Property="Visibility"
-                                                Value="Collapsed" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </DockPanel>
-            </Grid>
-        </Border>
+                               Text="セーブファイル" />
+                    <ComboBox DisplayMemberPath="FilePath"
+                              IsEnabled="{Binding IsInteractionEnabled}"
+                              ItemsSource="{Binding SaveCandidates}"
+                              SelectedItem="{Binding SelectedSaveCandidate, Mode=TwoWay}"
+                              ToolTip="{Binding SelectedSaveCandidate.FilePath}" />
+                </StackPanel>
 
-        <Grid Grid.Row="1"
-              Margin="0,0,0,8">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="2*" />
-            </Grid.ColumnDefinitions>
-
-            <Border Grid.Column="0"
-                    Margin="0,0,10,0"
-                    Padding="10,8"
-                    Style="{StaticResource PanelBorderStyle}">
-                <StackPanel>
-                    <TextBlock Margin="0,0,0,6"
+                <StackPanel Grid.Row="0"
+                            Grid.Column="2">
+                    <TextBlock Margin="0,0,0,4"
                                Foreground="{DynamicResource TextMutedBrush}"
                                Text="キャラクター" />
                     <ComboBox ItemsSource="{Binding CharacterSlots}"
@@ -586,6 +525,79 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
+                </StackPanel>
+
+                <WrapPanel Grid.Row="1"
+                           Grid.Column="0"
+                           Margin="0,8,0,0">
+                    <Button MinWidth="96"
+                            Margin="0,0,8,0"
+                            Command="{Binding ReloadCommand}"
+                            Content="再読み込み" />
+                    <Button MinWidth="110"
+                            Margin="0,0,8,0"
+                            Command="{Binding BrowseFolderCommand}"
+                            Content="フォルダーを選択" />
+                    <Button MinWidth="120"
+                            Command="{Binding RefreshDefaultCommand}"
+                            Content="既定場所を再検索" />
+                </WrapPanel>
+
+                <StackPanel Grid.Row="1"
+                            Grid.Column="2"
+                            Margin="0,8,0,0">
+                    <CheckBox IsChecked="{Binding IsAutoMonitoringEnabled, Mode=TwoWay}"
+                              IsEnabled="{Binding IsInteractionEnabled}"
+                              Content="自動監視" />
+                    <TextBlock Margin="0,4,0,0"
+                               Foreground="{DynamicResource TextMutedBrush}"
+                               Text="セーブ更新を検出すると自動で再読み込みします。"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+
+                <TextBlock Grid.Row="2"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="3"
+                           Margin="0,6,0,0"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                               Text="{Binding StatusMessage}"
+                               TextWrapping="Wrap">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsProgressStatusMessageVisible}"
+                                             Value="False">
+                                    <Setter Property="Visibility"
+                                            Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1"
+              Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Padding="10,7"
+                    Style="{StaticResource SummaryCardStyle}">
+                <StackPanel>
+                    <TextBlock Foreground="{DynamicResource TextMutedBrush}"
+                               Text="累計死亡数" />
+                    <TextBlock Margin="0,3,0,0"
+                               FontSize="24"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource AccentBrush}"
+                               Text="{Binding CumulativeDeathCountText}" />
                 </StackPanel>
             </Border>
 
@@ -896,12 +908,64 @@
                                     <TextBlock Margin="0,14,0,4"
                                                Foreground="{DynamicResource TextMutedBrush}"
                                                Text="OBSで読み込む推奨ファイル" />
-                                    <TextBox IsReadOnly="True"
-                                             Text="{Binding ObsRecommendedProgressFilePath, Mode=OneWay}"
-                                             ToolTip="{Binding ObsRecommendedProgressFilePath}" />
+                                    <Border Padding="10,8"
+                                            BorderBrush="{DynamicResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="2">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0"
+                                                        Margin="0,0,8,0">
+                                                <TextBlock FontWeight="SemiBold"
+                                                           Text="ボス進捗" />
+                                                <TextBlock Margin="0,3,0,0"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                                           Text="{Binding ObsRecommendedProgressFilePath, Mode=OneWay}"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           ToolTip="{Binding ObsRecommendedProgressFilePath}" />
+                                            </StackPanel>
+                                            <Button Grid.Column="1"
+                                                    Width="104"
+                                                    VerticalAlignment="Center"
+                                                    Click="CopyPathButton_Click"
+                                                    Content="パスをコピー"
+                                                    Tag="{Binding ObsRecommendedProgressFilePath}" />
+                                        </Grid>
+                                    </Border>
+                                    <Border Margin="0,8,0,0"
+                                            Padding="10,8"
+                                            BorderBrush="{DynamicResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="2">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0"
+                                                        Margin="0,0,8,0">
+                                                <TextBlock FontWeight="SemiBold"
+                                                           Text="累計死亡数" />
+                                                <TextBlock Margin="0,3,0,0"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                                           Text="{Binding ObsRecommendedDeathFilePath, Mode=OneWay}"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           ToolTip="{Binding ObsRecommendedDeathFilePath}" />
+                                            </StackPanel>
+                                            <Button Grid.Column="1"
+                                                    Width="104"
+                                                    VerticalAlignment="Center"
+                                                    Click="CopyPathButton_Click"
+                                                    Content="パスをコピー"
+                                                    Tag="{Binding ObsRecommendedDeathFilePath}" />
+                                        </Grid>
+                                    </Border>
                                     <TextBlock Margin="0,5,0,0"
                                                Foreground="{DynamicResource TextSecondaryBrush}"
-                                               Text="通常はこの progress.txt を、OBSの［テキスト（GDI+）］で［ファイルから読み取り］に指定します。他のファイルは数値を個別表示するときに使用します。"
+                                               Text="OBSの［テキスト（GDI+）］で［ファイルから読み取り］に指定します。"
                                                TextWrapping="Wrap" />
 
                                     <TextBlock Margin="0,16,0,4"
@@ -921,6 +985,7 @@
                                     Style="{StaticResource PanelBorderStyle}">
                                 <Grid>
                                     <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
@@ -1012,7 +1077,7 @@
                                         </StackPanel>
                                     </Border>
                                     <DataGrid Grid.Row="2"
-                                              Margin="14,0,14,14"
+                                              Margin="14,0,14,6"
                                               VerticalAlignment="Top"
                                               BorderThickness="1"
                                               ItemsSource="{Binding ObsPreviewItems}">
@@ -1028,6 +1093,11 @@
                                                                 Binding="{Binding Contents, Mode=OneWay}" />
                                         </DataGrid.Columns>
                                     </DataGrid>
+                                    <TextBlock Grid.Row="3"
+                                               Margin="14,0,14,12"
+                                               Foreground="{DynamicResource TextMutedBrush}"
+                                               Text="deaths.txt はNG+オフセット反映後の累計死亡数です。"
+                                               TextWrapping="Wrap" />
                                 </Grid>
                             </Border>
                         </Grid>
@@ -1101,6 +1171,94 @@
                             <TextBlock Margin="0,6,0,0"
                                        Foreground="{DynamicResource TextMutedBrush}"
                                        Text="セーブ更新を検出すると自動で再読み込みします。セーブファイルは読み取り専用で扱います。"
+                                       TextWrapping="Wrap" />
+
+                            <Border Height="1"
+                                    Margin="0,14,0,12"
+                                    Background="{DynamicResource BorderBrush}" />
+                            <TextBlock Margin="0,0,0,10"
+                                       FontSize="17"
+                                       FontWeight="SemiBold"
+                                       Text="累計死亡数" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="110" />
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="110" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Foreground="{DynamicResource TextMutedBrush}"
+                                               Text="セーブ内死亡数" />
+                                    <TextBlock Margin="0,5,0,0"
+                                               FontSize="22"
+                                               FontWeight="SemiBold"
+                                               Text="{Binding SaveDeathCountText}" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="1"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Bottom"
+                                           Margin="0,0,0,5"
+                                           FontSize="22"
+                                           Foreground="{DynamicResource TextMutedBrush}"
+                                           Text="+" />
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Foreground="{DynamicResource TextMutedBrush}"
+                                               Text="NG+オフセット" />
+                                    <Grid Margin="0,5,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Grid.Column="0"
+                                                 Margin="0,0,8,0"
+                                                 MaxLength="13"
+                                                 Text="{Binding DeathCountOffsetDraft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        <Button Grid.Column="1"
+                                                MinWidth="104"
+                                                Command="{Binding ApplyDeathCountOffsetCommand}"
+                                                Content="オフセットを適用" />
+                                    </Grid>
+                                </StackPanel>
+                                <TextBlock Grid.Column="3"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Bottom"
+                                           Margin="0,0,0,5"
+                                           FontSize="22"
+                                           Foreground="{DynamicResource TextMutedBrush}"
+                                           Text="=" />
+                                <StackPanel Grid.Column="4">
+                                    <TextBlock Foreground="{DynamicResource TextMutedBrush}"
+                                               Text="表示死亡数" />
+                                    <TextBlock Margin="0,5,0,0"
+                                               FontSize="22"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource AccentBrush}"
+                                               Text="{Binding CumulativeDeathCountText}" />
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Margin="134,5,0,0"
+                                       Foreground="{DynamicResource WarningBrush}"
+                                       Text="{Binding DeathCountOffsetStatusText}"
+                                       TextWrapping="Wrap">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility"
+                                                Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsDeathCountOffsetStatusVisible}"
+                                                         Value="True">
+                                                <Setter Property="Visibility"
+                                                        Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <TextBlock Margin="134,5,0,0"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       Text="オフセットは選択中のキャラクターごとに保存されます。"
                                        TextWrapping="Wrap" />
                         </StackPanel>
                     </Border>
