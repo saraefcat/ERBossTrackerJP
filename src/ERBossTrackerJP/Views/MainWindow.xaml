@@ -949,6 +949,25 @@
                                             <TextBox Margin="0,7,0,0"
                                                      MaxLength="256"
                                                      Text="{Binding ObsProgressFormatDraft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBlock Margin="0,5,0,0"
+                                                       AutomationProperties.LiveSetting="Polite"
+                                                       Foreground="{DynamicResource WarningBrush}"
+                                                       Text="{Binding ObsProgressFormatStatusText}"
+                                                       TextWrapping="Wrap">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility"
+                                                                Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsObsProgressFormatErrorVisible}"
+                                                                         Value="True">
+                                                                <Setter Property="Visibility"
+                                                                        Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                             <DockPanel Margin="0,8,0,0">
                                                 <StackPanel DockPanel.Dock="Right"
                                                             Orientation="Horizontal">
@@ -964,9 +983,31 @@
                                                 </StackPanel>
                                                 <TextBlock Margin="0,0,10,0"
                                                            VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                                           AutomationProperties.LiveSetting="Polite"
+                                                           FontWeight="SemiBold"
                                                            Text="{Binding ObsProgressFormatStatusText}"
-                                                           TextWrapping="Wrap" />
+                                                           TextWrapping="Wrap">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground"
+                                                                    Value="{DynamicResource WarningBrush}" />
+                                                            <Setter Property="Visibility"
+                                                                    Value="Collapsed" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsObsProgressFormatActionStatusVisible}"
+                                                                             Value="True">
+                                                                    <Setter Property="Visibility"
+                                                                            Value="Visible" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsObsProgressFormatStatusSuccess}"
+                                                                             Value="True">
+                                                                    <Setter Property="Foreground"
+                                                                            Value="{DynamicResource SuccessBrush}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
                                             </DockPanel>
                                         </StackPanel>
                                     </Border>
@@ -1138,9 +1179,32 @@
                                         Content="書式を適用" />
                             </Grid>
                             <TextBlock Margin="0,4,0,0"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       AutomationProperties.LiveSetting="Polite"
                                        Text="{Binding ObsProgressFormatStatusText}"
-                                       TextWrapping="Wrap" />
+                                       TextWrapping="Wrap">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground"
+                                                Value="{DynamicResource WarningBrush}" />
+                                        <Setter Property="Visibility"
+                                                Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsObsProgressFormatStatusVisible}"
+                                                         Value="True">
+                                                <Setter Property="Visibility"
+                                                        Value="Visible" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsObsProgressFormatStatusSuccess}"
+                                                         Value="True">
+                                                <Setter Property="Foreground"
+                                                        Value="{DynamicResource SuccessBrush}" />
+                                                <Setter Property="FontWeight"
+                                                        Value="SemiBold" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                         </StackPanel>
                     </Border>
 

@@ -659,6 +659,15 @@ public sealed class MainWindowViewModelTests
         viewModel.ObsProgressFormatDraft =
             "撃破 {defeated}/{total}体・残り{remaining}体・{percentage}%";
 
+        Assert.Equal(
+            "未適用の変更があります",
+            viewModel.ObsProgressFormatStatusText);
+        Assert.True(viewModel.IsObsProgressFormatStatusVisible);
+        Assert.True(viewModel.IsObsProgressFormatActionStatusVisible);
+        Assert.False(viewModel.IsObsProgressFormatErrorVisible);
+        Assert.False(viewModel.IsObsProgressFormatStatusSuccess);
+        Assert.True(viewModel.ApplyObsProgressFormatCommand.CanExecute(null));
+
         await viewModel.ApplyObsProgressFormatAsync();
 
         Assert.Equal(
@@ -667,7 +676,14 @@ public sealed class MainWindowViewModelTests
         Assert.Equal(
             viewModel.ObsProgressFormatDraft,
             settingsService.LastSaved?.ObsProgressFormat);
-        Assert.Equal("適用済み", viewModel.ObsProgressFormatStatusText);
+        Assert.Equal(
+            "✓ 書式を適用しました",
+            viewModel.ObsProgressFormatStatusText);
+        Assert.True(viewModel.IsObsProgressFormatStatusVisible);
+        Assert.True(viewModel.IsObsProgressFormatActionStatusVisible);
+        Assert.False(viewModel.IsObsProgressFormatErrorVisible);
+        Assert.True(viewModel.IsObsProgressFormatStatusSuccess);
+        Assert.False(viewModel.ApplyObsProgressFormatCommand.CanExecute(null));
         Assert.Equal(2, obsOutput.Updates.Count);
         Assert.Contains(
             viewModel.ObsPreviewItems,
@@ -694,6 +710,11 @@ public sealed class MainWindowViewModelTests
             "使用できない変数",
             viewModel.ObsProgressFormatStatusText,
             StringComparison.Ordinal);
+        Assert.True(viewModel.IsObsProgressFormatStatusVisible);
+        Assert.False(viewModel.IsObsProgressFormatActionStatusVisible);
+        Assert.True(viewModel.IsObsProgressFormatErrorVisible);
+        Assert.False(viewModel.IsObsProgressFormatStatusSuccess);
+        Assert.False(viewModel.ApplyObsProgressFormatCommand.CanExecute(null));
     }
 
     [Fact]
@@ -713,7 +734,53 @@ public sealed class MainWindowViewModelTests
 
         Assert.Equal(savedFormat, obsOutput.ProgressFormat);
         Assert.Equal(savedFormat, viewModel.ObsProgressFormatDraft);
-        Assert.Equal("適用済み", viewModel.ObsProgressFormatStatusText);
+        Assert.Empty(viewModel.ObsProgressFormatStatusText);
+        Assert.False(viewModel.IsObsProgressFormatStatusVisible);
+        Assert.False(viewModel.IsObsProgressFormatActionStatusVisible);
+        Assert.False(viewModel.IsObsProgressFormatErrorVisible);
+        Assert.False(viewModel.IsObsProgressFormatStatusSuccess);
+        Assert.False(viewModel.ApplyObsProgressFormatCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task ApplyObsProgressFormatAsync_SuccessNotificationDisappears()
+    {
+        var viewModel = CreateViewModel(
+            new StubSaveFileLocator(),
+            new StubSaveLoadService());
+        viewModel.ObsProgressFormatSuccessNotificationDuration =
+            TimeSpan.FromMilliseconds(10);
+        viewModel.ObsProgressFormatDraft = "撃破 {defeated}/{total}";
+
+        await viewModel.ApplyObsProgressFormatAsync();
+        await Task.Delay(100);
+
+        Assert.Empty(viewModel.ObsProgressFormatStatusText);
+        Assert.False(viewModel.IsObsProgressFormatStatusVisible);
+        Assert.False(viewModel.IsObsProgressFormatActionStatusVisible);
+        Assert.False(viewModel.IsObsProgressFormatErrorVisible);
+        Assert.False(viewModel.IsObsProgressFormatStatusSuccess);
+    }
+
+    [Fact]
+    public async Task EditingAfterApply_CancelsSuccessDismissalAndKeepsPendingStatus()
+    {
+        var viewModel = CreateViewModel(
+            new StubSaveFileLocator(),
+            new StubSaveLoadService());
+        viewModel.ObsProgressFormatSuccessNotificationDuration =
+            TimeSpan.FromMilliseconds(50);
+        viewModel.ObsProgressFormatDraft = "撃破 {defeated}/{total}";
+        await viewModel.ApplyObsProgressFormatAsync();
+
+        viewModel.ObsProgressFormatDraft = "残り {remaining}/{total}";
+        await Task.Delay(100);
+
+        Assert.Equal(
+            "未適用の変更があります",
+            viewModel.ObsProgressFormatStatusText);
+        Assert.True(viewModel.IsObsProgressFormatActionStatusVisible);
+        Assert.False(viewModel.IsObsProgressFormatStatusSuccess);
     }
 
     [Fact]

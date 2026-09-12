@@ -18,6 +18,14 @@ namespace ERBossTrackerJP.ViewModels;
 
 public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 {
+    private enum ObsProgressFormatStatusKind
+    {
+        None,
+        Pending,
+        Success,
+        Error,
+    }
+
     private readonly ISaveFileLocator _saveFileLocator;
     private readonly ISaveLoadService _saveLoadService;
     private readonly IFolderPickerService _folderPickerService;
@@ -40,6 +48,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly AsyncRelayCommand _testObsOutputCommand;
     private readonly AsyncRelayCommand _applyObsProgressFormatCommand;
     private CancellationTokenSource _obsOutputCancellationSource = new();
+    private CancellationTokenSource? _obsProgressFormatNotificationCancellationSource;
     private SaveFileCandidate? _selectedSaveCandidate;
     private CharacterSlot? _selectedCharacter;
     private RegionListItem? _selectedRegion;
@@ -62,7 +71,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private ApplicationTheme _applicationTheme = ApplicationTheme.Dark;
     private string _obsOutputDirectory;
     private string _obsProgressFormatDraft;
-    private string _obsProgressFormatStatusText = "適用済み";
+    private string _obsProgressFormatStatusText = string.Empty;
+    private ObsProgressFormatStatusKind _obsProgressFormatStatusKind;
     private string? _settingsSaveFilePath;
     private int? _settingsCharacterSlotIndex;
     private int? _pendingRestoredCharacterSlotIndex;
@@ -359,6 +369,23 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         get => _obsProgressFormatStatusText;
         private set => SetProperty(ref _obsProgressFormatStatusText, value);
     }
+
+    public bool IsObsProgressFormatStatusVisible =>
+        _obsProgressFormatStatusKind is not ObsProgressFormatStatusKind.None;
+
+    public bool IsObsProgressFormatActionStatusVisible =>
+        _obsProgressFormatStatusKind is
+            ObsProgressFormatStatusKind.Pending or
+            ObsProgressFormatStatusKind.Success;
+
+    public bool IsObsProgressFormatErrorVisible =>
+        _obsProgressFormatStatusKind is ObsProgressFormatStatusKind.Error;
+
+    public bool IsObsProgressFormatStatusSuccess =>
+        _obsProgressFormatStatusKind is ObsProgressFormatStatusKind.Success;
+
+    internal TimeSpan ObsProgressFormatSuccessNotificationDuration { get; set; } =
+        TimeSpan.FromSeconds(3);
 
     public string ObsOutputStatusText
     {
@@ -758,7 +785,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             return Task.CompletedTask;
         }
 
-        ObsProgressFormatStatusText = "適用済み";
+        ShowObsProgressFormatSuccessNotification();
         OnPropertyChanged(nameof(ObsPreviewItems));
         _applyObsProgressFormatCommand.NotifyCanExecuteChanged();
         PersistUserSettings();
@@ -783,20 +810,107 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
     private void UpdateObsProgressFormatStatus()
     {
+        CancelObsProgressFormatSuccessNotification();
+
         if (string.Equals(
                 ObsProgressFormatDraft,
                 _obsTextFileOutput.ProgressFormat,
                 StringComparison.Ordinal))
         {
-            ObsProgressFormatStatusText = "適用済み";
+            SetObsProgressFormatStatus(
+                string.Empty,
+                ObsProgressFormatStatusKind.None);
             return;
         }
 
-        ObsProgressFormatStatusText = ObsProgressTextFormatter.TryValidate(
-            ObsProgressFormatDraft,
-            out string errorMessage)
-                ? "［書式を適用］で反映します。"
-                : errorMessage;
+        if (ObsProgressTextFormatter.TryValidate(
+                ObsProgressFormatDraft,
+                out string errorMessage))
+        {
+            SetObsProgressFormatStatus(
+                "未適用の変更があります",
+                ObsProgressFormatStatusKind.Pending);
+            return;
+        }
+
+        SetObsProgressFormatStatus(
+            errorMessage,
+            ObsProgressFormatStatusKind.Error);
+    }
+
+    private void ShowObsProgressFormatSuccessNotification()
+    {
+        CancelObsProgressFormatSuccessNotification();
+        SetObsProgressFormatStatus(
+            "✓ 書式を適用しました",
+            ObsProgressFormatStatusKind.Success);
+        var cancellationSource = new CancellationTokenSource();
+        _obsProgressFormatNotificationCancellationSource = cancellationSource;
+        _ = ClearObsProgressFormatSuccessNotificationAsync(cancellationSource);
+    }
+
+    private async Task ClearObsProgressFormatSuccessNotificationAsync(
+        CancellationTokenSource cancellationSource)
+    {
+        try
+        {
+            await Task.Delay(
+                ObsProgressFormatSuccessNotificationDuration,
+                cancellationSource.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        PostToSynchronizationContext(() =>
+        {
+            if (!ReferenceEquals(
+                    _obsProgressFormatNotificationCancellationSource,
+                    cancellationSource))
+            {
+                return;
+            }
+
+            _obsProgressFormatNotificationCancellationSource = null;
+            cancellationSource.Dispose();
+            SetObsProgressFormatStatus(
+                string.Empty,
+                ObsProgressFormatStatusKind.None);
+        });
+    }
+
+    private void CancelObsProgressFormatSuccessNotification()
+    {
+        CancellationTokenSource? cancellationSource =
+            _obsProgressFormatNotificationCancellationSource;
+        _obsProgressFormatNotificationCancellationSource = null;
+
+        if (cancellationSource is null)
+        {
+            return;
+        }
+
+        cancellationSource.Cancel();
+        cancellationSource.Dispose();
+    }
+
+    private void SetObsProgressFormatStatus(
+        string text,
+        ObsProgressFormatStatusKind statusKind)
+    {
+        ObsProgressFormatStatusText = text;
+
+        if (_obsProgressFormatStatusKind == statusKind)
+        {
+            return;
+        }
+
+        _obsProgressFormatStatusKind = statusKind;
+        OnPropertyChanged(nameof(IsObsProgressFormatStatusVisible));
+        OnPropertyChanged(nameof(IsObsProgressFormatActionStatusVisible));
+        OnPropertyChanged(nameof(IsObsProgressFormatErrorVisible));
+        OnPropertyChanged(nameof(IsObsProgressFormatStatusSuccess));
     }
 
     private async Task LoadSelectedSaveCoreAsync()
@@ -1414,6 +1528,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         }
 
         _disposed = true;
+        CancelObsProgressFormatSuccessNotification();
         _obsOutputCancellationSource.Cancel();
         _obsOutputCancellationSource.Dispose();
         _saveFileMonitor.ChangeDetected -= OnSaveFileChangeDetected;
