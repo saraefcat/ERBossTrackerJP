@@ -580,25 +580,85 @@
         <Grid Grid.Row="1"
               Margin="0,0,0,8">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.45*" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="1.75*" />
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0"
-                    Padding="10,7"
+                    Padding="10,6"
                     Style="{StaticResource SummaryCardStyle}">
-                <StackPanel>
-                    <TextBlock Foreground="{DynamicResource TextMutedBrush}"
-                               Text="累計死亡数" />
-                    <TextBlock Margin="0,3,0,0"
-                               FontSize="24"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource AccentBrush}"
-                               Text="{Binding CumulativeDeathCountText}" />
-                </StackPanel>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <DockPanel Grid.Row="0">
+                        <Border DockPanel.Dock="Right"
+                                Padding="6,1"
+                                BorderThickness="1"
+                                CornerRadius="7">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource SurfaceAlternateBrush}" />
+                                    <Setter Property="BorderBrush"
+                                            Value="{DynamicResource BorderBrush}" />
+                                    <Setter Property="TextElement.Foreground"
+                                            Value="{DynamicResource TextMutedBrush}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsDeathCountOffsetEnabled}"
+                                                     Value="True">
+                                            <Setter Property="Background"
+                                                    Value="{DynamicResource SuccessBackgroundBrush}" />
+                                            <Setter Property="BorderBrush"
+                                                    Value="{DynamicResource SuccessBrush}" />
+                                            <Setter Property="TextElement.Foreground"
+                                                    Value="{DynamicResource SuccessBrush}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsDeathCountDisplayClamped}"
+                                                     Value="True">
+                                            <Setter Property="Background"
+                                                    Value="{DynamicResource WarningBackgroundBrush}" />
+                                            <Setter Property="BorderBrush"
+                                                    Value="{DynamicResource WarningBrush}" />
+                                            <Setter Property="TextElement.Foreground"
+                                                    Value="{DynamicResource WarningBrush}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding DeathCountSummaryStateText}" />
+                        </Border>
+                        <TextBlock VerticalAlignment="Center"
+                                   Foreground="{DynamicResource TextMutedBrush}"
+                                   Text="死亡数" />
+                    </DockPanel>
+                    <StackPanel Grid.Row="1"
+                                Margin="0,1,0,0"
+                                Orientation="Horizontal">
+                        <TextBlock FontSize="24"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AccentBrush}"
+                                   Text="{Binding DisplayDeathCountText}" />
+                        <TextBlock Margin="7,0,0,3"
+                                   VerticalAlignment="Bottom"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   Text="表示死亡数" />
+                    </StackPanel>
+                    <TextBlock Grid.Row="2"
+                               Margin="0,1,0,0"
+                               FontSize="10"
+                               Foreground="{DynamicResource TextMutedBrush}"
+                               Text="{Binding DeathCountSummaryDetailsText}"
+                               TextTrimming="CharacterEllipsis" />
+                </Grid>
             </Border>
 
             <Border Grid.Column="1"

@@ -656,6 +656,22 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         "N0",
         CultureInfo.InvariantCulture);
 
+    public string DeathCountSummaryStateText =>
+        _trackerSnapshot?.IsDeathCountBaselineAboveCumulative == true
+            ? "0制限"
+            : IsDeathCountOffsetEnabled
+                ? "周回補正 ON"
+                : "補正 OFF";
+
+    public string DeathCountSummaryDetailsText => string.Format(
+        CultureInfo.InvariantCulture,
+        "累計 {0:N0} ／ 基準 {1:N0}",
+        CumulativeDeathCount,
+        DeathCountBaseline);
+
+    public bool IsDeathCountDisplayClamped =>
+        _trackerSnapshot?.IsDeathCountBaselineAboveCumulative ?? false;
+
     public IReadOnlyList<ObsPreviewItem> ObsPreviewItems =>
     [
         new(ObsTextFileOutput.ProgressFileName,
@@ -1343,6 +1359,9 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         OnPropertyChanged(nameof(SaveDeathCountText));
         OnPropertyChanged(nameof(CumulativeDeathCountText));
         OnPropertyChanged(nameof(DisplayDeathCountText));
+        OnPropertyChanged(nameof(DeathCountSummaryStateText));
+        OnPropertyChanged(nameof(DeathCountSummaryDetailsText));
+        OnPropertyChanged(nameof(IsDeathCountDisplayClamped));
         OnPropertyChanged(nameof(VisibleBossCountText));
         OnPropertyChanged(nameof(TrackerLastUpdateText));
         OnPropertyChanged(nameof(ObsPreviewItems));

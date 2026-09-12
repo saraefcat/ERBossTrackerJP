@@ -36,8 +36,12 @@
                      Color="#7DB9FF" />
     <SolidColorBrush x:Key="SuccessBrush"
                      Color="#4ADE80" />
+    <SolidColorBrush x:Key="SuccessBackgroundBrush"
+                     Color="#183928" />
     <SolidColorBrush x:Key="WarningBrush"
                      Color="#FBBF24" />
+    <SolidColorBrush x:Key="WarningBackgroundBrush"
+                     Color="#3B3014" />
     <SolidColorBrush x:Key="DisabledTextBrush"
                      Color="#667085" />
 </ResourceDictionary>

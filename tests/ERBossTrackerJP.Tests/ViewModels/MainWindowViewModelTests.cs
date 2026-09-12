@@ -424,6 +424,11 @@ public sealed class MainWindowViewModelTests
         Assert.Equal(848u, viewModel.DisplayDeathCount);
         Assert.Equal("1,048", viewModel.CumulativeDeathCountText);
         Assert.Equal("848", viewModel.DisplayDeathCountText);
+        Assert.Equal("周回補正 ON", viewModel.DeathCountSummaryStateText);
+        Assert.Equal(
+            "累計 1,048 ／ 基準 200",
+            viewModel.DeathCountSummaryDetailsText);
+        Assert.False(viewModel.IsDeathCountDisplayClamped);
         Assert.Equal("200", viewModel.DeathCountBaselineDraft);
         Assert.Equal(200u, snapshotService.LastDeathCountBaseline);
         Assert.True(snapshotService.LastIsDeathCountOffsetEnabled);
@@ -445,6 +450,10 @@ public sealed class MainWindowViewModelTests
         viewModel.IsDeathCountOffsetEnabled = false;
 
         Assert.Equal(1_048u, viewModel.DisplayDeathCount);
+        Assert.Equal("補正 OFF", viewModel.DeathCountSummaryStateText);
+        Assert.Equal(
+            "累計 1,048 ／ 基準 350",
+            viewModel.DeathCountSummaryDetailsText);
         savedBaseline = Assert.Single(settingsService.LastSaved!.DeathCountBaselines!);
         Assert.Equal(350u, savedBaseline.Baseline);
         Assert.False(savedBaseline.IsEnabled);
@@ -505,6 +514,8 @@ public sealed class MainWindowViewModelTests
         await viewModel.ApplyDeathCountBaselineAsync();
 
         Assert.Equal(0u, viewModel.DisplayDeathCount);
+        Assert.Equal("0制限", viewModel.DeathCountSummaryStateText);
+        Assert.True(viewModel.IsDeathCountDisplayClamped);
         Assert.True(viewModel.IsDeathCountBaselineStatusVisible);
         Assert.Contains(
             "0に制限",
@@ -1091,7 +1102,7 @@ public sealed class MainWindowViewModelTests
                     grid => System.Windows.Controls.Grid.GetRow(grid) == 1);
                 string[] expectedSummaryOrder =
                 [
-                    "累計死亡数",
+                    "死亡数",
                     "撃破済み",
                     "未撃破",
                     "総数",
@@ -1110,6 +1121,28 @@ public sealed class MainWindowViewModelTests
                         index,
                         System.Windows.Controls.Grid.GetColumn(summaryPanel));
                 }
+                var deathSummaryPanel = Assert.Single(
+                    progressSummaryLayout.Children
+                        .OfType<System.Windows.Controls.Border>(),
+                    border => FindLogicalDescendants<
+                        System.Windows.Controls.TextBlock>(border)
+                        .Any(textBlock => textBlock.Text == "死亡数"));
+                Assert.Contains(
+                    FindLogicalDescendants<System.Windows.Controls.TextBlock>(
+                        deathSummaryPanel),
+                    textBlock => textBlock.Text == "表示死亡数");
+                AssertSingleBinding<System.Windows.Controls.TextBlock>(
+                    deathSummaryPanel,
+                    System.Windows.Controls.TextBlock.TextProperty,
+                    nameof(MainWindowViewModel.DisplayDeathCountText));
+                AssertSingleBinding<System.Windows.Controls.TextBlock>(
+                    deathSummaryPanel,
+                    System.Windows.Controls.TextBlock.TextProperty,
+                    nameof(MainWindowViewModel.DeathCountSummaryStateText));
+                AssertSingleBinding<System.Windows.Controls.TextBlock>(
+                    deathSummaryPanel,
+                    System.Windows.Controls.TextBlock.TextProperty,
+                    nameof(MainWindowViewModel.DeathCountSummaryDetailsText));
                 progressLayout.Measure(new System.Windows.Size(1252, 620));
                 Assert.True(
                     progressLayout.DesiredSize.Height <= 620,
