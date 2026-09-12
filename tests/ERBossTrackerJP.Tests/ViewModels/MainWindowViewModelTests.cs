@@ -29,7 +29,7 @@ public sealed class MainWindowViewModelTests
         Assert.Empty(viewModel.SaveCandidates);
         Assert.Empty(viewModel.CharacterSlots);
         Assert.Null(viewModel.SelectedSaveCandidate);
-        Assert.Contains("フォルダー参照", viewModel.StatusMessage, StringComparison.Ordinal);
+        Assert.Contains("フォルダーを選択", viewModel.StatusMessage, StringComparison.Ordinal);
         Assert.Equal(0, loadService.CallCount);
     }
 
@@ -782,6 +782,20 @@ public sealed class MainWindowViewModelTests
                     obsOutputLayout.Children
                         .OfType<System.Windows.Controls.Grid>(),
                     grid => System.Windows.Controls.Grid.GetRow(grid) == 1);
+                var obsBasicSettingsPanel = Assert.Single(
+                    obsOutputContentLayout.Children
+                        .OfType<System.Windows.Controls.Border>(),
+                    border => System.Windows.Controls.Grid.GetColumn(border) == 0);
+                var recommendedFileGuidance = Assert.Single(
+                    FindLogicalDescendants<System.Windows.Controls.TextBlock>(
+                        obsBasicSettingsPanel),
+                    textBlock => textBlock.Text.StartsWith(
+                        "通常はこの progress.txt を",
+                        StringComparison.Ordinal));
+                Assert.Contains(
+                    "他のファイルは数値を個別表示するときに使用します。",
+                    recommendedFileGuidance.Text,
+                    StringComparison.Ordinal);
                 var obsPreviewPanel = Assert.Single(
                     obsOutputContentLayout.Children
                         .OfType<System.Windows.Controls.Border>(),
@@ -820,6 +834,35 @@ public sealed class MainWindowViewModelTests
                     obsProgressFormatPanel,
                     System.Windows.Controls.Button.CommandProperty,
                     nameof(MainWindowViewModel.TestObsOutputCommand));
+                var applyFormatButton = Assert.Single(
+                    FindLogicalDescendants<System.Windows.Controls.Button>(
+                        obsProgressFormatPanel),
+                    button => System.Windows.Data.BindingOperations.GetBinding(
+                        button,
+                        System.Windows.Controls.Button.CommandProperty)?.Path.Path ==
+                        nameof(MainWindowViewModel.ApplyObsProgressFormatCommand));
+                var republishButton = Assert.Single(
+                    FindLogicalDescendants<System.Windows.Controls.Button>(
+                        obsProgressFormatPanel),
+                    button => System.Windows.Data.BindingOperations.GetBinding(
+                        button,
+                        System.Windows.Controls.Button.CommandProperty)?.Path.Path ==
+                        nameof(MainWindowViewModel.TestObsOutputCommand));
+                Assert.Equal(132d, applyFormatButton.Width);
+                Assert.Equal(applyFormatButton.Width, republishButton.Width);
+                var obsActionPanel = Assert.IsType<System.Windows.Controls.StackPanel>(
+                    System.Windows.LogicalTreeHelper.GetParent(applyFormatButton));
+                Assert.Same(
+                    obsActionPanel,
+                    System.Windows.LogicalTreeHelper.GetParent(republishButton));
+                Assert.Equal(
+                    System.Windows.Controls.Orientation.Horizontal,
+                    obsActionPanel.Orientation);
+                Assert.Equal(
+                    new[] { applyFormatButton, republishButton },
+                    obsActionPanel.Children
+                        .OfType<System.Windows.Controls.Button>()
+                        .ToArray());
                 obsOutputLayout.Measure(new System.Windows.Size(1252, 620));
                 Assert.True(
                     obsOutputLayout.DesiredSize.Height <= 620,
@@ -828,6 +871,22 @@ public sealed class MainWindowViewModelTests
                     tabControl.Items[0]);
                 var settingsTab = Assert.IsType<System.Windows.Controls.TabItem>(
                     tabControl.Items[2]);
+                var progressBrowseFolderButton = Assert.Single(
+                    FindLogicalDescendants<System.Windows.Controls.Button>(progressTab),
+                    button => System.Windows.Data.BindingOperations.GetBinding(
+                        button,
+                        System.Windows.Controls.Button.CommandProperty)?.Path.Path ==
+                        nameof(MainWindowViewModel.BrowseFolderCommand));
+                var settingsBrowseFolderButton = Assert.Single(
+                    FindLogicalDescendants<System.Windows.Controls.Button>(settingsTab),
+                    button => System.Windows.Data.BindingOperations.GetBinding(
+                        button,
+                        System.Windows.Controls.Button.CommandProperty)?.Path.Path ==
+                        nameof(MainWindowViewModel.BrowseFolderCommand));
+                Assert.Equal("フォルダーを選択", progressBrowseFolderButton.Content);
+                Assert.Equal(
+                    progressBrowseFolderButton.Content,
+                    settingsBrowseFolderButton.Content);
                 var settingsLayout = Assert.IsType<System.Windows.Controls.Grid>(
                     settingsTab.Content);
                 var settingsSavePanel = Assert.Single(

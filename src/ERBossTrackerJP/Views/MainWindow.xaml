@@ -510,7 +510,7 @@
                         MinWidth="110"
                         Margin="0,0,8,0"
                         Command="{Binding BrowseFolderCommand}"
-                        Content="フォルダー参照" />
+                        Content="フォルダーを選択" />
                 <Button Grid.Row="0"
                         Grid.Column="3"
                         MinWidth="120"
@@ -901,7 +901,7 @@
                                              ToolTip="{Binding ObsRecommendedProgressFilePath}" />
                                     <TextBlock Margin="0,5,0,0"
                                                Foreground="{DynamicResource TextSecondaryBrush}"
-                                               Text="通常の進捗表示では、OBSの［テキスト（GDI+）］で［ファイルから読み取り］にこのファイルを指定します。"
+                                               Text="通常はこの progress.txt を、OBSの［テキスト（GDI+）］で［ファイルから読み取り］に指定します。他のファイルは数値を個別表示するときに使用します。"
                                                TextWrapping="Wrap" />
 
                                     <TextBlock Margin="0,16,0,4"
@@ -946,34 +946,26 @@
                                                        Foreground="{DynamicResource TextMutedBrush}"
                                                        Text="使用可能: {defeated}  {remaining}  {total}  {percentage}（%記号は書式側へ入力）"
                                                        TextWrapping="Wrap" />
-                                            <Grid Margin="0,7,0,0">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBox Grid.Column="0"
-                                                         Margin="0,0,8,0"
-                                                         MaxLength="256"
-                                                         Text="{Binding ObsProgressFormatDraft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                <Button Grid.Column="1"
-                                                        MinWidth="112"
-                                                        Command="{Binding ApplyObsProgressFormatCommand}"
-                                                        Content="書式を適用" />
-                                            </Grid>
-                                            <TextBlock Margin="0,4,0,0"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}"
-                                                       Text="{Binding ObsProgressFormatStatusText}"
-                                                       TextWrapping="Wrap" />
+                                            <TextBox Margin="0,7,0,0"
+                                                     MaxLength="256"
+                                                     Text="{Binding ObsProgressFormatDraft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                             <DockPanel Margin="0,8,0,0">
-                                                <Button DockPanel.Dock="Right"
-                                                        MinWidth="120"
-                                                        Command="{Binding TestObsOutputCommand}"
-                                                        Content="現在値を再出力"
-                                                        ToolTip="セーブ更新を待たず、現在の進捗をOBS用ファイルへ書き直します。" />
+                                                <StackPanel DockPanel.Dock="Right"
+                                                            Orientation="Horizontal">
+                                                    <Button Width="132"
+                                                            Command="{Binding ApplyObsProgressFormatCommand}"
+                                                            Content="書式を適用"
+                                                            ToolTip="書式を保存して反映します。OBS出力が有効なら現在値も同時に更新します。" />
+                                                    <Button Width="132"
+                                                            Margin="8,0,0,0"
+                                                            Command="{Binding TestObsOutputCommand}"
+                                                            Content="現在値を再出力"
+                                                            ToolTip="書式適用とは別に、現在の進捗をOBS用ファイルへ書き直します。出力確認や失敗後の再試行に使用します。" />
+                                                </StackPanel>
                                                 <TextBlock Margin="0,0,10,0"
                                                            VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource TextMutedBrush}"
-                                                           Text="通常は progress.txt を指定します。他のファイルは数値を個別表示するときに使用します。"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                                           Text="{Binding ObsProgressFormatStatusText}"
                                                            TextWrapping="Wrap" />
                                             </DockPanel>
                                         </StackPanel>
@@ -1037,7 +1029,7 @@
                                         Content="再読み込み" />
                                 <Button Margin="0,0,8,0"
                                         Command="{Binding BrowseFolderCommand}"
-                                        Content="フォルダー変更" />
+                                        Content="フォルダーを選択" />
                                 <Button Command="{Binding RefreshDefaultCommand}"
                                         Content="既定場所を再検索" />
                             </WrapPanel>

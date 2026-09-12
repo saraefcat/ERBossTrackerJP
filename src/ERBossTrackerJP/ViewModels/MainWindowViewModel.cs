@@ -637,7 +637,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         {
             ReplaceSaveCandidates([]);
             StatusMessage =
-                "既定の保存場所にER0000.sl2が見つかりません。［フォルダー参照］から場所を指定してください。";
+                "既定の保存場所にER0000.sl2が見つかりません。［フォルダーを選択］から場所を指定してください。";
             return;
         }
 
