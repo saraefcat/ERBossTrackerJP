@@ -920,8 +920,8 @@
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="*" />
                                         <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <DockPanel Grid.Row="0"
@@ -934,22 +934,7 @@
                                                    FontWeight="SemiBold"
                                                    Text="OBS出力ファイルのプレビュー" />
                                     </DockPanel>
-                                    <DataGrid Grid.Row="1"
-                                              BorderThickness="0"
-                                              ItemsSource="{Binding ObsPreviewItems}">
-                                        <DataGrid.Columns>
-                                            <DataGridTextColumn Width="145"
-                                                                Header="ファイル名"
-                                                                Binding="{Binding FileName, Mode=OneWay}" />
-                                            <DataGridTextColumn Width="190"
-                                                                Header="用途"
-                                                                Binding="{Binding Usage, Mode=OneWay}" />
-                                            <DataGridTextColumn Width="*"
-                                                                Header="現在の内容"
-                                                                Binding="{Binding Contents, Mode=OneWay}" />
-                                        </DataGrid.Columns>
-                                    </DataGrid>
-                                    <Border Grid.Row="2"
+                                    <Border Grid.Row="1"
                                             Padding="14,10"
                                             BorderBrush="{DynamicResource BorderBrush}"
                                             BorderThickness="0,1,0,0">
@@ -977,9 +962,24 @@
                                             <TextBlock Margin="0,4,0,0"
                                                        Foreground="{DynamicResource TextSecondaryBrush}"
                                                        Text="{Binding ObsProgressFormatStatusText}"
-                                                       TextWrapping="Wrap" />
+                                               TextWrapping="Wrap" />
                                         </StackPanel>
                                     </Border>
+                                    <DataGrid Grid.Row="2"
+                                              BorderThickness="0"
+                                              ItemsSource="{Binding ObsPreviewItems}">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Width="145"
+                                                                Header="ファイル名"
+                                                                Binding="{Binding FileName, Mode=OneWay}" />
+                                            <DataGridTextColumn Width="190"
+                                                                Header="用途"
+                                                                Binding="{Binding Usage, Mode=OneWay}" />
+                                            <DataGridTextColumn Width="*"
+                                                                Header="現在の内容"
+                                                                Binding="{Binding Contents, Mode=OneWay}" />
+                                        </DataGrid.Columns>
+                                    </DataGrid>
                                     <DockPanel Grid.Row="3"
                                                Margin="14,12">
                                         <Button DockPanel.Dock="Right"
@@ -1013,6 +1013,7 @@
 
                     <Border Grid.Row="0"
                             Grid.Column="0"
+                            VerticalAlignment="Top"
                             Style="{StaticResource PanelBorderStyle}">
                         <StackPanel>
                             <TextBlock Margin="0,0,0,12"
@@ -1091,8 +1092,8 @@
 
                     <Border Grid.Row="1"
                             Grid.Column="0"
-                            Grid.ColumnSpan="3"
                             Margin="0,12,0,0"
+                            VerticalAlignment="Top"
                             Style="{StaticResource PanelBorderStyle}">
                         <StackPanel>
                             <TextBlock FontSize="17"

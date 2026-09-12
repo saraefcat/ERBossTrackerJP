@@ -786,8 +786,21 @@ public sealed class MainWindowViewModelTests
                     obsOutputContentLayout.Children
                         .OfType<System.Windows.Controls.Border>(),
                     border => System.Windows.Controls.Grid.GetColumn(border) == 2);
+                var obsPreviewLayout = Assert.IsType<System.Windows.Controls.Grid>(
+                    obsPreviewPanel.Child);
+                var obsProgressFormatPanel = Assert.Single(
+                    obsPreviewLayout.Children
+                        .OfType<System.Windows.Controls.Border>(),
+                    border => System.Windows.Controls.Grid.GetRow(border) == 1);
+                var obsPreviewTable = Assert.Single(
+                    obsPreviewLayout.Children
+                        .OfType<System.Windows.Controls.DataGrid>(),
+                    dataGrid => System.Windows.Controls.Grid.GetRow(dataGrid) == 2);
+                Assert.True(
+                    System.Windows.Controls.Grid.GetRow(obsProgressFormatPanel) <
+                    System.Windows.Controls.Grid.GetRow(obsPreviewTable));
                 AssertSingleBinding<System.Windows.Controls.TextBox>(
-                    obsPreviewPanel,
+                    obsProgressFormatPanel,
                     System.Windows.Controls.TextBox.TextProperty,
                     nameof(MainWindowViewModel.ObsProgressFormatDraft));
                 var progressTab = Assert.IsType<System.Windows.Controls.TabItem>(
@@ -796,10 +809,23 @@ public sealed class MainWindowViewModelTests
                     tabControl.Items[2]);
                 var settingsLayout = Assert.IsType<System.Windows.Controls.Grid>(
                     settingsTab.Content);
+                var settingsDisplayPanel = Assert.Single(
+                    settingsLayout.Children
+                        .OfType<System.Windows.Controls.Border>(),
+                    border =>
+                        System.Windows.Controls.Grid.GetRow(border) == 0 &&
+                        System.Windows.Controls.Grid.GetColumn(border) == 0);
+                Assert.Equal(
+                    System.Windows.VerticalAlignment.Top,
+                    settingsDisplayPanel.VerticalAlignment);
                 var settingsObsPanel = Assert.Single(
                     settingsLayout.Children
                         .OfType<System.Windows.Controls.Border>(),
-                    border => System.Windows.Controls.Grid.GetRow(border) == 1);
+                    border =>
+                        System.Windows.Controls.Grid.GetRow(border) == 1 &&
+                        System.Windows.Controls.Grid.GetColumn(border) == 0);
+                Assert.Equal(1, System.Windows.Controls.Grid.GetColumnSpan(
+                    settingsObsPanel));
                 var settingsObsStack = Assert.IsType<
                     System.Windows.Controls.StackPanel>(settingsObsPanel.Child);
                 Assert.Equal(
