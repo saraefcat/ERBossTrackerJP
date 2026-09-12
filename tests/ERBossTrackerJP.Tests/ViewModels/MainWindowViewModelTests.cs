@@ -988,6 +988,27 @@ public sealed class MainWindowViewModelTests
                         .Cast<System.Windows.Controls.TabItem>()
                         .Select(item => item.Header?.ToString() ?? string.Empty)
                         .ToArray());
+                var tabStripBorder = Assert.IsType<System.Windows.Controls.Border>(
+                    tabControl.Template.FindName("TabStripBorder", tabControl));
+                Assert.Equal(
+                    new System.Windows.Thickness(1),
+                    tabStripBorder.BorderThickness);
+                Assert.Equal(
+                    new System.Windows.CornerRadius(5),
+                    tabStripBorder.CornerRadius);
+                var selectedTab = Assert.IsType<System.Windows.Controls.TabItem>(
+                    tabControl.Items[0]);
+                var selectedTabBorder = Assert.IsType<System.Windows.Controls.Border>(
+                    selectedTab.Template.FindName("TabBorder", selectedTab));
+                var selectedIndicator = Assert.IsType<System.Windows.Controls.Border>(
+                    selectedTab.Template.FindName("SelectionIndicator", selectedTab));
+                Assert.Equal(
+                    new System.Windows.Thickness(1),
+                    selectedTabBorder.BorderThickness);
+                Assert.Equal(3d, selectedIndicator.Height);
+                Assert.Same(
+                    window.FindResource("AccentBrush"),
+                    selectedIndicator.Background);
                 var obsOutputTab = Assert.IsType<System.Windows.Controls.TabItem>(
                     tabControl.Items[1]);
                 var obsOutputLayout = Assert.IsType<System.Windows.Controls.Grid>(
@@ -1043,6 +1064,22 @@ public sealed class MainWindowViewModelTests
                     obsBasicSettingsPanel,
                     System.Windows.Controls.Button.CommandProperty,
                     nameof(MainWindowViewModel.ApplyDeathCountBaselineCommand));
+                var obsBasicSettingsStack = Assert.IsType<
+                    System.Windows.Controls.StackPanel>(obsBasicSettingsPanel.Child);
+                var obsLanguageLabel = Assert.Single(
+                    obsBasicSettingsStack.Children
+                        .OfType<System.Windows.Controls.TextBlock>(),
+                    textBlock => textBlock.Text ==
+                        "固有名詞の言語（画面とOBS共通）");
+                var obsDeathGuidance = Assert.Single(
+                    obsBasicSettingsStack.Children
+                        .OfType<System.Windows.Controls.TextBlock>(),
+                    textBlock => textBlock.Text.StartsWith(
+                        "この表示死亡数が deaths.txt",
+                        StringComparison.Ordinal));
+                Assert.True(
+                    obsBasicSettingsStack.Children.IndexOf(obsLanguageLabel) >
+                    obsBasicSettingsStack.Children.IndexOf(obsDeathGuidance));
                 var obsPreviewPanel = Assert.Single(
                     obsOutputContentLayout.Children
                         .OfType<System.Windows.Controls.Border>(),

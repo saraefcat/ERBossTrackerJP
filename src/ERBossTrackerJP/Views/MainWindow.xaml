@@ -370,27 +370,68 @@
         <Style TargetType="TabControl">
             <Setter Property="Background"
                     Value="Transparent" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource BorderBrush}" />
             <Setter Property="BorderThickness"
                     Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid KeyboardNavigation.TabNavigation="Local"
+                              SnapsToDevicePixels="True">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Border x:Name="TabStripBorder"
+                                    Grid.Row="0"
+                                    HorizontalAlignment="Left"
+                                    Padding="2"
+                                    Background="{DynamicResource SurfaceAlternateBrush}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="5">
+                                <TabPanel IsItemsHost="True"
+                                          KeyboardNavigation.DirectionalNavigation="Cycle" />
+                            </Border>
+                            <ContentPresenter x:Name="PART_SelectedContentHost"
+                                              Grid.Row="1"
+                                              ContentSource="SelectedContent" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style TargetType="TabItem">
             <Setter Property="Foreground"
                     Value="{DynamicResource TextSecondaryBrush}" />
             <Setter Property="Background"
-                    Value="Transparent" />
+                    Value="{DynamicResource SurfaceAlternateBrush}" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource BorderBrush}" />
+            <Setter Property="Margin"
+                    Value="0,0,2,0" />
             <Setter Property="Padding"
-                    Value="18,7" />
+                    Value="17,6" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TabItem">
                         <Border x:Name="TabBorder"
                                 Background="{TemplateBinding Background}"
-                                BorderBrush="Transparent"
-                                BorderThickness="0,0,0,3"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"
-                                              ContentSource="Header" />
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="3">
+                            <Grid>
+                                <ContentPresenter Margin="{TemplateBinding Padding}"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  ContentSource="Header" />
+                                <Border x:Name="SelectionIndicator"
+                                        Height="3"
+                                        VerticalAlignment="Bottom"
+                                        Background="Transparent"
+                                        CornerRadius="1" />
+                            </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver"
@@ -408,6 +449,15 @@
                                 <Setter TargetName="TabBorder"
                                         Property="Background"
                                         Value="{DynamicResource ControlBackgroundBrush}" />
+                                <Setter TargetName="TabBorder"
+                                        Property="BorderBrush"
+                                        Value="{DynamicResource AccentBrush}" />
+                                <Setter TargetName="SelectionIndicator"
+                                        Property="Background"
+                                        Value="{DynamicResource AccentBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused"
+                                     Value="True">
                                 <Setter TargetName="TabBorder"
                                         Property="BorderBrush"
                                         Value="{DynamicResource AccentBrush}" />
@@ -1028,14 +1078,6 @@
                                                Text="OBSの［テキスト（GDI+）］で［ファイルから読み取り］に指定します。"
                                                TextWrapping="Wrap" />
 
-                                    <TextBlock Margin="0,16,0,4"
-                                               Foreground="{DynamicResource TextMutedBrush}"
-                                               Text="固有名詞の言語（画面とOBS共通）" />
-                                    <ComboBox DisplayMemberPath="Label"
-                                              ItemsSource="{Binding LanguageOptions}"
-                                              SelectedValue="{Binding DisplayLanguage, Mode=TwoWay}"
-                                              SelectedValuePath="Value" />
-
                                     <Border Height="1"
                                             Margin="0,14,0,12"
                                             Background="{DynamicResource BorderBrush}" />
@@ -1125,6 +1167,14 @@
                                                Foreground="{DynamicResource TextMutedBrush}"
                                                Text="この表示死亡数が deaths.txt へ出力されます。基準値とON／OFFはキャラクターごとに保存されます。"
                                                TextWrapping="Wrap" />
+
+                                    <TextBlock Margin="0,16,0,4"
+                                               Foreground="{DynamicResource TextMutedBrush}"
+                                               Text="固有名詞の言語（画面とOBS共通）" />
+                                    <ComboBox DisplayMemberPath="Label"
+                                              ItemsSource="{Binding LanguageOptions}"
+                                              SelectedValue="{Binding DisplayLanguage, Mode=TwoWay}"
+                                              SelectedValuePath="Value" />
 
                                 </StackPanel>
                             </Border>
