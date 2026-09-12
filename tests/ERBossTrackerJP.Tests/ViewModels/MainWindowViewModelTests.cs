@@ -774,15 +774,37 @@ public sealed class MainWindowViewModelTests
                     tabControl.Items[1]);
                 var obsOutputLayout = Assert.IsType<System.Windows.Controls.Grid>(
                     obsOutputTab.Content);
+                Assert.Equal(2, obsOutputLayout.RowDefinitions.Count);
                 Assert.Equal(
                     System.Windows.GridUnitType.Star,
                     obsOutputLayout.RowDefinitions[1].Height.GridUnitType);
+                var obsOutputContentLayout = Assert.Single(
+                    obsOutputLayout.Children
+                        .OfType<System.Windows.Controls.Grid>(),
+                    grid => System.Windows.Controls.Grid.GetRow(grid) == 1);
+                var obsPreviewPanel = Assert.Single(
+                    obsOutputContentLayout.Children
+                        .OfType<System.Windows.Controls.Border>(),
+                    border => System.Windows.Controls.Grid.GetColumn(border) == 2);
+                AssertSingleBinding<System.Windows.Controls.TextBox>(
+                    obsPreviewPanel,
+                    System.Windows.Controls.TextBox.TextProperty,
+                    nameof(MainWindowViewModel.ObsProgressFormatDraft));
                 var progressTab = Assert.IsType<System.Windows.Controls.TabItem>(
                     tabControl.Items[0]);
                 var settingsTab = Assert.IsType<System.Windows.Controls.TabItem>(
                     tabControl.Items[2]);
                 var settingsLayout = Assert.IsType<System.Windows.Controls.Grid>(
                     settingsTab.Content);
+                var settingsObsPanel = Assert.Single(
+                    settingsLayout.Children
+                        .OfType<System.Windows.Controls.Border>(),
+                    border => System.Windows.Controls.Grid.GetRow(border) == 1);
+                var settingsObsStack = Assert.IsType<
+                    System.Windows.Controls.StackPanel>(settingsObsPanel.Child);
+                Assert.Equal(
+                    System.Windows.Controls.Orientation.Vertical,
+                    settingsObsStack.Orientation);
                 settingsLayout.Measure(new System.Windows.Size(1252, 620));
                 Assert.True(
                     settingsLayout.DesiredSize.Height <= 620,
