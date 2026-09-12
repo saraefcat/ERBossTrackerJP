@@ -385,7 +385,7 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
-    public async Task DeathCountOffset_IsRestoredAppliedAndStoredPerCharacter()
+    public async Task DeathCountBaseline_IsRestoredAppliedAndStoredPerCharacter()
     {
         SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
         var locator = new StubSaveFileLocator(
@@ -400,9 +400,13 @@ public sealed class MainWindowViewModelTests
             new UserSettings(
                 candidate.FilePath,
                 3,
-                DeathCountOffsets:
+                DeathCountBaselines:
                 [
-                    new DeathCountOffsetSetting(candidate.FilePath, 3, 200),
+                    new DeathCountBaselineSetting(
+                        candidate.FilePath,
+                        3,
+                        200,
+                        IsEnabled: true),
                 ]));
         var snapshotService = new StubTrackerSnapshotService();
         var viewModel = CreateViewModel(
@@ -414,34 +418,48 @@ public sealed class MainWindowViewModelTests
         await viewModel.InitializeAsync();
 
         Assert.Equal(1_048u, viewModel.SaveDeathCount);
-        Assert.Equal(200u, viewModel.DeathCountOffset);
-        Assert.Equal(1_248ul, viewModel.CumulativeDeathCount);
-        Assert.Equal("1,248", viewModel.CumulativeDeathCountText);
-        Assert.Equal("200", viewModel.DeathCountOffsetDraft);
-        Assert.Equal(200u, snapshotService.LastDeathCountOffset);
+        Assert.Equal(1_048ul, viewModel.CumulativeDeathCount);
+        Assert.Equal(200u, viewModel.DeathCountBaseline);
+        Assert.True(viewModel.IsDeathCountOffsetEnabled);
+        Assert.Equal(848u, viewModel.DisplayDeathCount);
+        Assert.Equal("1,048", viewModel.CumulativeDeathCountText);
+        Assert.Equal("848", viewModel.DisplayDeathCountText);
+        Assert.Equal("200", viewModel.DeathCountBaselineDraft);
+        Assert.Equal(200u, snapshotService.LastDeathCountBaseline);
+        Assert.True(snapshotService.LastIsDeathCountOffsetEnabled);
 
-        viewModel.DeathCountOffsetDraft = "350";
-        Assert.True(viewModel.IsDeathCountOffsetStatusVisible);
-        await viewModel.ApplyDeathCountOffsetAsync();
+        viewModel.DeathCountBaselineDraft = "350";
+        Assert.True(viewModel.IsDeathCountBaselineStatusVisible);
+        await viewModel.ApplyDeathCountBaselineAsync();
 
-        Assert.Equal(350u, viewModel.DeathCountOffset);
-        Assert.Equal(1_398ul, viewModel.CumulativeDeathCount);
-        Assert.False(viewModel.IsDeathCountOffsetStatusVisible);
-        DeathCountOffsetSetting savedOffset = Assert.Single(
-            settingsService.LastSaved!.DeathCountOffsets!);
-        Assert.Equal(candidate.FilePath, savedOffset.SaveFilePath);
-        Assert.Equal(3, savedOffset.CharacterSlotIndex);
-        Assert.Equal(350u, savedOffset.Offset);
+        Assert.Equal(350u, viewModel.DeathCountBaseline);
+        Assert.Equal(698u, viewModel.DisplayDeathCount);
+        Assert.False(viewModel.IsDeathCountBaselineStatusVisible);
+        DeathCountBaselineSetting savedBaseline = Assert.Single(
+            settingsService.LastSaved!.DeathCountBaselines!);
+        Assert.Equal(candidate.FilePath, savedBaseline.SaveFilePath);
+        Assert.Equal(3, savedBaseline.CharacterSlotIndex);
+        Assert.Equal(350u, savedBaseline.Baseline);
+        Assert.True(savedBaseline.IsEnabled);
+
+        viewModel.IsDeathCountOffsetEnabled = false;
+
+        Assert.Equal(1_048u, viewModel.DisplayDeathCount);
+        savedBaseline = Assert.Single(settingsService.LastSaved!.DeathCountBaselines!);
+        Assert.Equal(350u, savedBaseline.Baseline);
+        Assert.False(savedBaseline.IsEnabled);
 
         viewModel.SelectedCharacter = viewModel.CharacterSlots[0];
 
-        Assert.Equal(0u, viewModel.DeathCountOffset);
-        Assert.Equal("0", viewModel.DeathCountOffsetDraft);
+        Assert.Equal(0u, viewModel.DeathCountBaseline);
+        Assert.False(viewModel.IsDeathCountOffsetEnabled);
+        Assert.Equal("0", viewModel.DeathCountBaselineDraft);
         Assert.Equal(1_048ul, viewModel.CumulativeDeathCount);
+        Assert.Equal(1_048u, viewModel.DisplayDeathCount);
     }
 
     [Fact]
-    public async Task DeathCountOffset_ZeroClearsStoredOffset()
+    public async Task DeathCountBaseline_CurrentValueStartsDisplayAtZero()
     {
         SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
         var locator = new StubSaveFileLocator(
@@ -451,26 +469,52 @@ public sealed class MainWindowViewModelTests
         loadService.Enqueue(CreateLoadedSave(
             candidate.FilePath,
             new CharacterSlot(0, "First", 20)));
-        var settingsService = new StubUserSettingsService(
-            new UserSettings(
-                candidate.FilePath,
-                0,
-                DeathCountOffsets:
-                [
-                    new DeathCountOffsetSetting(candidate.FilePath, 0, 200),
-                ]));
+        var settingsService = new StubUserSettingsService();
         var viewModel = CreateViewModel(
             locator,
             loadService,
             userSettingsService: settingsService);
 
         await viewModel.InitializeAsync();
-        viewModel.DeathCountOffsetDraft = "0";
-        await viewModel.ApplyDeathCountOffsetAsync();
+        await viewModel.SetCurrentDeathCountBaselineAsync();
 
-        Assert.Equal(0u, viewModel.DeathCountOffset);
-        Assert.Equal(1_048ul, viewModel.CumulativeDeathCount);
-        Assert.Empty(settingsService.LastSaved!.DeathCountOffsets!);
+        Assert.Equal(1_048u, viewModel.DeathCountBaseline);
+        Assert.True(viewModel.IsDeathCountOffsetEnabled);
+        Assert.Equal(0u, viewModel.DisplayDeathCount);
+        DeathCountBaselineSetting savedBaseline = Assert.Single(
+            settingsService.LastSaved!.DeathCountBaselines!);
+        Assert.Equal(1_048u, savedBaseline.Baseline);
+        Assert.True(savedBaseline.IsEnabled);
+    }
+
+    [Fact]
+    public async Task DeathCountBaseline_AboveCumulativeClampsDisplayAndWarns()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator(
+            defaultCandidates: [candidate],
+            folderCandidates: [candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "First", 20)));
+        var viewModel = CreateViewModel(locator, loadService);
+
+        await viewModel.InitializeAsync();
+        viewModel.DeathCountBaselineDraft = "2000";
+        await viewModel.ApplyDeathCountBaselineAsync();
+
+        Assert.Equal(0u, viewModel.DisplayDeathCount);
+        Assert.True(viewModel.IsDeathCountBaselineStatusVisible);
+        Assert.Contains(
+            "0に制限",
+            viewModel.DeathCountBaselineStatusText,
+            StringComparison.Ordinal);
+
+        viewModel.IsDeathCountOffsetEnabled = false;
+
+        Assert.Equal(1_048u, viewModel.DisplayDeathCount);
+        Assert.False(viewModel.IsDeathCountBaselineStatusVisible);
     }
 
     [Fact]
@@ -700,7 +744,7 @@ public sealed class MainWindowViewModelTests
             viewModel.ObsPreviewItems,
             item => item.FileName == ObsTextFileOutput.DeathsFileName &&
                     item.Contents == "1,048" &&
-                    item.Usage.Contains("オフセット反映", StringComparison.Ordinal));
+                    item.Usage.Contains("基準値反映", StringComparison.Ordinal));
         Assert.Contains(
             viewModel.ObsPreviewItems,
             item => item.FileName == ObsTextFileOutput.SnapshotFileName &&
@@ -963,7 +1007,7 @@ public sealed class MainWindowViewModelTests
                 Assert.Contains(
                     FindLogicalDescendants<System.Windows.Controls.TextBlock>(
                         obsBasicSettingsPanel),
-                    textBlock => textBlock.Text == "累計死亡数");
+                    textBlock => textBlock.Text == "表示死亡数");
                 var obsPreviewPanel = Assert.Single(
                     obsOutputContentLayout.Children
                         .OfType<System.Windows.Controls.Border>(),
@@ -1101,11 +1145,15 @@ public sealed class MainWindowViewModelTests
                 AssertSingleBinding<System.Windows.Controls.TextBox>(
                     settingsSavePanel,
                     System.Windows.Controls.TextBox.TextProperty,
-                    nameof(MainWindowViewModel.DeathCountOffsetDraft));
+                    nameof(MainWindowViewModel.DeathCountBaselineDraft));
                 AssertSingleBinding<System.Windows.Controls.Button>(
                     settingsSavePanel,
                     System.Windows.Controls.Button.CommandProperty,
-                    nameof(MainWindowViewModel.ApplyDeathCountOffsetCommand));
+                    nameof(MainWindowViewModel.ApplyDeathCountBaselineCommand));
+                AssertSingleBinding<System.Windows.Controls.Button>(
+                    settingsSavePanel,
+                    System.Windows.Controls.Button.CommandProperty,
+                    nameof(MainWindowViewModel.SetCurrentDeathCountBaselineCommand));
                 var settingsDisplayPanel = Assert.Single(
                     settingsLayout.Children
                         .OfType<System.Windows.Controls.Border>(),
@@ -1634,15 +1682,19 @@ public sealed class MainWindowViewModelTests
 
         public Exception? NextException { get; set; }
 
-        public uint LastDeathCountOffset { get; private set; }
+        public uint LastDeathCountBaseline { get; private set; }
+
+        public bool LastIsDeathCountOffsetEnabled { get; private set; }
 
         public TrackerSnapshot Create(
             LoadedSaveFile loadedSave,
             CharacterSlot character,
-            uint deathCountOffset = 0)
+            uint deathCountBaseline = 0,
+            bool isDeathCountOffsetEnabled = false)
         {
             CallCount++;
-            LastDeathCountOffset = deathCountOffset;
+            LastDeathCountBaseline = deathCountBaseline;
+            LastIsDeathCountOffsetEnabled = isDeathCountOffsetEnabled;
 
             if (NextException is not null)
             {
@@ -1703,7 +1755,8 @@ public sealed class MainWindowViewModelTests
                         1),
                 ],
                 saveDeathCount: 1_048,
-                deathCountOffset);
+                deathCountBaseline,
+                isDeathCountOffsetEnabled);
         }
 
         private static BossDefinition CreateBoss(

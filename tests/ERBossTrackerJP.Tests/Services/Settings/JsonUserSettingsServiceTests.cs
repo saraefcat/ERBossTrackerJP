@@ -31,7 +31,7 @@ public sealed class JsonUserSettingsServiceTests
 
             Assert.True(saved);
             Assert.Equal(expected, actual);
-            Assert.Contains("\"schemaVersion\": 1", json, StringComparison.Ordinal);
+            Assert.Contains("\"schemaVersion\": 2", json, StringComparison.Ordinal);
             Assert.Contains("\"displayLanguage\": \"en\"", json, StringComparison.Ordinal);
             Assert.Contains("\"theme\": \"light\"", json, StringComparison.Ordinal);
             Assert.Contains("\"isObsOutputEnabled\": true", json, StringComparison.Ordinal);
@@ -72,7 +72,7 @@ public sealed class JsonUserSettingsServiceTests
     }
 
     [Fact]
-    public void TrySaveAndLoad_RoundTripsCharacterSpecificDeathCountOffsets()
+    public void TrySaveAndLoad_RoundTripsCharacterSpecificDeathCountBaselines()
     {
         string testDirectory = CreateTestDirectory();
         string settingsPath = Path.Combine(testDirectory, "settings.json");
@@ -83,35 +83,51 @@ public sealed class JsonUserSettingsServiceTests
             var settings = new UserSettings(
                 SaveFilePath: "D:\\EldenRing\\ER0000.sl2",
                 CharacterSlotIndex: 4,
-                DeathCountOffsets:
+                DeathCountBaselines:
                 [
-                    new DeathCountOffsetSetting(
+                    new DeathCountBaselineSetting(
                         "D:\\EldenRing\\ER0000.sl2",
                         4,
-                        1_234),
-                    new DeathCountOffsetSetting(
+                        1_234,
+                        IsEnabled: true),
+                    new DeathCountBaselineSetting(
                         "D:\\EldenRing\\ER0000.sl2",
                         7,
-                        99),
+                        99,
+                        IsEnabled: false),
+                    new DeathCountBaselineSetting(
+                        "D:\\EldenRing\\ER0000.sl2",
+                        8,
+                        0,
+                        IsEnabled: true),
                 ]);
 
             Assert.True(service.TrySave(settings));
             UserSettings actual = service.Load();
 
             Assert.Collection(
-                actual.DeathCountOffsets!,
-                offset => Assert.Equal(
-                    new DeathCountOffsetSetting(
+                actual.DeathCountBaselines!,
+                baseline => Assert.Equal(
+                    new DeathCountBaselineSetting(
                         "D:\\EldenRing\\ER0000.sl2",
                         4,
-                        1_234),
-                    offset),
-                offset => Assert.Equal(
-                    new DeathCountOffsetSetting(
+                        1_234,
+                        IsEnabled: true),
+                    baseline),
+                baseline => Assert.Equal(
+                    new DeathCountBaselineSetting(
                         "D:\\EldenRing\\ER0000.sl2",
                         7,
-                        99),
-                    offset));
+                        99,
+                        IsEnabled: false),
+                    baseline),
+                baseline => Assert.Equal(
+                    new DeathCountBaselineSetting(
+                        "D:\\EldenRing\\ER0000.sl2",
+                        8,
+                        0,
+                        IsEnabled: true),
+                    baseline));
         }
         finally
         {
@@ -185,7 +201,7 @@ public sealed class JsonUserSettingsServiceTests
             Assert.True(actual.IsObsOutputEnabled);
             Assert.Null(actual.ObsOutputDirectory);
             Assert.Null(actual.ObsProgressFormat);
-            Assert.Null(actual.DeathCountOffsets);
+            Assert.Null(actual.DeathCountBaselines);
         }
         finally
         {
@@ -194,7 +210,7 @@ public sealed class JsonUserSettingsServiceTests
     }
 
     [Fact]
-    public void Load_LegacyDocumentWithoutThemePreservesSettingsAndDefaultsToDark()
+    public void Load_LegacyDocumentIgnoresAdditiveOffsetsAndPreservesOtherSettings()
     {
         string testDirectory = CreateTestDirectory();
         string settingsPath = Path.Combine(testDirectory, "settings.json");
@@ -209,7 +225,14 @@ public sealed class JsonUserSettingsServiceTests
                   "saveFilePath": "D:\\EldenRing\\ER0000.sl2",
                   "characterSlotIndex": 2,
                   "displayLanguage": "en",
-                  "isAutoMonitoringEnabled": false
+                  "isAutoMonitoringEnabled": false,
+                  "deathCountOffsets": [
+                    {
+                      "saveFilePath": "D:\\EldenRing\\ER0000.sl2",
+                      "characterSlotIndex": 2,
+                      "offset": 1234
+                    }
+                  ]
                 }
                 """);
             var service = new JsonUserSettingsService(settingsPath);
@@ -224,7 +247,7 @@ public sealed class JsonUserSettingsServiceTests
             Assert.False(actual.IsObsOutputEnabled);
             Assert.Null(actual.ObsOutputDirectory);
             Assert.Null(actual.ObsProgressFormat);
-            Assert.Null(actual.DeathCountOffsets);
+            Assert.Null(actual.DeathCountBaselines);
         }
         finally
         {

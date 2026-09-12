@@ -12,7 +12,7 @@ public sealed record UserSettings(
     bool IsObsOutputEnabled = false,
     string? ObsOutputDirectory = null,
     string? ObsProgressFormat = null,
-    IReadOnlyList<DeathCountOffsetSetting>? DeathCountOffsets = null)
+    IReadOnlyList<DeathCountBaselineSetting>? DeathCountBaselines = null)
 {
     public static UserSettings Default { get; } = new();
 }

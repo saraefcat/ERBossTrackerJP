@@ -1,6 +1,7 @@
 namespace ERBossTrackerJP.Services.Settings;
 
-public sealed record DeathCountOffsetSetting(
+public sealed record DeathCountBaselineSetting(
     string SaveFilePath,
     int CharacterSlotIndex,
-    uint Offset);
+    uint Baseline,
+    bool IsEnabled);

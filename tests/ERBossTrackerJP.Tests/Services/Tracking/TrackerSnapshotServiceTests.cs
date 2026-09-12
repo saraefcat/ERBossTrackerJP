@@ -28,7 +28,8 @@ public sealed class TrackerSnapshotServiceTests
         TrackerSnapshot snapshot = service.Create(
             loadedSave,
             character,
-            deathCountOffset: 123);
+            deathCountBaseline: 123,
+            isDeathCountOffsetEnabled: true);
 
         Assert.Same(progressService.Result, snapshot);
         Assert.Same(loadedSave, saveLoadService.ReceivedLoadedSave);
@@ -38,7 +39,8 @@ public sealed class TrackerSnapshotServiceTests
         Assert.Same(character, progressService.ReceivedCharacter);
         Assert.Same(definition, Assert.Single(progressService.ReceivedDefinitions!));
         Assert.Equal(456u, progressService.ReceivedSaveDeathCount);
-        Assert.Equal(123u, progressService.ReceivedDeathCountOffset);
+        Assert.Equal(123u, progressService.ReceivedDeathCountBaseline);
+        Assert.True(progressService.ReceivedIsDeathCountOffsetEnabled);
     }
 
     [Fact]
@@ -126,7 +128,9 @@ public sealed class TrackerSnapshotServiceTests
 
         public uint? ReceivedSaveDeathCount { get; private set; }
 
-        public uint? ReceivedDeathCountOffset { get; private set; }
+        public uint? ReceivedDeathCountBaseline { get; private set; }
+
+        public bool? ReceivedIsDeathCountOffsetEnabled { get; private set; }
 
         public TrackerSnapshot CreateSnapshot(
             DateTimeOffset updatedAt,
@@ -134,14 +138,16 @@ public sealed class TrackerSnapshotServiceTests
             ReadOnlyMemory<byte> eventFlags,
             IReadOnlyList<BossDefinition> bossDefinitions,
             uint saveDeathCount = 0,
-            uint deathCountOffset = 0)
+            uint deathCountBaseline = 0,
+            bool isDeathCountOffsetEnabled = false)
         {
             ReceivedUpdatedAt = updatedAt;
             ReceivedCharacter = character;
             ReceivedEventFlags = eventFlags;
             ReceivedDefinitions = bossDefinitions;
             ReceivedSaveDeathCount = saveDeathCount;
-            ReceivedDeathCountOffset = deathCountOffset;
+            ReceivedDeathCountBaseline = deathCountBaseline;
+            ReceivedIsDeathCountOffsetEnabled = isDeathCountOffsetEnabled;
             return Result;
         }
     }

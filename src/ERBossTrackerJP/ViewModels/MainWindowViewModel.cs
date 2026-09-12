@@ -48,7 +48,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly AsyncRelayCommand _browseObsOutputFolderCommand;
     private readonly AsyncRelayCommand _testObsOutputCommand;
     private readonly AsyncRelayCommand _applyObsProgressFormatCommand;
-    private readonly AsyncRelayCommand _applyDeathCountOffsetCommand;
+    private readonly AsyncRelayCommand _applyDeathCountBaselineCommand;
+    private readonly AsyncRelayCommand _setCurrentDeathCountBaselineCommand;
     private CancellationTokenSource _obsOutputCancellationSource = new();
     private CancellationTokenSource? _obsProgressFormatNotificationCancellationSource;
     private SaveFileCandidate? _selectedSaveCandidate;
@@ -78,11 +79,11 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private string? _settingsSaveFilePath;
     private int? _settingsCharacterSlotIndex;
     private int? _pendingRestoredCharacterSlotIndex;
-    private IReadOnlyList<DeathCountOffsetSetting> _deathCountOffsets = [];
-    private string _deathCountOffsetDraft = "0";
-    private string _deathCountOffsetStatusText = string.Empty;
-    private string? _deathCountOffsetContextPath;
-    private int? _deathCountOffsetContextSlotIndex;
+    private IReadOnlyList<DeathCountBaselineSetting> _deathCountBaselines = [];
+    private string _deathCountBaselineDraft = "0";
+    private string _deathCountBaselineStatusText = string.Empty;
+    private string? _deathCountBaselineContextPath;
+    private int? _deathCountBaselineContextSlotIndex;
     private UserSettings _lastPersistedSettings = UserSettings.Default;
     private string _monitoringStatusText = "停止中";
     private string _obsOutputStatusText = "停止中";
@@ -160,7 +161,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
                 ? settings.CharacterSlotIndex
                 : null;
         _pendingRestoredCharacterSlotIndex = _settingsCharacterSlotIndex;
-        _deathCountOffsets = settings.DeathCountOffsets?.ToArray() ?? [];
+        _deathCountBaselines = settings.DeathCountBaselines?.ToArray() ?? [];
         _lastPersistedSettings = new UserSettings(
             _settingsSaveFilePath,
             _settingsCharacterSlotIndex,
@@ -170,7 +171,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             _isObsOutputEnabled,
             _obsOutputDirectory,
             obsTextFileOutput.ProgressFormat,
-            _deathCountOffsets);
+            _deathCountBaselines);
         _synchronizationContext = SynchronizationContext.Current;
         SaveCandidates = new ReadOnlyObservableCollection<SaveFileCandidate>(_saveCandidates);
         CharacterSlots = new ReadOnlyObservableCollection<CharacterSlot>(_characterSlots);
@@ -211,9 +212,12 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         _applyObsProgressFormatCommand = new AsyncRelayCommand(
             ApplyObsProgressFormatAsync,
             CanApplyObsProgressFormat);
-        _applyDeathCountOffsetCommand = new AsyncRelayCommand(
-            ApplyDeathCountOffsetAsync,
-            CanApplyDeathCountOffset);
+        _applyDeathCountBaselineCommand = new AsyncRelayCommand(
+            ApplyDeathCountBaselineAsync,
+            CanApplyDeathCountBaseline);
+        _setCurrentDeathCountBaselineCommand = new AsyncRelayCommand(
+            SetCurrentDeathCountBaselineAsync,
+            CanSetCurrentDeathCountBaseline);
         _saveFileMonitor.ChangeDetected += OnSaveFileChangeDetected;
         _saveFileMonitor.MonitoringError += OnSaveFileMonitoringError;
     }
@@ -275,8 +279,11 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     public AsyncRelayCommand ApplyObsProgressFormatCommand =>
         _applyObsProgressFormatCommand;
 
-    public AsyncRelayCommand ApplyDeathCountOffsetCommand =>
-        _applyDeathCountOffsetCommand;
+    public AsyncRelayCommand ApplyDeathCountBaselineCommand =>
+        _applyDeathCountBaselineCommand;
+
+    public AsyncRelayCommand SetCurrentDeathCountBaselineCommand =>
+        _setCurrentDeathCountBaselineCommand;
 
     public bool IsAutoMonitoringEnabled
     {
@@ -365,31 +372,55 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     public string ObsRecommendedDeathFilePath =>
         Path.Combine(ObsOutputDirectory, ObsTextFileOutput.DeathsFileName);
 
-    public string DeathCountOffsetDraft
+    public string DeathCountBaselineDraft
     {
-        get => _deathCountOffsetDraft;
+        get => _deathCountBaselineDraft;
         set
         {
             value ??= string.Empty;
 
-            if (!SetProperty(ref _deathCountOffsetDraft, value))
+            if (!SetProperty(ref _deathCountBaselineDraft, value))
             {
                 return;
             }
 
-            UpdateDeathCountOffsetStatus();
-            _applyDeathCountOffsetCommand.NotifyCanExecuteChanged();
+            UpdateDeathCountBaselineStatus();
+            _applyDeathCountBaselineCommand.NotifyCanExecuteChanged();
         }
     }
 
-    public string DeathCountOffsetStatusText
+    public string DeathCountBaselineStatusText
     {
-        get => _deathCountOffsetStatusText;
-        private set => SetProperty(ref _deathCountOffsetStatusText, value);
+        get => _deathCountBaselineStatusText;
+        private set => SetProperty(ref _deathCountBaselineStatusText, value);
     }
 
-    public bool IsDeathCountOffsetStatusVisible =>
-        !string.IsNullOrEmpty(DeathCountOffsetStatusText);
+    public bool IsDeathCountBaselineStatusVisible =>
+        !string.IsNullOrEmpty(DeathCountBaselineStatusText);
+
+    public bool IsDeathCountOffsetEnabled
+    {
+        get => _trackerSnapshot?.IsDeathCountOffsetEnabled ?? false;
+        set
+        {
+            if (_loadedSave is null ||
+                SelectedCharacter is null ||
+                _trackerSnapshot is null ||
+                value == _trackerSnapshot.IsDeathCountOffsetEnabled)
+            {
+                return;
+            }
+
+            UpdateDeathCountBaselineSetting(
+                _trackerSnapshot.DeathCountBaseline,
+                value);
+            LoadTrackerSnapshot(SelectedCharacter);
+            PersistUserSettings();
+        }
+    }
+
+    public bool IsDeathCountOffsetControlEnabled =>
+        !IsBusy && _trackerSnapshot is not null;
 
     public string ObsProgressFormatDraft
     {
@@ -605,16 +636,23 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
     public uint SaveDeathCount => _trackerSnapshot?.SaveDeathCount ?? 0;
 
-    public uint DeathCountOffset => _trackerSnapshot?.DeathCountOffset ?? 0;
+    public uint DeathCountBaseline => _trackerSnapshot?.DeathCountBaseline ?? 0;
 
     public ulong CumulativeDeathCount =>
         _trackerSnapshot?.CumulativeDeathCount ?? 0;
+
+    public uint DisplayDeathCount =>
+        _trackerSnapshot?.DisplayDeathCount ?? 0;
 
     public string SaveDeathCountText => SaveDeathCount.ToString(
         "N0",
         CultureInfo.InvariantCulture);
 
     public string CumulativeDeathCountText => CumulativeDeathCount.ToString(
+        "N0",
+        CultureInfo.InvariantCulture);
+
+    public string DisplayDeathCountText => DisplayDeathCount.ToString(
         "N0",
         CultureInfo.InvariantCulture);
 
@@ -629,8 +667,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
                 ProgressPercentage),
             "進捗を1行表示（推奨）"),
         new(ObsTextFileOutput.DeathsFileName,
-            CumulativeDeathCountText,
-            "累計死亡数（オフセット反映）"),
+            DisplayDeathCountText,
+            "表示死亡数（周回基準値反映）"),
         new(ObsTextFileOutput.DefeatedFileName, Defeated.ToString(), "撃破数だけ"),
         new(ObsTextFileOutput.RemainingFileName, Remaining.ToString(), "未撃破数だけ"),
         new(ObsTextFileOutput.TotalFileName, Total.ToString(), "総数だけ"),
@@ -664,8 +702,10 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             _browseObsOutputFolderCommand.NotifyCanExecuteChanged();
             _testObsOutputCommand.NotifyCanExecuteChanged();
             _applyObsProgressFormatCommand.NotifyCanExecuteChanged();
-            _applyDeathCountOffsetCommand.NotifyCanExecuteChanged();
+            _applyDeathCountBaselineCommand.NotifyCanExecuteChanged();
+            _setCurrentDeathCountBaselineCommand.NotifyCanExecuteChanged();
             OnPropertyChanged(nameof(IsInteractionEnabled));
+            OnPropertyChanged(nameof(IsDeathCountOffsetControlEnabled));
         }
     }
 
@@ -862,72 +902,81 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         return Task.CompletedTask;
     }
 
-    public Task ApplyDeathCountOffsetAsync()
+    public Task ApplyDeathCountBaselineAsync()
     {
         if (_loadedSave is null ||
             SelectedCharacter is null ||
-            !TryParseDeathCountOffset(out uint offset))
+            !TryParseDeathCountBaseline(out uint baseline))
         {
-            UpdateDeathCountOffsetStatus();
+            UpdateDeathCountBaselineStatus();
             return Task.CompletedTask;
         }
 
-        string saveFilePath = _loadedSave.SourcePath;
-        int slotIndex = SelectedCharacter.SlotIndex;
-        var updatedOffsets = _deathCountOffsets
-            .Where(setting => !IsSameDeathCountOffsetContext(
-                setting,
-                saveFilePath,
-                slotIndex))
-            .ToList();
-
-        if (offset > 0)
-        {
-            updatedOffsets.Add(new DeathCountOffsetSetting(
-                saveFilePath,
-                slotIndex,
-                offset));
-        }
-
-        _deathCountOffsets = updatedOffsets.ToArray();
+        UpdateDeathCountBaselineSetting(baseline, isEnabled: true);
         LoadTrackerSnapshot(SelectedCharacter);
-        UpdateDeathCountOffsetStatus();
-        _applyDeathCountOffsetCommand.NotifyCanExecuteChanged();
         PersistUserSettings();
         return Task.CompletedTask;
     }
 
-    private bool CanApplyDeathCountOffset() =>
+    public Task SetCurrentDeathCountBaselineAsync()
+    {
+        if (_loadedSave is null ||
+            SelectedCharacter is null ||
+            _trackerSnapshot is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        uint baseline = _trackerSnapshot.SaveDeathCount;
+        _deathCountBaselineDraft = baseline.ToString(CultureInfo.InvariantCulture);
+        OnPropertyChanged(nameof(DeathCountBaselineDraft));
+        UpdateDeathCountBaselineSetting(baseline, isEnabled: true);
+        LoadTrackerSnapshot(SelectedCharacter);
+        PersistUserSettings();
+        return Task.CompletedTask;
+    }
+
+    private bool CanApplyDeathCountBaseline() =>
         !IsBusy &&
         _trackerSnapshot is not null &&
-        TryParseDeathCountOffset(out uint offset) &&
-        offset != DeathCountOffset;
+        TryParseDeathCountBaseline(out uint baseline) &&
+        (baseline != DeathCountBaseline || !IsDeathCountOffsetEnabled);
 
-    private bool TryParseDeathCountOffset(out uint offset) =>
+    private bool CanSetCurrentDeathCountBaseline() =>
+        !IsBusy &&
+        _trackerSnapshot is not null &&
+        (DeathCountBaseline != SaveDeathCount || !IsDeathCountOffsetEnabled);
+
+    private bool TryParseDeathCountBaseline(out uint baseline) =>
         uint.TryParse(
-            DeathCountOffsetDraft,
+            DeathCountBaselineDraft,
             NumberStyles.AllowThousands,
             CultureInfo.InvariantCulture,
-            out offset);
+            out baseline);
 
-    private void UpdateDeathCountOffsetStatus()
+    private void UpdateDeathCountBaselineStatus()
     {
         string status = string.Empty;
 
         if (_trackerSnapshot is not null)
         {
-            if (!TryParseDeathCountOffset(out uint offset))
+            if (!TryParseDeathCountBaseline(out uint baseline))
             {
                 status = "0から4,294,967,295までの整数を入力してください。";
             }
-            else if (offset != DeathCountOffset)
+            else if (baseline != DeathCountBaseline)
             {
                 status = "未適用の変更があります。";
             }
+            else if (_trackerSnapshot.IsDeathCountBaselineAboveCumulative)
+            {
+                status =
+                    "基準値が累計死亡数を上回っています。表示死亡数を0に制限しています。";
+            }
         }
 
-        DeathCountOffsetStatusText = status;
-        OnPropertyChanged(nameof(IsDeathCountOffsetStatusVisible));
+        DeathCountBaselineStatusText = status;
+        OnPropertyChanged(nameof(IsDeathCountBaselineStatusVisible));
     }
 
     private bool CanApplyObsProgressFormat() =>
@@ -1123,7 +1172,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
         _selectedCharacter = character;
         OnPropertyChanged(nameof(SelectedCharacter));
-        SynchronizeDeathCountOffsetDraft(character);
+        SynchronizeDeathCountBaselineDraft(character);
 
         if (character is null)
         {
@@ -1148,16 +1197,18 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
         try
         {
-            uint deathCountOffset = GetConfiguredDeathCountOffset(
+            DeathCountBaselineSetting? deathCountSetting =
+                GetConfiguredDeathCountBaseline(
                 _loadedSave.SourcePath,
                 character.SlotIndex);
             _trackerSnapshot = _trackerSnapshotService.Create(
                 _loadedSave,
                 character,
-                deathCountOffset);
+                deathCountSetting?.Baseline ?? 0,
+                deathCountSetting?.IsEnabled ?? false);
             RebuildRegionOptions();
             RefreshDisplay();
-            UpdateDeathCountOffsetStatus();
+            UpdateDeathCountBaselineStatus();
             if (IsObsOutputEnabled)
             {
                 QueueObsOutput(_trackerSnapshot, previousSnapshot);
@@ -1273,7 +1324,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         RebuildRegionOptions();
         SynchronizeSelectedRegion();
         RaiseTrackerSummaryPropertiesChanged();
-        UpdateDeathCountOffsetStatus();
+        UpdateDeathCountBaselineStatus();
     }
 
     private void RaiseTrackerSummaryPropertiesChanged()
@@ -1284,15 +1335,20 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         OnPropertyChanged(nameof(ProgressPercentage));
         OnPropertyChanged(nameof(ProgressPercentageText));
         OnPropertyChanged(nameof(SaveDeathCount));
-        OnPropertyChanged(nameof(DeathCountOffset));
+        OnPropertyChanged(nameof(DeathCountBaseline));
+        OnPropertyChanged(nameof(IsDeathCountOffsetEnabled));
+        OnPropertyChanged(nameof(IsDeathCountOffsetControlEnabled));
         OnPropertyChanged(nameof(CumulativeDeathCount));
+        OnPropertyChanged(nameof(DisplayDeathCount));
         OnPropertyChanged(nameof(SaveDeathCountText));
         OnPropertyChanged(nameof(CumulativeDeathCountText));
+        OnPropertyChanged(nameof(DisplayDeathCountText));
         OnPropertyChanged(nameof(VisibleBossCountText));
         OnPropertyChanged(nameof(TrackerLastUpdateText));
         OnPropertyChanged(nameof(ObsPreviewItems));
         _testObsOutputCommand.NotifyCanExecuteChanged();
-        _applyDeathCountOffsetCommand.NotifyCanExecuteChanged();
+        _applyDeathCountBaselineCommand.NotifyCanExecuteChanged();
+        _setCurrentDeathCountBaselineCommand.NotifyCanExecuteChanged();
     }
 
     private bool TryFindSavedCandidate(
@@ -1350,7 +1406,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             IsObsOutputEnabled,
             ObsOutputDirectory,
             _obsTextFileOutput.ProgressFormat,
-            _deathCountOffsets);
+            _deathCountBaselines);
 
         if (settings == _lastPersistedSettings)
         {
@@ -1374,41 +1430,71 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             "設定を保存できませんでした。変更は再起動後に戻る可能性があります。";
     }
 
-    private void SynchronizeDeathCountOffsetDraft(CharacterSlot? character)
+    private void SynchronizeDeathCountBaselineDraft(CharacterSlot? character)
     {
         string? saveFilePath = character is null ? null : _loadedSave?.SourcePath;
         int? slotIndex = character?.SlotIndex;
 
-        if (slotIndex == _deathCountOffsetContextSlotIndex &&
-            (saveFilePath is null && _deathCountOffsetContextPath is null ||
-             PathsEqual(saveFilePath, _deathCountOffsetContextPath)))
+        if (slotIndex == _deathCountBaselineContextSlotIndex &&
+            (saveFilePath is null && _deathCountBaselineContextPath is null ||
+             PathsEqual(saveFilePath, _deathCountBaselineContextPath)))
         {
             return;
         }
 
-        _deathCountOffsetContextPath = saveFilePath;
-        _deathCountOffsetContextSlotIndex = slotIndex;
-        uint offset = saveFilePath is not null && slotIndex.HasValue
-            ? GetConfiguredDeathCountOffset(saveFilePath, slotIndex.Value)
-            : 0;
-        _deathCountOffsetDraft = offset.ToString(CultureInfo.InvariantCulture);
-        OnPropertyChanged(nameof(DeathCountOffsetDraft));
-        UpdateDeathCountOffsetStatus();
-        _applyDeathCountOffsetCommand.NotifyCanExecuteChanged();
+        _deathCountBaselineContextPath = saveFilePath;
+        _deathCountBaselineContextSlotIndex = slotIndex;
+        DeathCountBaselineSetting? setting =
+            saveFilePath is not null && slotIndex.HasValue
+                ? GetConfiguredDeathCountBaseline(saveFilePath, slotIndex.Value)
+                : null;
+        _deathCountBaselineDraft = (setting?.Baseline ?? 0).ToString(
+            CultureInfo.InvariantCulture);
+        OnPropertyChanged(nameof(DeathCountBaselineDraft));
+        UpdateDeathCountBaselineStatus();
+        _applyDeathCountBaselineCommand.NotifyCanExecuteChanged();
+        _setCurrentDeathCountBaselineCommand.NotifyCanExecuteChanged();
     }
 
-    private uint GetConfiguredDeathCountOffset(
+    private DeathCountBaselineSetting? GetConfiguredDeathCountBaseline(
         string saveFilePath,
         int slotIndex) =>
-        _deathCountOffsets
-            .LastOrDefault(setting => IsSameDeathCountOffsetContext(
+        _deathCountBaselines
+            .LastOrDefault(setting => IsSameDeathCountBaselineContext(
+                setting,
+                saveFilePath,
+                slotIndex));
+
+    private void UpdateDeathCountBaselineSetting(uint baseline, bool isEnabled)
+    {
+        if (_loadedSave is null || SelectedCharacter is null)
+        {
+            return;
+        }
+
+        string saveFilePath = _loadedSave.SourcePath;
+        int slotIndex = SelectedCharacter.SlotIndex;
+        var updatedSettings = _deathCountBaselines
+            .Where(setting => !IsSameDeathCountBaselineContext(
                 setting,
                 saveFilePath,
                 slotIndex))
-            ?.Offset ?? 0;
+            .ToList();
 
-    private static bool IsSameDeathCountOffsetContext(
-        DeathCountOffsetSetting setting,
+        if (baseline > 0 || isEnabled)
+        {
+            updatedSettings.Add(new DeathCountBaselineSetting(
+                saveFilePath,
+                slotIndex,
+                baseline,
+                isEnabled));
+        }
+
+        _deathCountBaselines = updatedSettings.ToArray();
+    }
+
+    private static bool IsSameDeathCountBaselineContext(
+        DeathCountBaselineSetting setting,
         string saveFilePath,
         int slotIndex) =>
         setting.CharacterSlotIndex == slotIndex &&

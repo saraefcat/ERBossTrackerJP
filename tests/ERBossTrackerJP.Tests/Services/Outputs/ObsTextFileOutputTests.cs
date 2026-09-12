@@ -38,7 +38,7 @@ public sealed class ObsTextFileOutputTests
                     outputDirectory,
                     ObsTextFileOutput.RemainingFileName)));
             Assert.Equal(
-                "1,248",
+                "848",
                 File.ReadAllText(Path.Combine(
                     outputDirectory,
                     ObsTextFileOutput.DeathsFileName)));
@@ -63,13 +63,15 @@ public sealed class ObsTextFileOutputTests
 
             using JsonDocument document = JsonDocument.Parse(File.ReadAllText(
                 Path.Combine(outputDirectory, ObsTextFileOutput.SnapshotFileName)));
-            Assert.Equal(2, document.RootElement.GetProperty("schemaVersion").GetInt32());
+            Assert.Equal(3, document.RootElement.GetProperty("schemaVersion").GetInt32());
             Assert.Equal("ja", document.RootElement.GetProperty("displayLanguage").GetString());
             Assert.Equal(1_048u, document.RootElement.GetProperty("saveDeathCount").GetUInt32());
-            Assert.Equal(200u, document.RootElement.GetProperty("deathCountOffset").GetUInt32());
             Assert.Equal(
-                1_248ul,
+                1_048ul,
                 document.RootElement.GetProperty("cumulativeDeathCount").GetUInt64());
+            Assert.Equal(200u, document.RootElement.GetProperty("deathCountBaseline").GetUInt32());
+            Assert.True(document.RootElement.GetProperty("isDeathCountOffsetEnabled").GetBoolean());
+            Assert.Equal(848u, document.RootElement.GetProperty("displayDeathCount").GetUInt32());
             Assert.Equal(2, document.RootElement.GetProperty("bosses").GetArrayLength());
             Assert.Equal(
                 "Tarnished",
@@ -380,7 +382,8 @@ public sealed class ObsTextFileOutputTests
                     2),
             ],
             saveDeathCount: 1_048,
-            deathCountOffset: 200);
+            deathCountBaseline: 200,
+            isDeathCountOffsetEnabled: true);
     }
 
     private static string CreateTestDirectory()

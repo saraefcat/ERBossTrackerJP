@@ -170,7 +170,8 @@ public sealed class ObsTextFileOutput : IObsTextFileOutput
             System.Diagnostics.Trace.WriteLine(
                 $"[ObsTextFileOutput] Published: {outputDirectory}; " +
                 $"Defeated={snapshot.Defeated}; Total={snapshot.Total}; " +
-                $"Deaths={snapshot.CumulativeDeathCount}; " +
+                $"CumulativeDeaths={snapshot.CumulativeDeathCount}; " +
+                $"DisplayDeaths={snapshot.DisplayDeathCount}; " +
                 $"LatestBosses={latestBosses.Count}");
         }
         finally
@@ -215,7 +216,7 @@ public sealed class ObsTextFileOutput : IObsTextFileOutput
             .Select(progress => GetBossName(progress.Boss, update.DisplayLanguage))
             .ToArray();
         var document = new ObsSnapshotDocument(
-            SchemaVersion: 2,
+            SchemaVersion: 3,
             UpdatedAt: snapshot.UpdatedAt,
             DisplayLanguage: update.DisplayLanguage == DisplayLanguage.English
                 ? "en"
@@ -229,8 +230,10 @@ public sealed class ObsTextFileOutput : IObsTextFileOutput
             Total: snapshot.Total,
             ProgressPercentage: snapshot.ProgressPercentage,
             SaveDeathCount: snapshot.SaveDeathCount,
-            DeathCountOffset: snapshot.DeathCountOffset,
             CumulativeDeathCount: snapshot.CumulativeDeathCount,
+            DeathCountBaseline: snapshot.DeathCountBaseline,
+            IsDeathCountOffsetEnabled: snapshot.IsDeathCountOffsetEnabled,
+            DisplayDeathCount: snapshot.DisplayDeathCount,
             LatestBosses: latestBosses
                 .Select((progress, index) => new ObsLatestBossDocument(
                     progress.Boss.Id,
@@ -253,7 +256,7 @@ public sealed class ObsTextFileOutput : IObsTextFileOutput
                 snapshot.Remaining,
                 snapshot.Total,
                 snapshot.ProgressPercentage),
-            [DeathsFileName] = snapshot.CumulativeDeathCount.ToString(
+            [DeathsFileName] = snapshot.DisplayDeathCount.ToString(
                 "N0",
                 CultureInfo.InvariantCulture),
             [DefeatedFileName] = snapshot.Defeated.ToString(CultureInfo.InvariantCulture),
@@ -391,8 +394,10 @@ public sealed class ObsTextFileOutput : IObsTextFileOutput
         int Total,
         double ProgressPercentage,
         uint SaveDeathCount,
-        uint DeathCountOffset,
         ulong CumulativeDeathCount,
+        uint DeathCountBaseline,
+        bool IsDeathCountOffsetEnabled,
+        uint DisplayDeathCount,
         IReadOnlyList<ObsLatestBossDocument> LatestBosses,
         IReadOnlyList<ObsBossDocument> Bosses);
 

@@ -8,7 +8,8 @@ public sealed record TrackerSnapshot
         IEnumerable<BossProgress> bosses,
         IEnumerable<RegionProgress> regions,
         uint saveDeathCount = 0,
-        uint deathCountOffset = 0)
+        uint deathCountBaseline = 0,
+        bool isDeathCountOffsetEnabled = false)
     {
         ArgumentNullException.ThrowIfNull(character);
         ArgumentNullException.ThrowIfNull(bosses);
@@ -24,8 +25,14 @@ public sealed record TrackerSnapshot
         Defeated = bossArray.Count(boss => boss.IsDefeated);
         Total = bossArray.Length;
         SaveDeathCount = saveDeathCount;
-        DeathCountOffset = deathCountOffset;
-        CumulativeDeathCount = (ulong)saveDeathCount + deathCountOffset;
+        DeathCountBaseline = deathCountBaseline;
+        IsDeathCountOffsetEnabled = isDeathCountOffsetEnabled;
+        CumulativeDeathCount = saveDeathCount;
+        DisplayDeathCount = !isDeathCountOffsetEnabled
+            ? saveDeathCount
+            : saveDeathCount >= deathCountBaseline
+                ? saveDeathCount - deathCountBaseline
+                : 0;
     }
 
     public DateTimeOffset UpdatedAt { get; }
@@ -42,9 +49,16 @@ public sealed record TrackerSnapshot
 
     public uint SaveDeathCount { get; }
 
-    public uint DeathCountOffset { get; }
+    public uint DeathCountBaseline { get; }
+
+    public bool IsDeathCountOffsetEnabled { get; }
 
     public ulong CumulativeDeathCount { get; }
+
+    public uint DisplayDeathCount { get; }
+
+    public bool IsDeathCountBaselineAboveCumulative =>
+        IsDeathCountOffsetEnabled && DeathCountBaseline > SaveDeathCount;
 
     public IReadOnlyList<BossProgress> Bosses { get; }
 

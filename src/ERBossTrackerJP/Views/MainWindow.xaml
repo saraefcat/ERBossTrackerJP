@@ -948,7 +948,7 @@
                                             <StackPanel Grid.Column="0"
                                                         Margin="0,0,8,0">
                                                 <TextBlock FontWeight="SemiBold"
-                                                           Text="累計死亡数" />
+                                                           Text="表示死亡数" />
                                                 <TextBlock Margin="0,3,0,0"
                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                            Text="{Binding ObsRecommendedDeathFilePath, Mode=OneWay}"
@@ -1096,7 +1096,7 @@
                                     <TextBlock Grid.Row="3"
                                                Margin="14,0,14,12"
                                                Foreground="{DynamicResource TextMutedBrush}"
-                                               Text="deaths.txt はNG+オフセット反映後の累計死亡数です。"
+                                               Text="deaths.txt は周回基準値を反映した表示死亡数です。"
                                                TextWrapping="Wrap" />
                                 </Grid>
                             </Border>
@@ -1176,13 +1176,17 @@
                             <Border Height="1"
                                     Margin="0,14,0,12"
                                     Background="{DynamicResource BorderBrush}" />
-                            <TextBlock Margin="0,0,0,10"
+                            <TextBlock Margin="0,0,0,8"
                                        FontSize="17"
                                        FontWeight="SemiBold"
-                                       Text="累計死亡数" />
+                                       Text="死亡数と周回基準値" />
+                            <CheckBox Margin="0,0,0,8"
+                                      Content="周回オフセットを有効にする"
+                                      IsChecked="{Binding IsDeathCountOffsetEnabled, Mode=TwoWay}"
+                                      IsEnabled="{Binding IsDeathCountOffsetControlEnabled}" />
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="110" />
+                                    <ColumnDefinition Width="120" />
                                     <ColumnDefinition Width="24" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="24" />
@@ -1190,11 +1194,11 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Foreground="{DynamicResource TextMutedBrush}"
-                                               Text="セーブ内死亡数" />
+                                               Text="セーブ内累計死亡数" />
                                     <TextBlock Margin="0,5,0,0"
                                                FontSize="22"
                                                FontWeight="SemiBold"
-                                               Text="{Binding SaveDeathCountText}" />
+                                               Text="{Binding CumulativeDeathCountText}" />
                                 </StackPanel>
                                 <TextBlock Grid.Column="1"
                                            HorizontalAlignment="Center"
@@ -1202,24 +1206,13 @@
                                            Margin="0,0,0,5"
                                            FontSize="22"
                                            Foreground="{DynamicResource TextMutedBrush}"
-                                           Text="+" />
+                                           Text="−" />
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Foreground="{DynamicResource TextMutedBrush}"
-                                               Text="NG+オフセット" />
-                                    <Grid Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Grid.Column="0"
-                                                 Margin="0,0,8,0"
-                                                 MaxLength="13"
-                                                 Text="{Binding DeathCountOffsetDraft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                        <Button Grid.Column="1"
-                                                MinWidth="104"
-                                                Command="{Binding ApplyDeathCountOffsetCommand}"
-                                                Content="オフセットを適用" />
-                                    </Grid>
+                                               Text="周回開始時の基準値" />
+                                    <TextBox Margin="0,5,0,0"
+                                             MaxLength="13"
+                                             Text="{Binding DeathCountBaselineDraft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                 </StackPanel>
                                 <TextBlock Grid.Column="3"
                                            HorizontalAlignment="Center"
@@ -1235,19 +1228,28 @@
                                                FontSize="22"
                                                FontWeight="SemiBold"
                                                Foreground="{DynamicResource AccentBrush}"
-                                               Text="{Binding CumulativeDeathCountText}" />
+                                               Text="{Binding DisplayDeathCountText}" />
                                 </StackPanel>
                             </Grid>
-                            <TextBlock Margin="134,5,0,0"
+                            <WrapPanel Margin="144,7,0,0">
+                                <Button Width="132"
+                                        Margin="0,0,8,0"
+                                        Command="{Binding SetCurrentDeathCountBaselineCommand}"
+                                        Content="現在値を基準にする" />
+                                <Button Width="116"
+                                        Command="{Binding ApplyDeathCountBaselineCommand}"
+                                        Content="基準値を適用" />
+                            </WrapPanel>
+                            <TextBlock Margin="144,5,0,0"
                                        Foreground="{DynamicResource WarningBrush}"
-                                       Text="{Binding DeathCountOffsetStatusText}"
+                                       Text="{Binding DeathCountBaselineStatusText}"
                                        TextWrapping="Wrap">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Visibility"
                                                 Value="Collapsed" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsDeathCountOffsetStatusVisible}"
+                                            <DataTrigger Binding="{Binding IsDeathCountBaselineStatusVisible}"
                                                          Value="True">
                                                 <Setter Property="Visibility"
                                                         Value="Visible" />
@@ -1256,9 +1258,9 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
-                            <TextBlock Margin="134,5,0,0"
+                            <TextBlock Margin="144,5,0,0"
                                        Foreground="{DynamicResource TextMutedBrush}"
-                                       Text="オフセットは選択中のキャラクターごとに保存されます。"
+                                       Text="基準値とON／OFFはキャラクターごとに保存されます。表示死亡数は0未満になりません。"
                                        TextWrapping="Wrap" />
                         </StackPanel>
                     </Border>

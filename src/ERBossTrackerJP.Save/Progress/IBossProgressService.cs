@@ -10,5 +10,6 @@ public interface IBossProgressService
         ReadOnlyMemory<byte> eventFlags,
         IReadOnlyList<BossDefinition> bossDefinitions,
         uint saveDeathCount = 0,
-        uint deathCountOffset = 0);
+        uint deathCountBaseline = 0,
+        bool isDeathCountOffsetEnabled = false);
 }

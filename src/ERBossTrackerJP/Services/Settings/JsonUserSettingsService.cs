@@ -9,7 +9,8 @@ namespace ERBossTrackerJP.Services.Settings;
 
 public sealed class JsonUserSettingsService : IUserSettingsService
 {
-    public const int CurrentSchemaVersion = 1;
+    public const int CurrentSchemaVersion = 2;
+    private const int LegacySchemaVersion = 1;
     public const int MaximumSettingsFileSize = 64 * 1024;
     public const string ApplicationDirectoryName = "ERBossTrackerJP";
     public const string SettingsFileName = "settings.json";
@@ -115,7 +116,7 @@ public sealed class JsonUserSettingsService : IUserSettingsService
                 settings.IsObsOutputEnabled,
                 NormalizePath(settings.ObsOutputDirectory),
                 NormalizeObsProgressFormat(settings.ObsProgressFormat),
-                NormalizeDeathCountOffsets(settings.DeathCountOffsets));
+                NormalizeDeathCountBaselines(settings.DeathCountBaselines));
             string json = JsonSerializer.Serialize(document, SerializerOptions);
             File.WriteAllText(temporaryPath, json);
             File.Move(temporaryPath, _settingsPath, overwrite: true);
@@ -133,7 +134,8 @@ public sealed class JsonUserSettingsService : IUserSettingsService
 
     private static UserSettings Validate(SettingsDocument? document)
     {
-        if (document is null || document.SchemaVersion != CurrentSchemaVersion)
+        if (document is null || document.SchemaVersion is not (
+                LegacySchemaVersion or CurrentSchemaVersion))
         {
             return UserSettings.Default;
         }
@@ -158,7 +160,9 @@ public sealed class JsonUserSettingsService : IUserSettingsService
             document.IsObsOutputEnabled ?? false,
             NormalizePath(document.ObsOutputDirectory),
             NormalizeObsProgressFormat(document.ObsProgressFormat),
-            NormalizeDeathCountOffsets(document.DeathCountOffsets));
+            document.SchemaVersion == CurrentSchemaVersion
+                ? NormalizeDeathCountBaselines(document.DeathCountBaselines)
+                : null);
     }
 
     private static string? NormalizePath(string? path)
@@ -177,23 +181,23 @@ public sealed class JsonUserSettingsService : IUserSettingsService
             ? format
             : null;
 
-    private static IReadOnlyList<DeathCountOffsetSetting>? NormalizeDeathCountOffsets(
-        IReadOnlyList<DeathCountOffsetSetting>? offsets)
+    private static IReadOnlyList<DeathCountBaselineSetting>? NormalizeDeathCountBaselines(
+        IReadOnlyList<DeathCountBaselineSetting>? baselines)
     {
-        if (offsets is null)
+        if (baselines is null)
         {
             return null;
         }
 
-        var normalized = new List<DeathCountOffsetSetting>();
+        var normalized = new List<DeathCountBaselineSetting>();
 
-        foreach (DeathCountOffsetSetting? offset in offsets)
+        foreach (DeathCountBaselineSetting? baseline in baselines)
         {
-            string? saveFilePath = NormalizePath(offset?.SaveFilePath);
+            string? saveFilePath = NormalizePath(baseline?.SaveFilePath);
 
             if (saveFilePath is null ||
-                ValidateSlotIndex(offset?.CharacterSlotIndex) is not int slotIndex ||
-                offset!.Offset == 0)
+                ValidateSlotIndex(baseline?.CharacterSlotIndex) is not int slotIndex ||
+                (baseline!.Baseline == 0 && !baseline.IsEnabled))
             {
                 continue;
             }
@@ -204,10 +208,11 @@ public sealed class JsonUserSettingsService : IUserSettingsService
                     existing.SaveFilePath,
                     saveFilePath,
                     StringComparison.OrdinalIgnoreCase));
-            normalized.Add(new DeathCountOffsetSetting(
+            normalized.Add(new DeathCountBaselineSetting(
                 saveFilePath,
                 slotIndex,
-                offset.Offset));
+                baseline.Baseline,
+                baseline.IsEnabled));
         }
 
         return normalized;
@@ -255,5 +260,5 @@ public sealed class JsonUserSettingsService : IUserSettingsService
         bool? IsObsOutputEnabled,
         string? ObsOutputDirectory,
         string? ObsProgressFormat,
-        IReadOnlyList<DeathCountOffsetSetting>? DeathCountOffsets);
+        IReadOnlyList<DeathCountBaselineSetting>? DeathCountBaselines);
 }

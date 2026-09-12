@@ -28,7 +28,8 @@ public sealed class BossProgressService : IBossProgressService
         ReadOnlyMemory<byte> eventFlags,
         IReadOnlyList<BossDefinition> bossDefinitions,
         uint saveDeathCount = 0,
-        uint deathCountOffset = 0)
+        uint deathCountBaseline = 0,
+        bool isDeathCountOffsetEnabled = false)
     {
         ArgumentNullException.ThrowIfNull(character);
         ArgumentNullException.ThrowIfNull(bossDefinitions);
@@ -74,7 +75,8 @@ public sealed class BossProgressService : IBossProgressService
             bosses,
             regions,
             saveDeathCount,
-            deathCountOffset);
+            deathCountBaseline,
+            isDeathCountOffsetEnabled);
     }
 
     private static BossDefinition[] CopyAndOrderDefinitions(

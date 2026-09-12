@@ -35,7 +35,8 @@ public sealed class TrackerSnapshotService : ITrackerSnapshotService
     public TrackerSnapshot Create(
         LoadedSaveFile loadedSave,
         CharacterSlot character,
-        uint deathCountOffset = 0)
+        uint deathCountBaseline = 0,
+        bool isDeathCountOffsetEnabled = false)
     {
         ArgumentNullException.ThrowIfNull(loadedSave);
         ArgumentNullException.ThrowIfNull(character);
@@ -57,6 +58,7 @@ public sealed class TrackerSnapshotService : ITrackerSnapshotService
             characterData.Bytes,
             _bossDefinitions,
             characterData.TotalDeathCount,
-            deathCountOffset);
+            deathCountBaseline,
+            isDeathCountOffsetEnabled);
     }
 }

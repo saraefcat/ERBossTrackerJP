@@ -8,5 +8,6 @@ public interface ITrackerSnapshotService
     TrackerSnapshot Create(
         LoadedSaveFile loadedSave,
         CharacterSlot character,
-        uint deathCountOffset = 0);
+        uint deathCountBaseline = 0,
+        bool isDeathCountOffsetEnabled = false);
 }

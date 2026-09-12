@@ -88,6 +88,7 @@ SOFTWARE.
 - EldenRingSaveTemplate by ClayAmore: <https://github.com/ClayAmore/EldenRingSaveTemplate>
 - The Grand Archives Elden Ring Cheat Table: <https://github.com/The-Grand-Archives/Elden-Ring-CT-TGA>
 - Souls Modding Community: <https://soulsmodding.com>
+- DSDeaths community-maintained fork: <https://github.com/saraefcat/DSDeaths>（2026-09-12に周回オフセットの利用者向け仕様だけを確認。ソースコード、メモリ参照処理、UIは取り込んでいない）
 
 ## 神攻略wiki（エルデンリング攻略wiki）
 
