@@ -788,6 +788,10 @@ public sealed class MainWindowViewModelTests
                     border => System.Windows.Controls.Grid.GetColumn(border) == 2);
                 var obsPreviewLayout = Assert.IsType<System.Windows.Controls.Grid>(
                     obsPreviewPanel.Child);
+                Assert.Equal(3, obsPreviewLayout.RowDefinitions.Count);
+                Assert.Equal(
+                    System.Windows.GridUnitType.Auto,
+                    obsPreviewLayout.RowDefinitions[2].Height.GridUnitType);
                 var obsProgressFormatPanel = Assert.Single(
                     obsPreviewLayout.Children
                         .OfType<System.Windows.Controls.Border>(),
@@ -799,21 +803,48 @@ public sealed class MainWindowViewModelTests
                 Assert.True(
                     System.Windows.Controls.Grid.GetRow(obsProgressFormatPanel) <
                     System.Windows.Controls.Grid.GetRow(obsPreviewTable));
+                Assert.Equal(
+                    System.Windows.VerticalAlignment.Top,
+                    obsPreviewTable.VerticalAlignment);
+                Assert.Equal(
+                    new System.Windows.Thickness(14, 0, 14, 14),
+                    obsPreviewTable.Margin);
+                Assert.Equal(
+                    new System.Windows.Thickness(1),
+                    obsPreviewTable.BorderThickness);
                 AssertSingleBinding<System.Windows.Controls.TextBox>(
                     obsProgressFormatPanel,
                     System.Windows.Controls.TextBox.TextProperty,
                     nameof(MainWindowViewModel.ObsProgressFormatDraft));
+                AssertSingleBinding<System.Windows.Controls.Button>(
+                    obsProgressFormatPanel,
+                    System.Windows.Controls.Button.CommandProperty,
+                    nameof(MainWindowViewModel.TestObsOutputCommand));
+                obsOutputLayout.Measure(new System.Windows.Size(1252, 620));
+                Assert.True(
+                    obsOutputLayout.DesiredSize.Height <= 620,
+                    $"OBS output layout requires {obsOutputLayout.DesiredSize.Height:F1} DIPs.");
                 var progressTab = Assert.IsType<System.Windows.Controls.TabItem>(
                     tabControl.Items[0]);
                 var settingsTab = Assert.IsType<System.Windows.Controls.TabItem>(
                     tabControl.Items[2]);
                 var settingsLayout = Assert.IsType<System.Windows.Controls.Grid>(
                     settingsTab.Content);
-                var settingsDisplayPanel = Assert.Single(
+                var settingsSavePanel = Assert.Single(
                     settingsLayout.Children
                         .OfType<System.Windows.Controls.Border>(),
                     border =>
                         System.Windows.Controls.Grid.GetRow(border) == 0 &&
+                        System.Windows.Controls.Grid.GetColumn(border) == 0);
+                AssertSingleBinding<System.Windows.Controls.ComboBox>(
+                    settingsSavePanel,
+                    System.Windows.Controls.Primitives.Selector.SelectedItemProperty,
+                    nameof(MainWindowViewModel.SelectedSaveCandidate));
+                var settingsDisplayPanel = Assert.Single(
+                    settingsLayout.Children
+                        .OfType<System.Windows.Controls.Border>(),
+                    border =>
+                        System.Windows.Controls.Grid.GetRow(border) == 1 &&
                         System.Windows.Controls.Grid.GetColumn(border) == 0);
                 Assert.Equal(
                     System.Windows.VerticalAlignment.Top,
@@ -822,8 +853,10 @@ public sealed class MainWindowViewModelTests
                     settingsLayout.Children
                         .OfType<System.Windows.Controls.Border>(),
                     border =>
-                        System.Windows.Controls.Grid.GetRow(border) == 1 &&
-                        System.Windows.Controls.Grid.GetColumn(border) == 0);
+                        System.Windows.Controls.Grid.GetRow(border) == 0 &&
+                        System.Windows.Controls.Grid.GetColumn(border) == 2);
+                Assert.Equal(2, System.Windows.Controls.Grid.GetRowSpan(
+                    settingsObsPanel));
                 Assert.Equal(1, System.Windows.Controls.Grid.GetColumnSpan(
                     settingsObsPanel));
                 var settingsObsStack = Assert.IsType<
@@ -831,6 +864,14 @@ public sealed class MainWindowViewModelTests
                 Assert.Equal(
                     System.Windows.Controls.Orientation.Vertical,
                     settingsObsStack.Orientation);
+                AssertSingleBinding<System.Windows.Controls.TextBox>(
+                    settingsObsPanel,
+                    System.Windows.Controls.TextBox.TextProperty,
+                    nameof(MainWindowViewModel.ObsOutputDirectory));
+                AssertSingleBinding<System.Windows.Controls.TextBox>(
+                    settingsObsPanel,
+                    System.Windows.Controls.TextBox.TextProperty,
+                    nameof(MainWindowViewModel.ObsProgressFormatDraft));
                 settingsLayout.Measure(new System.Windows.Size(1252, 620));
                 Assert.True(
                     settingsLayout.DesiredSize.Height <= 620,

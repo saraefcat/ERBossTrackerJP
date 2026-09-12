@@ -866,6 +866,7 @@
                             </Grid.ColumnDefinitions>
 
                             <Border Grid.Column="0"
+                                    VerticalAlignment="Top"
                                     Style="{StaticResource PanelBorderStyle}">
                                 <StackPanel>
                                     <TextBlock Margin="0,0,0,16"
@@ -916,12 +917,12 @@
 
                             <Border Grid.Column="2"
                                     Padding="0"
+                                    VerticalAlignment="Top"
                                     Style="{StaticResource PanelBorderStyle}">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="*" />
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <DockPanel Grid.Row="0"
@@ -962,11 +963,25 @@
                                             <TextBlock Margin="0,4,0,0"
                                                        Foreground="{DynamicResource TextSecondaryBrush}"
                                                        Text="{Binding ObsProgressFormatStatusText}"
-                                               TextWrapping="Wrap" />
+                                                       TextWrapping="Wrap" />
+                                            <DockPanel Margin="0,8,0,0">
+                                                <Button DockPanel.Dock="Right"
+                                                        MinWidth="120"
+                                                        Command="{Binding TestObsOutputCommand}"
+                                                        Content="現在値を再出力"
+                                                        ToolTip="セーブ更新を待たず、現在の進捗をOBS用ファイルへ書き直します。" />
+                                                <TextBlock Margin="0,0,10,0"
+                                                           VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource TextMutedBrush}"
+                                                           Text="通常は progress.txt を指定します。他のファイルは数値を個別表示するときに使用します。"
+                                                           TextWrapping="Wrap" />
+                                            </DockPanel>
                                         </StackPanel>
                                     </Border>
                                     <DataGrid Grid.Row="2"
-                                              BorderThickness="0"
+                                              Margin="14,0,14,14"
+                                              VerticalAlignment="Top"
+                                              BorderThickness="1"
                                               ItemsSource="{Binding ObsPreviewItems}">
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Width="145"
@@ -980,18 +995,6 @@
                                                                 Binding="{Binding Contents, Mode=OneWay}" />
                                         </DataGrid.Columns>
                                     </DataGrid>
-                                    <DockPanel Grid.Row="3"
-                                               Margin="14,12">
-                                        <Button DockPanel.Dock="Right"
-                                                MinWidth="120"
-                                                Command="{Binding TestObsOutputCommand}"
-                                                Content="現在値を再出力"
-                                                ToolTip="セーブ更新を待たず、現在の進捗をOBS用ファイルへ書き直します。" />
-                                        <TextBlock VerticalAlignment="Center"
-                                                   Foreground="{DynamicResource TextMutedBrush}"
-                                                   Text="通常は progress.txt を指定します。他のファイルは数値を個別表示するときに使用します。"
-                                                   TextWrapping="Wrap" />
-                                    </DockPanel>
                                 </Grid>
                             </Border>
                         </Grid>
@@ -1013,27 +1016,6 @@
 
                     <Border Grid.Row="0"
                             Grid.Column="0"
-                            VerticalAlignment="Top"
-                            Style="{StaticResource PanelBorderStyle}">
-                        <StackPanel>
-                            <TextBlock Margin="0,0,0,12"
-                                       FontSize="17"
-                                       FontWeight="SemiBold"
-                                       Text="表示設定" />
-                            <CheckBox Content="ダークモード"
-                                      IsChecked="{Binding IsDarkMode, Mode=TwoWay}" />
-                            <TextBlock Margin="0,12,0,4"
-                                       Foreground="{DynamicResource TextMutedBrush}"
-                                       Text="固有名詞" />
-                            <ComboBox DisplayMemberPath="Label"
-                                      ItemsSource="{Binding LanguageOptions}"
-                                      SelectedValue="{Binding DisplayLanguage, Mode=TwoWay}"
-                                      SelectedValuePath="Value" />
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Row="0"
-                            Grid.Column="2"
                             Style="{StaticResource PanelBorderStyle}">
                         <StackPanel>
                             <TextBlock Margin="0,0,0,10"
@@ -1094,6 +1076,27 @@
                             Grid.Column="0"
                             Margin="0,12,0,0"
                             VerticalAlignment="Top"
+                            Style="{StaticResource PanelBorderStyle}">
+                        <StackPanel>
+                            <TextBlock Margin="0,0,0,12"
+                                       FontSize="17"
+                                       FontWeight="SemiBold"
+                                       Text="表示設定" />
+                            <CheckBox Content="ダークモード"
+                                      IsChecked="{Binding IsDarkMode, Mode=TwoWay}" />
+                            <TextBlock Margin="0,12,0,4"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       Text="固有名詞" />
+                            <ComboBox DisplayMemberPath="Label"
+                                      ItemsSource="{Binding LanguageOptions}"
+                                      SelectedValue="{Binding DisplayLanguage, Mode=TwoWay}"
+                                      SelectedValuePath="Value" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="0"
+                            Grid.RowSpan="2"
+                            Grid.Column="2"
                             Style="{StaticResource PanelBorderStyle}">
                         <StackPanel>
                             <TextBlock FontSize="17"
