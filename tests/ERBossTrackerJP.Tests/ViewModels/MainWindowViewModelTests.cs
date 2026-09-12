@@ -1019,6 +1019,30 @@ public sealed class MainWindowViewModelTests
                     FindLogicalDescendants<System.Windows.Controls.TextBlock>(
                         obsBasicSettingsPanel),
                     textBlock => textBlock.Text == "表示死亡数");
+                Assert.Contains(
+                    FindLogicalDescendants<System.Windows.Controls.TextBlock>(
+                        obsBasicSettingsPanel),
+                    textBlock => textBlock.Text == "死亡数と周回基準値");
+                AssertSingleBinding<System.Windows.Controls.CheckBox>(
+                    obsBasicSettingsPanel,
+                    System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty,
+                    nameof(MainWindowViewModel.IsDeathCountOffsetEnabled));
+                AssertSingleBinding<System.Windows.Controls.TextBox>(
+                    obsBasicSettingsPanel,
+                    System.Windows.Controls.TextBox.TextProperty,
+                    nameof(MainWindowViewModel.DeathCountBaselineDraft));
+                AssertSingleBinding<System.Windows.Controls.TextBlock>(
+                    obsBasicSettingsPanel,
+                    System.Windows.Controls.TextBlock.TextProperty,
+                    nameof(MainWindowViewModel.DisplayDeathCountText));
+                AssertSingleBinding<System.Windows.Controls.Button>(
+                    obsBasicSettingsPanel,
+                    System.Windows.Controls.Button.CommandProperty,
+                    nameof(MainWindowViewModel.SetCurrentDeathCountBaselineCommand));
+                AssertSingleBinding<System.Windows.Controls.Button>(
+                    obsBasicSettingsPanel,
+                    System.Windows.Controls.Button.CommandProperty,
+                    nameof(MainWindowViewModel.ApplyDeathCountBaselineCommand));
                 var obsPreviewPanel = Assert.Single(
                     obsOutputContentLayout.Children
                         .OfType<System.Windows.Controls.Border>(),

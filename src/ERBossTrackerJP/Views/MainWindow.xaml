@@ -1036,6 +1036,96 @@
                                               SelectedValue="{Binding DisplayLanguage, Mode=TwoWay}"
                                               SelectedValuePath="Value" />
 
+                                    <Border Height="1"
+                                            Margin="0,14,0,12"
+                                            Background="{DynamicResource BorderBrush}" />
+                                    <TextBlock Margin="0,0,0,8"
+                                               FontSize="17"
+                                               FontWeight="SemiBold"
+                                               Text="死亡数と周回基準値" />
+                                    <CheckBox Margin="0,0,0,8"
+                                              Content="周回オフセットを有効にする"
+                                              IsChecked="{Binding IsDeathCountOffsetEnabled, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsDeathCountOffsetControlEnabled}" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="120" />
+                                            <ColumnDefinition Width="24" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="24" />
+                                            <ColumnDefinition Width="110" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Foreground="{DynamicResource TextMutedBrush}"
+                                                       Text="セーブ内累計死亡数" />
+                                            <TextBlock Margin="0,5,0,0"
+                                                       FontSize="22"
+                                                       FontWeight="SemiBold"
+                                                       Text="{Binding CumulativeDeathCountText}" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Bottom"
+                                                   Margin="0,0,0,5"
+                                                   FontSize="22"
+                                                   Foreground="{DynamicResource TextMutedBrush}"
+                                                   Text="−" />
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Foreground="{DynamicResource TextMutedBrush}"
+                                                       Text="周回開始時の基準値" />
+                                            <TextBox Margin="0,5,0,0"
+                                                     MaxLength="13"
+                                                     Text="{Binding DeathCountBaselineDraft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="3"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Bottom"
+                                                   Margin="0,0,0,5"
+                                                   FontSize="22"
+                                                   Foreground="{DynamicResource TextMutedBrush}"
+                                                   Text="=" />
+                                        <StackPanel Grid.Column="4">
+                                            <TextBlock Foreground="{DynamicResource TextMutedBrush}"
+                                                       Text="表示死亡数" />
+                                            <TextBlock Margin="0,5,0,0"
+                                                       FontSize="22"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource AccentBrush}"
+                                                       Text="{Binding DisplayDeathCountText}" />
+                                        </StackPanel>
+                                    </Grid>
+                                    <WrapPanel Margin="144,7,0,0">
+                                        <Button Width="132"
+                                                Margin="0,0,8,0"
+                                                Command="{Binding SetCurrentDeathCountBaselineCommand}"
+                                                Content="現在値を基準にする" />
+                                        <Button Width="116"
+                                                Command="{Binding ApplyDeathCountBaselineCommand}"
+                                                Content="基準値を適用" />
+                                    </WrapPanel>
+                                    <TextBlock Margin="144,5,0,0"
+                                               Foreground="{DynamicResource WarningBrush}"
+                                               Text="{Binding DeathCountBaselineStatusText}"
+                                               TextWrapping="Wrap">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility"
+                                                        Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsDeathCountBaselineStatusVisible}"
+                                                                 Value="True">
+                                                        <Setter Property="Visibility"
+                                                                Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock Margin="144,5,0,0"
+                                               Foreground="{DynamicResource TextMutedBrush}"
+                                               Text="この表示死亡数が deaths.txt へ出力されます。基準値とON／OFFはキャラクターごとに保存されます。"
+                                               TextWrapping="Wrap" />
+
                                 </StackPanel>
                             </Border>
 
