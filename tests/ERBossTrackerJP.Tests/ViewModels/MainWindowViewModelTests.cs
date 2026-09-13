@@ -1354,6 +1354,8 @@ public sealed class MainWindowViewModelTests
                     System.Windows.Controls.TextBlock.TextProperty,
                     nameof(MainWindowViewModel.SettingsSaveStatusText));
                 Assert.True(viewModel.HasSettingsSaveError);
+                Assert.True(viewModel.IsDarkMode);
+                Assert.True(themeService.TryApply(ApplicationTheme.Dark));
 
                 var darkBackground = Assert.IsType<System.Windows.Media.SolidColorBrush>(
                     application.Resources["AppBackgroundBrush"]);

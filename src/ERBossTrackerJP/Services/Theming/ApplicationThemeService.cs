@@ -20,11 +20,6 @@ public sealed class ApplicationThemeService : IApplicationThemeService
             return false;
         }
 
-        if (CurrentTheme == theme)
-        {
-            return true;
-        }
-
         Application? application = Application.Current;
 
         if (application is null)
