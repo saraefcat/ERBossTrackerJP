@@ -116,7 +116,8 @@ public sealed class JsonUserSettingsService : IUserSettingsService
                 settings.IsObsOutputEnabled,
                 NormalizePath(settings.ObsOutputDirectory),
                 NormalizeObsProgressFormat(settings.ObsProgressFormat),
-                NormalizeDeathCountBaselines(settings.DeathCountBaselines));
+                NormalizeDeathCountBaselines(settings.DeathCountBaselines),
+                NormalizeWindowPlacement(settings.WindowPlacement));
             string json = JsonSerializer.Serialize(document, SerializerOptions);
             File.WriteAllText(temporaryPath, json);
             File.Move(temporaryPath, _settingsPath, overwrite: true);
@@ -162,6 +163,9 @@ public sealed class JsonUserSettingsService : IUserSettingsService
             NormalizeObsProgressFormat(document.ObsProgressFormat),
             document.SchemaVersion == CurrentSchemaVersion
                 ? NormalizeDeathCountBaselines(document.DeathCountBaselines)
+                : null,
+            document.SchemaVersion == CurrentSchemaVersion
+                ? NormalizeWindowPlacement(document.WindowPlacement)
                 : null);
     }
 
@@ -218,6 +222,30 @@ public sealed class JsonUserSettingsService : IUserSettingsService
         return normalized;
     }
 
+    private static WindowPlacementSetting? NormalizeWindowPlacement(
+        WindowPlacementSetting? placement)
+    {
+        const double maximumDimension = 32_768;
+        const double maximumCoordinateMagnitude = 131_072;
+
+        if (placement is null ||
+            !double.IsFinite(placement.Left) ||
+            !double.IsFinite(placement.Top) ||
+            !double.IsFinite(placement.Width) ||
+            !double.IsFinite(placement.Height) ||
+            placement.Width <= 0 ||
+            placement.Height <= 0 ||
+            placement.Width > maximumDimension ||
+            placement.Height > maximumDimension ||
+            Math.Abs(placement.Left) > maximumCoordinateMagnitude ||
+            Math.Abs(placement.Top) > maximumCoordinateMagnitude)
+        {
+            return null;
+        }
+
+        return placement;
+    }
+
     private static int? ValidateSlotIndex(int? slotIndex) =>
         slotIndex is >= 0 and < CharacterSlot.MaximumSlotCount
             ? slotIndex
@@ -260,5 +288,6 @@ public sealed class JsonUserSettingsService : IUserSettingsService
         bool? IsObsOutputEnabled,
         string? ObsOutputDirectory,
         string? ObsProgressFormat,
-        IReadOnlyList<DeathCountBaselineSetting>? DeathCountBaselines);
+        IReadOnlyList<DeathCountBaselineSetting>? DeathCountBaselines,
+        WindowPlacementSetting? WindowPlacement);
 }

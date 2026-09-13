@@ -23,7 +23,13 @@ public sealed class JsonUserSettingsServiceTests
                 ApplicationTheme.Light,
                 IsObsOutputEnabled: true,
                 ObsOutputDirectory: "D:\\OBS",
-                ObsProgressFormat: "撃破 {defeated}/{total}（{percentage}%）");
+                ObsProgressFormat: "撃破 {defeated}/{total}（{percentage}%）",
+                WindowPlacement: new WindowPlacementSetting(
+                    -1_200,
+                    80,
+                    1_280,
+                    800,
+                    IsMaximized: true));
 
             bool saved = service.TrySave(expected);
             UserSettings actual = service.Load();
@@ -40,8 +46,13 @@ public sealed class JsonUserSettingsServiceTests
                 "\"obsProgressFormat\":",
                 json,
                 StringComparison.Ordinal);
+            Assert.Contains("\"windowPlacement\":", json, StringComparison.Ordinal);
+            Assert.Contains("\"isMaximized\": true", json, StringComparison.Ordinal);
             Assert.DoesNotContain("eventFlag", json, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("characterName", json, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("completionFilter", json, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("regionFilter", json, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("searchText", json, StringComparison.OrdinalIgnoreCase);
             Assert.Empty(Directory.EnumerateFiles(testDirectory, "*.tmp"));
         }
         finally
@@ -210,6 +221,42 @@ public sealed class JsonUserSettingsServiceTests
     }
 
     [Fact]
+    public void Load_InvalidWindowPlacementIsIgnored()
+    {
+        string testDirectory = CreateTestDirectory();
+        string settingsPath = Path.Combine(testDirectory, "settings.json");
+
+        try
+        {
+            File.WriteAllText(
+                settingsPath,
+                """
+                {
+                  "schemaVersion": 2,
+                  "displayLanguage": "en",
+                  "windowPlacement": {
+                    "left": 100,
+                    "top": 100,
+                    "width": 1280,
+                    "height": 0,
+                    "isMaximized": true
+                  }
+                }
+                """);
+            var service = new JsonUserSettingsService(settingsPath);
+
+            UserSettings actual = service.Load();
+
+            Assert.Equal(DisplayLanguage.English, actual.DisplayLanguage);
+            Assert.Null(actual.WindowPlacement);
+        }
+        finally
+        {
+            DeleteTestDirectory(testDirectory);
+        }
+    }
+
+    [Fact]
     public void Load_LegacyDocumentIgnoresAdditiveOffsetsAndPreservesOtherSettings()
     {
         string testDirectory = CreateTestDirectory();
@@ -226,6 +273,13 @@ public sealed class JsonUserSettingsServiceTests
                   "characterSlotIndex": 2,
                   "displayLanguage": "en",
                   "isAutoMonitoringEnabled": false,
+                  "windowPlacement": {
+                    "left": 100,
+                    "top": 100,
+                    "width": 1280,
+                    "height": 800,
+                    "isMaximized": true
+                  },
                   "deathCountOffsets": [
                     {
                       "saveFilePath": "D:\\EldenRing\\ER0000.sl2",
@@ -248,6 +302,7 @@ public sealed class JsonUserSettingsServiceTests
             Assert.Null(actual.ObsOutputDirectory);
             Assert.Null(actual.ObsProgressFormat);
             Assert.Null(actual.DeathCountBaselines);
+            Assert.Null(actual.WindowPlacement);
         }
         finally
         {

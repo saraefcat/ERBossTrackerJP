@@ -84,6 +84,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private string _deathCountBaselineStatusText = string.Empty;
     private string? _deathCountBaselineContextPath;
     private int? _deathCountBaselineContextSlotIndex;
+    private WindowPlacementSetting? _windowPlacement;
     private UserSettings _lastPersistedSettings = UserSettings.Default;
     private string _monitoringStatusText = "停止中";
     private string _obsOutputStatusText = "停止中";
@@ -162,6 +163,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
                 : null;
         _pendingRestoredCharacterSlotIndex = _settingsCharacterSlotIndex;
         _deathCountBaselines = settings.DeathCountBaselines?.ToArray() ?? [];
+        _windowPlacement = settings.WindowPlacement;
         _lastPersistedSettings = new UserSettings(
             _settingsSaveFilePath,
             _settingsCharacterSlotIndex,
@@ -171,7 +173,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             _isObsOutputEnabled,
             _obsOutputDirectory,
             obsTextFileOutput.ProgressFormat,
-            _deathCountBaselines);
+            _deathCountBaselines,
+            _windowPlacement);
         _synchronizationContext = SynchronizationContext.Current;
         SaveCandidates = new ReadOnlyObservableCollection<SaveFileCandidate>(_saveCandidates);
         CharacterSlots = new ReadOnlyObservableCollection<CharacterSlot>(_characterSlots);
@@ -223,6 +226,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     }
 
     public string Title => "ER Boss Tracker JP";
+
+    public WindowPlacementSetting? WindowPlacement => _windowPlacement;
 
     public ReadOnlyObservableCollection<SaveFileCandidate> SaveCandidates { get; }
 
@@ -897,6 +902,19 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             _obsOutputCancellationSource.Token);
     }
 
+    public void SaveWindowPlacement(WindowPlacementSetting placement)
+    {
+        ArgumentNullException.ThrowIfNull(placement);
+
+        if (_windowPlacement == placement)
+        {
+            return;
+        }
+
+        _windowPlacement = placement;
+        PersistUserSettings();
+    }
+
     public Task ApplyObsProgressFormatAsync()
     {
         if (!_obsTextFileOutput.TrySetProgressFormat(ObsProgressFormatDraft))
@@ -1425,7 +1443,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             IsObsOutputEnabled,
             ObsOutputDirectory,
             _obsTextFileOutput.ProgressFormat,
-            _deathCountBaselines);
+            _deathCountBaselines,
+            _windowPlacement);
 
         if (settings == _lastPersistedSettings)
         {

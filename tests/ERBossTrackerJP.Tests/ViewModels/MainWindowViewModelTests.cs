@@ -229,6 +229,34 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public async Task DisplayFiltersAndSelectedRegion_AreNotPersisted()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "Session Filter", 40)));
+        var settingsService = new StubUserSettingsService();
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            userSettingsService: settingsService);
+        await viewModel.InitializeAsync();
+        int savedCount = settingsService.SaveCount;
+        RegionListItem selectedRegion = Assert.Single(
+            viewModel.Regions,
+            region => region.RegionId == "limgrave");
+
+        viewModel.CompletionFilter = BossCompletionFilter.Undefeated;
+        viewModel.ContentFilter = GameContent.BaseGame;
+        viewModel.SearchText = "Tree";
+        viewModel.SelectedRegion = selectedRegion;
+
+        Assert.Equal(savedCount, settingsService.SaveCount);
+    }
+
+    [Fact]
     public async Task InitializeAsync_StartsMonitoringAndDetectedChangeReloadsSameSlot()
     {
         SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
@@ -382,6 +410,61 @@ public sealed class MainWindowViewModelTests
         Assert.Equal(ApplicationTheme.Light, settingsService.LastSaved?.Theme);
         Assert.True(settingsService.LastSaved?.IsObsOutputEnabled);
         Assert.Equal("C:\\obs-default", settingsService.LastSaved?.ObsOutputDirectory);
+    }
+
+    [Fact]
+    public void WindowPlacement_IsRestoredAndPersistedWithOtherSettings()
+    {
+        var original = new WindowPlacementSetting(
+            100,
+            80,
+            1_280,
+            800,
+            IsMaximized: false);
+        var settingsService = new StubUserSettingsService(
+            new UserSettings(
+                DisplayLanguage: DisplayLanguage.English,
+                WindowPlacement: original));
+        var viewModel = CreateViewModel(
+            new StubSaveFileLocator(),
+            new StubSaveLoadService(),
+            userSettingsService: settingsService);
+        var updated = new WindowPlacementSetting(
+            -1_600,
+            120,
+            1_400,
+            900,
+            IsMaximized: true);
+
+        Assert.Equal(original, viewModel.WindowPlacement);
+
+        viewModel.SaveWindowPlacement(updated);
+
+        Assert.Equal(updated, viewModel.WindowPlacement);
+        Assert.Equal(updated, settingsService.LastSaved?.WindowPlacement);
+        Assert.Equal(DisplayLanguage.English, settingsService.LastSaved?.DisplayLanguage);
+    }
+
+    [Fact]
+    public void FitWindowBoundsToVisibleArea_RecoversRemovedMonitorPlacement()
+    {
+        var placement = new WindowPlacementSetting(
+            4_000,
+            2_000,
+            1_280,
+            800,
+            IsMaximized: false);
+        var virtualScreen = new System.Windows.Rect(0, 0, 1_920, 1_080);
+        var workArea = new System.Windows.Rect(0, 0, 1_920, 1_040);
+
+        System.Windows.Rect actual = MainWindow.FitWindowBoundsToVisibleArea(
+            placement,
+            960,
+            640,
+            virtualScreen,
+            workArea);
+
+        Assert.Equal(new System.Windows.Rect(320, 120, 1_280, 800), actual);
     }
 
     [Fact]
@@ -956,7 +1039,14 @@ public sealed class MainWindowViewModelTests
                     candidate.FilePath,
                     new CharacterSlot(0, "Binding Hero", 30)));
                 var themeService = new ApplicationThemeService();
-                var settingsService = new StubUserSettingsService
+                var settingsService = new StubUserSettingsService(
+                    new UserSettings(
+                        WindowPlacement: new WindowPlacementSetting(
+                            10,
+                            10,
+                            960,
+                            640,
+                            IsMaximized: false)))
                 {
                     CanSave = false,
                 };
@@ -978,6 +1068,12 @@ public sealed class MainWindowViewModelTests
                 window.Dispatcher.Invoke(
                     static () => { },
                     DispatcherPriority.ApplicationIdle);
+
+                Assert.Equal(
+                    System.Windows.WindowStartupLocation.Manual,
+                    window.WindowStartupLocation);
+                Assert.Equal(960, window.Width);
+                Assert.Equal(640, window.Height);
 
                 var tabControl = Assert.IsType<System.Windows.Controls.TabControl>(
                     FindVisualDescendant<System.Windows.Controls.TabControl>(window));
@@ -1422,6 +1518,31 @@ public sealed class MainWindowViewModelTests
                     Assert.IsType<System.Windows.Media.SolidColorBrush>(
                         buttonBorder.Background);
                 Assert.Equal("#FFE2E7ED", lightButtonBackground.Color.ToString());
+
+                settingsService.CanSave = true;
+                window.WindowState = System.Windows.WindowState.Normal;
+                window.Left += 20;
+                window.Width = 980;
+                window.Dispatcher.Invoke(
+                    static () => { },
+                    DispatcherPriority.ApplicationIdle);
+                var expectedBounds = new System.Windows.Rect(
+                    window.Left,
+                    window.Top,
+                    window.ActualWidth,
+                    window.ActualHeight);
+                window.WindowState = System.Windows.WindowState.Maximized;
+                window.WindowState = System.Windows.WindowState.Minimized;
+                window.Close();
+
+                WindowPlacementSetting savedPlacement = Assert.IsType<
+                    WindowPlacementSetting>(settingsService.LastSaved?.WindowPlacement);
+                Assert.Equal(expectedBounds.Left, savedPlacement.Left, precision: 3);
+                Assert.Equal(expectedBounds.Top, savedPlacement.Top, precision: 3);
+                Assert.Equal(expectedBounds.Width, savedPlacement.Width, precision: 3);
+                Assert.Equal(expectedBounds.Height, savedPlacement.Height, precision: 3);
+                Assert.True(savedPlacement.IsMaximized);
+                window = null;
             }
             catch (Exception exception)
             {
@@ -1688,6 +1809,8 @@ public sealed class MainWindowViewModelTests
     {
         public UserSettings? LastSaved { get; private set; }
 
+        public int SaveCount { get; private set; }
+
         public bool CanSave { get; set; } = true;
 
         public UserSettings Load() => settings ?? UserSettings.Default;
@@ -1700,6 +1823,7 @@ public sealed class MainWindowViewModelTests
             }
 
             LastSaved = userSettings;
+            SaveCount++;
             return true;
         }
     }
