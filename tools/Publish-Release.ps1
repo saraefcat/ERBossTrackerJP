@@ -125,6 +125,7 @@ try {
         'DOTNET_THIRD_PARTY_NOTICES.txt',
         'LICENSE',
         'README.md',
+        'README.en.md',
         'RELEASE_NOTES.md',
         'SOURCE_COMMIT.txt',
         'THIRD_PARTY_NOTICES.md',

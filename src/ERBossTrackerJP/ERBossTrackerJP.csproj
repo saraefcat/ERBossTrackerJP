@@ -26,6 +26,9 @@
     <None Include="..\..\README.md"
           Link="README.md"
           CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\..\README.en.md"
+          Link="README.en.md"
+          CopyToPublishDirectory="PreserveNewest" />
     <None Include="..\..\THIRD_PARTY_NOTICES.md"
           Link="THIRD_PARTY_NOTICES.md"
           CopyToPublishDirectory="PreserveNewest" />
