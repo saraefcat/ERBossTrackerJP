@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="{Binding Title}"
+        Icon="/ERBossTrackerJP;component/Assets/ERBossTrackerJP.ico"
         Width="1280"
         Height="800"
         MinWidth="960"

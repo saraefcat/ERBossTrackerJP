@@ -12,11 +12,17 @@
     <Authors>ER Boss Tracker JP contributors</Authors>
     <Description>PC版ELDEN RINGのセーブファイルからボス撃破状況を表示します。</Description>
     <NeutralLanguage>ja-JP</NeutralLanguage>
+    <ApplicationIcon>Assets\ERBossTrackerJP.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ERBossTrackerJP.Core\ERBossTrackerJP.Core.csproj" />
     <ProjectReference Include="..\ERBossTrackerJP.Save\ERBossTrackerJP.Save.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\ERBossTrackerJP.ico" />
+    <Resource Include="Assets\ERBossTrackerJP.png" />
   </ItemGroup>
 
   <ItemGroup>
