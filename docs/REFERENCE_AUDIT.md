@@ -80,3 +80,24 @@
 - 参考元で場所が空欄だった32ボスについて、地域名より詳細な場所を表示するか
 
 これらは推測で確定せず、該当フェーズの実装前に調査する。
+
+## eventflag_bst.txtの来歴再監査
+
+再監査日: 2026-09-14
+
+`src/ERBossTrackerJP.Save/Data/eventflag_bst.txt`について、参照リポジトリの履歴とライセンスを再確認した。
+
+| 項目 | 値 |
+|---|---|
+| ERBossTrackerJP側SHA-256 | `092C3B73B7049D04087DA425544396BC93ED9B1F80EE3BB3C2E4734C8900B728` |
+| `er-save-manager`への導入コミット | `8473fd30dd7f0cf6c2114274cb25c1c6980fa8ff` |
+| `er-save-manager`で最後に確認したMITコミット | `07bfd75834b9ee46b1e16e8a9c3ccf6d10c9139d` |
+| `er-save-manager`のライセンス変更コミット | `4b507ab4818e8406395bd5505b7f0a518da96c58` |
+| さらに上流の`ER_Save_File_Fixer`導入コミット | `97a4b84b3f431b3796fdafa135bada572e46dff4` |
+| 各upstreamの対象Git blob | `8497ded00dfd8814965715eeeb981425e92bc9d0` |
+
+ローカルファイルはCRLF、upstreamはLFである。ローカルのCRを除いてLFへ正規化すると、11,920組の数値、順序、末尾状態を含めてupstreamとバイト単位で一致する。ローカル側の実質的な変更は改行形式だけである。
+
+上記`er-save-manager`の2コミットと`ER_Save_File_Fixer`の導入コミットでは、対象ファイルとMIT LICENSEが同時に存在する。`er-save-manager`の現在のライセンスはSource Availableへ変更済みのため、現在のmainではなく、上記の固定MITコミットを再配布根拠として記録する。
+
+`er-save-manager`のREADMEにはTGA Event Flag Manager tables等への謝辞があるが、11,920組を最初に生成した主体、元ファイル、生成手順、個別ライセンスまでは一次資料から特定できなかった。このさらに上流の由来は確認不能として扱い、第三者通知では断定しない。

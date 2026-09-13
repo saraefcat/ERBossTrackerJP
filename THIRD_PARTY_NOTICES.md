@@ -35,21 +35,70 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-## er-save-manager
+## eventflag_bst.txt（Hapfelプロジェクト由来）
+
+本プロジェクトの取り込み記録では、次の`er-save-manager`を取得元としています。
 
 - Project: <https://github.com/Hapfel1/er-save-manager>
-- Author: Hapfel
-- License: MIT
-- Usage: セーブ形式の順次解析方式と`eventflag_bst.txt`の由来
+- MIT-era import commit: `8473fd30dd7f0cf6c2114274cb25c1c6980fa8ff`
+- Last verified MIT commit: `07bfd75834b9ee46b1e16e8a9c3ccf6d10c9139d`
+- Upstream file: `src/resources/eventflag_bst.txt`
+- Upstream Git blob: `8497ded00dfd8814965715eeeb981425e92bc9d0`
+- License at the commits above: MIT
+- MIT-era source: <https://github.com/Hapfel1/er-save-manager/blob/07bfd75834b9ee46b1e16e8a9c3ccf6d10c9139d/src/resources/eventflag_bst.txt>
+- MIT-era license: <https://github.com/Hapfel1/er-save-manager/blob/07bfd75834b9ee46b1e16e8a9c3ccf6d10c9139d/LICENSE>
+- License at the current upstream: Source Available
+- License-change commit: `4b507ab4818e8406395bd5505b7f0a518da96c58`
+- Current license: <https://github.com/Hapfel1/er-save-manager/blob/main/LICENSE>
+- Usage: セーブ形式の順次解析方式とイベントフラグ格納位置の対応表
 - Redistributed data: `src/ERBossTrackerJP.Save/Data/eventflag_bst.txt`
-- SHA-256: `092C3B73B7049D04087DA425544396BC93ED9B1F80EE3BB3C2E4734C8900B728`
+- Redistributed SHA-256: `092C3B73B7049D04087DA425544396BC93ED9B1F80EE3BB3C2E4734C8900B728`
+- Modification: 数値ペアの内容と順序は変更せず、改行をLFからCRLFへ変更
 
-参照元の第三者通知に記載されたMIT表示は次のとおりです。
+`eventflag_bst.txt`と同一のGit blobは、`er-save-manager`へ取り込まれる前に次のプロジェクトにも存在します。
+
+- Project: <https://github.com/Hapfel1/ER_Save_File_Fixer>
+- Introduction commit: `97a4b84b3f431b3796fdafa135bada572e46dff4`
+- Upstream file: `src/er_save_fixer/resources/eventflag_bst.txt`
+- Upstream Git blob: `8497ded00dfd8814965715eeeb981425e92bc9d0`
+- License at the commit above: MIT
+- MIT-era source: <https://github.com/Hapfel1/ER_Save_File_Fixer/blob/97a4b84b3f431b3796fdafa135bada572e46dff4/src/er_save_fixer/resources/eventflag_bst.txt>
+- MIT-era license: <https://github.com/Hapfel1/ER_Save_File_Fixer/blob/97a4b84b3f431b3796fdafa135bada572e46dff4/LICENSE>
+
+ERBossTrackerJP側のCRを除いてLFへ正規化すると、上記upstreamファイルとバイト単位で一致します。MIT時代の固定コミットと当時のLICENSEを再配布根拠としており、現在のSource Available版からデータを取り込んだものではありません。
+
+`er-save-manager`のMIT表示は次のとおりです。
 
 ```text
 MIT License
 
 Copyright (c) 2026 Hapfel
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+`ER_Save_File_Fixer`のMIT表示は次のとおりです。
+
+```text
+MIT License
+
+Copyright (c) 2025 Hapfel
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -102,3 +151,7 @@ SOFTWARE.
 同サイトの転載方針に従い、出典ページへのリンクを本通知に記載しています。ゲーム名、会社名、製品名およびゲーム内固有名詞に関する権利は、それぞれの権利者に帰属します。
 
 Skald、SDL3、Vulkan関連コードおよびフォントは本プロジェクトへ取り込んでいません。WPFはWindowsに含まれる.NETデスクトップフレームワークを使用します。
+
+## アプリアイコン
+
+アプリアイコン「進捗カタツムリ」は、第三者のロゴやゲーム画像を入力せず、OpenAI Codexの組み込み画像生成機能で新規生成したものです。生成プロンプト、原画、派生処理およびファイルハッシュは[アプリ資産の来歴](docs/ASSET_PROVENANCE.md)に記録しています。

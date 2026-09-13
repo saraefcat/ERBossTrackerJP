@@ -7,6 +7,9 @@
 
 ER Boss Tracker JP is a Windows application for viewing per-character boss completion and death counts from PC Steam ELDEN RING save files. It automatically detects save updates and can provide text files for use in OBS Studio streams.
 
+> [!IMPORTANT]
+> This is an unofficial community tool and is not affiliated with FromSoftware or Bandai Namco Entertainment.
+
 ## Key features
 
 - Tracks 207 bosses: 165 from the base game and 42 from the DLC
@@ -170,13 +173,15 @@ docs/                        Design documents and OBS output guide
 
 ### Building from source
 
-The .NET 10 SDK is required.
+.NET SDK `10.0.204` is required. The repository pins the SDK in `global.json`.
 
 ```powershell
 dotnet restore ERBossTrackerJP.sln
 dotnet build ERBossTrackerJP.sln -c Release
 dotnet test ERBossTrackerJP.sln -c Release
 ```
+
+Test-only NuGet dependencies are pinned in `tests/ERBossTrackerJP.Tests/packages.lock.json`. Disable locked mode and regenerate that file only when intentionally changing dependency versions.
 
 ### Creating a release
 
@@ -195,6 +200,7 @@ To override the version, run a command such as `.\tools\Publish-Release.ps1 -Ver
 - [Architecture](docs/ARCHITECTURE.md) — Japanese
 - [Save parser design](docs/SAVE_PARSER_DESIGN.md) — Japanese
 - [Reference and data audit](docs/REFERENCE_AUDIT.md) — Japanese
+- [Application asset provenance](docs/ASSET_PROVENANCE.md) — Japanese
 - [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 ## License and disclaimer

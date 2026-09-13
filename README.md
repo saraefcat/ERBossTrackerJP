@@ -7,6 +7,9 @@
 
 PC Steam版『ELDEN RING』のセーブファイルから、キャラクターごとのボス撃破状況と死亡数を確認できるWindowsアプリです。ゲームのセーブ更新を自動検出し、配信で使えるテキストをOBS Studioへ出力できます。
 
+> [!IMPORTANT]
+> 本プロジェクトは非公式のコミュニティツールであり、FromSoftwareおよびBandai Namco Entertainmentとは関係ありません。
+
 ## 主な機能
 
 - 本編165件、DLC42件、合計207件のボス撃破状況を一覧表示
@@ -168,13 +171,15 @@ docs/                        設計資料とOBS出力ガイド
 
 ### ソースからのビルド
 
-.NET 10 SDKが必要です。
+.NET SDK `10.0.204`が必要です。リポジトリの`global.json`で使用するSDKを固定しています。
 
 ```powershell
 dotnet restore ERBossTrackerJP.sln
 dotnet build ERBossTrackerJP.sln -c Release
 dotnet test ERBossTrackerJP.sln -c Release
 ```
+
+テスト用NuGet依存は`tests/ERBossTrackerJP.Tests/packages.lock.json`で固定されています。依存バージョンを意図的に変更する場合だけ、ロックモードを無効にしてロックファイルを再生成してください。
 
 ### 配布物の作成
 
@@ -193,6 +198,7 @@ dotnet test ERBossTrackerJP.sln -c Release
 - [アーキテクチャ](docs/ARCHITECTURE.md)
 - [セーブ解析設計](docs/SAVE_PARSER_DESIGN.md)
 - [参考資料・データ監査記録](docs/REFERENCE_AUDIT.md)
+- [アプリ資産の来歴](docs/ASSET_PROVENANCE.md)
 - [第三者通知](THIRD_PARTY_NOTICES.md)
 
 ## ライセンスと免責

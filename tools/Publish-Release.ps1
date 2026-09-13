@@ -129,6 +129,7 @@ try {
         'RELEASE_NOTES.md',
         'SOURCE_COMMIT.txt',
         'THIRD_PARTY_NOTICES.md',
+        'docs\ASSET_PROVENANCE.md',
         'docs\OBS_OUTPUT.md',
         'docs\REFERENCE_AUDIT.md'
     )

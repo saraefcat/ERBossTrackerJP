@@ -41,6 +41,9 @@
     <None Include="..\..\docs\REFERENCE_AUDIT.md"
           Link="docs\REFERENCE_AUDIT.md"
           CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\..\docs\ASSET_PROVENANCE.md"
+          Link="docs\ASSET_PROVENANCE.md"
+          CopyToPublishDirectory="PreserveNewest" />
     <None Include="..\..\docs\OBS_OUTPUT.md"
           Link="docs\OBS_OUTPUT.md"
           CopyToPublishDirectory="PreserveNewest" />
