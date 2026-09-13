@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionPrefix>0.1.1</VersionPrefix>
     <AssemblyTitle>ER Boss Tracker JP</AssemblyTitle>
     <Product>ER Boss Tracker JP</Product>
     <Authors>ER Boss Tracker JP contributors</Authors>

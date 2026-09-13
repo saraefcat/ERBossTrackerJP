@@ -34,7 +34,7 @@ The self-contained release includes the .NET runtime. End users do not need to i
 
 ## Download and launch
 
-1. Download `ERBossTrackerJP-v0.1.0-win-x64.zip` from [GitHub Releases](../../releases/latest).
+1. Download `ERBossTrackerJP-v0.1.1-win-x64.zip` from [GitHub Releases](../../releases/latest).
 2. Fully extract the ZIP to a folder of your choice.
 3. Launch `ERBossTrackerJP.exe` from the extracted folder.
 
