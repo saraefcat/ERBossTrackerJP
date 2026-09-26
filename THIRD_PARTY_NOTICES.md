@@ -145,7 +145,7 @@ SOFTWARE.
 - Base-game boss list: <https://kamikouryaku.net/eldenring/?%E3%83%9C%E3%82%B9%E6%94%BB%E7%95%A5>
 - DLC boss list: <https://kamikouryaku.net/eldenring/?%E3%83%9C%E3%82%B9%E6%94%BB%E7%95%A5%28DLC%29>
 - Accessed: 2026-09-10
-- Usage: ボス名、地域名、場所名の日本語表記と、個別ボスページに併記された英語名の照合
+- Historical usage: 2026-09-10の初版生成時に、ボス名、地域名、場所名の日本語表記と、個別ボスページに併記された英語名を照合（現在のproductionローカライズは公式ゲームテキストへ移行済み）
 - Not redistributed: 攻略本文、攻略表の数値、画像、コメント
 
 同サイトの転載方針に従い、出典ページへのリンクを本通知に記載しています。ゲーム名、会社名、製品名およびゲーム内固有名詞に関する権利は、それぞれの権利者に帰属します。
