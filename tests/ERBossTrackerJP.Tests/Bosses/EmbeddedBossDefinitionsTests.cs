@@ -31,10 +31,10 @@ public sealed class EmbeddedBossDefinitionsTests
 
     [Theory]
     [InlineData(18000850u, "ゴドリックの軍兵", "リムグレイブ")]
-    [InlineData(15000800u, "ミケラの刃、マレニア（腐敗の女神、マレニア）", "ミケラの聖樹")]
+    [InlineData(15000800u, "ミケラの刃、マレニア＆腐敗の女神、マレニア", "ミケラの聖樹")]
     [InlineData(20000800u, "神獣獅子舞", "墓地平原")]
-    [InlineData(21010800u, "串刺し公、メスメル(邪な蛇、メスメル)", "影のアルター")]
-    [InlineData(20010800u, "約束の王、ラダーン(ミケラの王、ラダーン)", "エニル・イリム")]
+    [InlineData(21010800u, "串刺し公、メスメル＆邪な蛇、メスメル", "影のアルター")]
+    [InlineData(20010800u, "約束の王、ラダーン＆ミケラの王、ラダーン", "エニル・イリム")]
     public void Load_ContainsReviewedJapaneseNames(
         uint flagId,
         string expectedNameJa,
