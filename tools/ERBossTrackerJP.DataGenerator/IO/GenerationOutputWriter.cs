@@ -32,13 +32,16 @@ public static class GenerationOutputWriter
                 "Generated boss data and comparison report must use different paths.");
         }
 
-        string outputJson = JsonSerializer.Serialize(result.BossDocument, Options) + Environment.NewLine;
-        string reportJson = JsonSerializer.Serialize(result.ComparisonReport, Options) + Environment.NewLine;
+        string outputJson = SerializeWithLf(result.BossDocument);
+        string reportJson = SerializeWithLf(result.ComparisonReport);
         ValidateRuntimeSchema(outputJson, result.BossDocument.Bosses.Count);
 
         WriteAtomic(resolvedOutputPath, outputJson);
         WriteAtomic(resolvedReportPath, reportJson);
     }
+
+    private static string SerializeWithLf<T>(T value) =>
+        JsonSerializer.Serialize(value, Options).ReplaceLineEndings("\n") + "\n";
 
     private static void ValidateRuntimeSchema(string outputJson, int expectedBossCount)
     {

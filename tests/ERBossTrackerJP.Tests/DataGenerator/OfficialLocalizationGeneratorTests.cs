@@ -63,6 +63,27 @@ public sealed class OfficialLocalizationGeneratorTests
     }
 
     [Fact]
+    public void GenerationOutputWriter_UsesDeterministicLfLineEndings()
+    {
+        GenerationResult result = GenerateSingle(
+            1,
+            Exact(10),
+            Exact(20),
+            [Official(10, "公式名", "Official Name", "NpcName")],
+            [Official(20, "公式場所", "Official Place", "PlaceName")]);
+        using var files = new GeneratorFiles();
+
+        GenerationOutputWriter.Write(result, files.OutputPath, files.ReportPath);
+
+        string outputJson = File.ReadAllText(files.OutputPath);
+        string reportJson = File.ReadAllText(files.ReportPath);
+        Assert.EndsWith("\n", outputJson, StringComparison.Ordinal);
+        Assert.EndsWith("\n", reportJson, StringComparison.Ordinal);
+        Assert.DoesNotContain("\r", outputJson, StringComparison.Ordinal);
+        Assert.DoesNotContain("\r", reportJson, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Generate_ReviewedMapping_CoversAll207Bosses()
     {
         string repositoryRoot = FindRepositoryRoot();
