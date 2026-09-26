@@ -8,6 +8,9 @@
 ER Boss Tracker JP is a Windows application for viewing per-character boss completion and death counts from PC Steam ELDEN RING save files. It automatically detects save updates and can provide text files for use in OBS Studio streams.
 
 > [!IMPORTANT]
+> The application opens save files as read-only and never modifies them. It also does not access the game process or its memory.
+
+> [!IMPORTANT]
 > This is an unofficial community tool and is not affiliated with FromSoftware or Bandai Namco Entertainment.
 
 ## Key features
@@ -35,11 +38,23 @@ The self-contained release includes the .NET runtime. End users do not need to i
 ## Download and launch
 
 1. Download `ERBossTrackerJP-v0.1.2-win-x64.zip` from [GitHub Releases](../../releases/latest).
-2. Fully extract the ZIP to a folder of your choice.
+2. Fully extract the ZIP to a new folder of your choice. Do not run the application directly from inside the ZIP viewer.
 3. Launch `ERBossTrackerJP.exe` from the extracted folder.
 
+The release is self-contained, so no additional .NET runtime installation is required. There is no installer; run the application directly from the extracted folder.
+
 > [!IMPORTANT]
-> The current release has no installer or code signing. Windows may display an unknown-publisher warning. Verify the download source and the `.sha256.txt` file next to the ZIP, or `SHA256SUMS.txt` after extraction, before running the application.
+> The release is not code-signed, so Windows may display an unknown-publisher warning. Confirm that you downloaded it from GitHub Releases and, if desired, verify its SHA-256 checksum as described below.
+
+### Verifying the SHA-256 checksum
+
+You can use Windows PowerShell to confirm that the downloaded ZIP matches the GitHub Release asset. Open PowerShell in the folder containing the ZIP and run:
+
+```powershell
+Get-FileHash .\ERBossTrackerJP-v0.1.2-win-x64.zip -Algorithm SHA256
+```
+
+Compare the displayed `Hash` value with the value in `ERBossTrackerJP-v0.1.2-win-x64.zip.sha256.txt`, which is attached to the same GitHub Release.
 
 ## Basic usage
 
@@ -55,7 +70,23 @@ The Progress tab shows regional completion and the boss list. Filters and search
 
 The application starts in dark mode. Disable ［ダークモード］ (Dark Mode) on the Settings tab to use the light theme.
 
-The interface itself is primarily Japanese. The language setting changes proper names such as bosses, regions, and locations; it does not translate every interface label.
+The application interface is Japanese. The language setting changes proper names such as bosses, regions, and locations; it does not translate the interface labels.
+
+## Updating to a newer version
+
+1. Exit ER Boss Tracker JP if it is running.
+2. Download the new release ZIP from [GitHub Releases](../../releases/latest).
+3. Fully extract it to a new folder separate from the previous version.
+4. Launch `ERBossTrackerJP.exe` from the new folder and confirm that it works normally.
+5. After confirming the new version works, you may delete the old application folder.
+
+Settings are stored outside the application folder at the following location, so they are normally carried over automatically:
+
+```text
+%LOCALAPPDATA%\ERBossTrackerJP\settings.json
+```
+
+Extracting each release to a new folder is recommended instead of overwriting the previous version's folder.
 
 ## Displaying data in OBS Studio
 
@@ -121,7 +152,19 @@ The saved character slot is restored only when the same save can still be found.
 
 ### The save file is not found
 
-Use ［フォルダーを選択］ (Select Folder) to choose the folder containing `ER0000.sl2` or the parent `EldenRing` folder.
+The standard save location has the following form:
+
+```text
+%APPDATA%\EldenRing\<SteamID>\ER0000.sl2
+```
+
+The `<SteamID>` folder name varies by environment. You do not need to enter a SteamID into the application.
+
+Use ［フォルダーを選択］ (Select Folder) and choose any of the following:
+
+- The SteamID folder containing `ER0000.sl2`
+- The `EldenRing` folder containing the SteamID folder
+- A parent folder containing that `EldenRing` folder
 
 ### Game progress is not updating
 
