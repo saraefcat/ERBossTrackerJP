@@ -24,6 +24,7 @@
     <ProjectReference Include="..\..\src\ERBossTrackerJP.Core\ERBossTrackerJP.Core.csproj" />
     <ProjectReference Include="..\..\src\ERBossTrackerJP.Save\ERBossTrackerJP.Save.csproj" />
     <ProjectReference Include="..\..\src\ERBossTrackerJP\ERBossTrackerJP.csproj" />
+    <ProjectReference Include="..\..\tools\ERBossTrackerJP.DataGenerator\ERBossTrackerJP.DataGenerator.csproj" />
   </ItemGroup>
 
 </Project>

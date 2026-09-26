@@ -1,0 +1,4043 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "game": "EldenRing",
+    "appVersion": "1.17",
+    "regulationVersion": "1.17"
+  },
+  "languageSeparators": {
+    "ja": "＆",
+    "en": " & "
+  },
+  "entries": [
+    {
+      "flagId": 18000850,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904311000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          18000,
+          180001
+        ]
+      }
+    },
+    {
+      "flagId": 1042360800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903251600,
+          903251601,
+          903251602,
+          906251600,
+          906251601
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          610000,
+          6100300
+        ]
+      }
+    },
+    {
+      "flagId": 31150800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              904120310,
+              904120311
+            ]
+          },
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              904120310,
+              904120311
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31150,
+          311500,
+          10670174
+        ]
+      }
+    },
+    {
+      "flagId": 30020800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904260300,
+          904260301,
+          904260302,
+          904260303
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30020,
+          300200,
+          10670162
+        ]
+      }
+    },
+    {
+      "flagId": 31030800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903970310
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31030,
+          310300,
+          10670173
+        ]
+      }
+    },
+    {
+      "flagId": 32010800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904600320,
+          904600321
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          32010,
+          320100,
+          10670181
+        ]
+      }
+    },
+    {
+      "flagId": 1044360800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904340540
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6100501,
+          10670106
+        ]
+      }
+    },
+    {
+      "flagId": 1044350800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904290520
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6100900
+        ]
+      }
+    },
+    {
+      "flagId": 31000800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          130900,
+          130901
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31000,
+          310000,
+          10670172
+        ]
+      }
+    },
+    {
+      "flagId": 30040800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903400300,
+          903400301
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30040,
+          300400,
+          10670164
+        ]
+      }
+    },
+    {
+      "flagId": 31170800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904660310
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31170,
+          311700,
+          10670175
+        ]
+      }
+    },
+    {
+      "flagId": 30110800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          902100300,
+          902100301,
+          902100302,
+          902100310,
+          902100600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30110,
+          301100,
+          10670163
+        ]
+      }
+    },
+    {
+      "flagId": 18000800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904640000,
+          904640301,
+          904640600
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          18001
+        ]
+      }
+    },
+    {
+      "flagId": 1043360800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904500600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6108100,
+          10670102
+        ]
+      }
+    },
+    {
+      "flagId": 1045390800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904950600,
+          904950601,
+          904950602,
+          904950603
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6100504
+        ]
+      }
+    },
+    {
+      "flagId": 1042370800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          902500301,
+          902500500,
+          902500520
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6100901
+        ]
+      }
+    },
+    {
+      "flagId": 1043370800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903150600,
+          903150601,
+          903150602,
+          903150603,
+          903150604,
+          903150605,
+          903150606,
+          903150607
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          61000,
+          8000000
+        ]
+      }
+    },
+    {
+      "flagId": 1042380800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904980601,
+          904980602,
+          904980603,
+          904980605
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          61000,
+          8000000
+        ]
+      }
+    },
+    {
+      "flagId": 1042380850,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903100600,
+          903100601,
+          903100602,
+          903100603
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          610017,
+          6100601
+        ]
+      }
+    },
+    {
+      "flagId": 31010800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904630310
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31010,
+          310100,
+          10670171
+        ]
+      }
+    },
+    {
+      "flagId": 32000800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903451320
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          32000,
+          320000,
+          10670180
+        ]
+      }
+    },
+    {
+      "flagId": 30010800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904260300,
+          904260301,
+          904260302,
+          904260303
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30010,
+          300100,
+          10670161
+        ]
+      }
+    },
+    {
+      "flagId": 30000800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903664300,
+          903664301,
+          903664302
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30000,
+          300000,
+          10670160
+        ]
+      }
+    },
+    {
+      "flagId": 31020800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904480310
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31020,
+          310200,
+          10670170
+        ]
+      }
+    },
+    {
+      "flagId": 1043330800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904810600,
+          904810601,
+          904810602
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6103000,
+          6113000,
+          6203000,
+          6203001,
+          6303000,
+          6303001,
+          6313000,
+          6403000,
+          6403001,
+          6413000,
+          6503000,
+          6513000
+        ]
+      }
+    },
+    {
+      "flagId": 1042330800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          907100300,
+          907100301,
+          907100520
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6110900
+        ]
+      }
+    },
+    {
+      "flagId": 1044320850,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903150600,
+          903150601,
+          903150602,
+          903150603,
+          903150604,
+          903150605,
+          903150606,
+          903150607
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          611001
+        ]
+      }
+    },
+    {
+      "flagId": 1044320800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904980601,
+          904980602,
+          904980603,
+          904980605
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          61002
+        ]
+      }
+    },
+    {
+      "flagId": 1043300800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903460500
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          611011
+        ]
+      }
+    },
+    {
+      "flagId": 10000850,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          902130000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          10000,
+          6120000
+        ]
+      }
+    },
+    {
+      "flagId": 10000800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904750000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          10000,
+          6120000
+        ]
+      }
+    },
+    {
+      "flagId": 31040800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903800310
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31040,
+          310400,
+          10670270
+        ]
+      }
+    },
+    {
+      "flagId": 31050800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904290310
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31050,
+          310500,
+          10670271
+        ]
+      }
+    },
+    {
+      "flagId": 30060800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904260300,
+          904260301,
+          904260302,
+          904260303
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30060,
+          300600,
+          10670262
+        ]
+      }
+    },
+    {
+      "flagId": 31060800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              903350310
+            ]
+          },
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              903350311,
+              903350322
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31060,
+          310600,
+          10670272
+        ]
+      }
+    },
+    {
+      "flagId": 32020800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903350321
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          32020,
+          320200,
+          10670280
+        ]
+      }
+    },
+    {
+      "flagId": 30050800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903664300,
+          903664301,
+          903664302
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30050,
+          300500,
+          10670260
+        ]
+      }
+    },
+    {
+      "flagId": 30050850,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          902100300,
+          902100301,
+          902100302,
+          902100310,
+          902100600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30050,
+          300500,
+          10670260
+        ]
+      }
+    },
+    {
+      "flagId": 30030800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904140300,
+          904140310
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30030,
+          300300,
+          10670261
+        ]
+      }
+    },
+    {
+      "flagId": 10010800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904690000
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          10010
+        ]
+      }
+    },
+    {
+      "flagId": 1034450800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904502600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          620056,
+          6203201,
+          10670201
+        ]
+      }
+    },
+    {
+      "flagId": 1035420800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904820310,
+          904820600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          620035,
+          6200700,
+          10670202
+        ]
+      }
+    },
+    {
+      "flagId": 1034480800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904020540
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6200501,
+          10670203
+        ]
+      }
+    },
+    {
+      "flagId": 1039440800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904950600,
+          904950601,
+          904950602,
+          904950603
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          62000,
+          8000400
+        ]
+      }
+    },
+    {
+      "flagId": 1033430800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904810600,
+          904810601,
+          904810602
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          620052,
+          6201700
+        ]
+      }
+    },
+    {
+      "flagId": 1038480800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904810600,
+          904810601,
+          904810602
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          620041
+        ]
+      }
+    },
+    {
+      "flagId": 1038410800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          135600,
+          900000520
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6200900
+        ]
+      }
+    },
+    {
+      "flagId": 1033450800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904600520
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6200901
+        ]
+      }
+    },
+    {
+      "flagId": 1036500800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903600320,
+          903600520
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6200902
+        ]
+      }
+    },
+    {
+      "flagId": 1039430800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903150600,
+          903150601,
+          903150602,
+          903150603,
+          903150604,
+          903150605,
+          903150606,
+          903150607
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          620037
+        ]
+      }
+    },
+    {
+      "flagId": 1036480800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903150600,
+          903150601,
+          903150602,
+          903150603,
+          903150604,
+          903150605,
+          903150606,
+          903150607
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          620011,
+          6200303
+        ]
+      }
+    },
+    {
+      "flagId": 1037420800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904980601,
+          904980602,
+          904980603,
+          904980605
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          620003
+        ]
+      }
+    },
+    {
+      "flagId": 1036450800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904980600,
+          904980604,
+          904980606,
+          904980607,
+          906260600
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          620048
+        ]
+      }
+    },
+    {
+      "flagId": 1037460800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903100600,
+          903100601,
+          903100602,
+          903100603
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          620039,
+          6200301
+        ]
+      }
+    },
+    {
+      "flagId": 1035500800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903253500
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6202600,
+          10670204
+        ]
+      }
+    },
+    {
+      "flagId": 39200800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904910000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          39200,
+          390001,
+          10670240
+        ]
+      }
+    },
+    {
+      "flagId": 1034420800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904502601,
+          904502602
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          62002,
+          621000
+        ]
+      }
+    },
+    {
+      "flagId": 1033420800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          902100521
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6210900
+        ]
+      }
+    },
+    {
+      "flagId": 14000850,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903181000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          14000,
+          6220000
+        ]
+      }
+    },
+    {
+      "flagId": 14000800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          120000,
+          902030000,
+          902030001
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          14000,
+          6220000
+        ]
+      }
+    },
+    {
+      "flagId": 32070800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904910320,
+          904910600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          32070,
+          320700,
+          10670480
+        ]
+      }
+    },
+    {
+      "flagId": 30140800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              904260304
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              904260305
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30140,
+          301400,
+          10670460
+        ]
+      }
+    },
+    {
+      "flagId": 31210800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903400310
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31210,
+          312100,
+          10670470
+        ]
+      }
+    },
+    {
+      "flagId": 30150800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903664300,
+          903664301,
+          903664302
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30150,
+          301500,
+          10670461
+        ]
+      }
+    },
+    {
+      "flagId": 32080800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904680320,
+          904680601,
+          904680602,
+          906310600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          32080,
+          320800,
+          10670481
+        ]
+      }
+    },
+    {
+      "flagId": 31110800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              903350312
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              903350313
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              903350314
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31110,
+          311100,
+          10670473
+        ]
+      }
+    },
+    {
+      "flagId": 1048400800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              904340541
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              904340542
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          640005,
+          6400503,
+          10670401
+        ]
+      }
+    },
+    {
+      "flagId": 1048370800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904501600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          640018,
+          6400302
+        ]
+      }
+    },
+    {
+      "flagId": 1049390800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              903300560
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              903300561
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6403300,
+          10670404
+        ]
+      }
+    },
+    {
+      "flagId": 1049380800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903050600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          64002,
+          640027,
+          10670403
+        ]
+      }
+    },
+    {
+      "flagId": 1047400800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904811600,
+          904811601,
+          904811602
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6103000,
+          6113000,
+          6203000,
+          6203001,
+          6303000,
+          6303001,
+          6313000,
+          6403000,
+          6403001,
+          6413000,
+          6503000,
+          6513000
+        ]
+      }
+    },
+    {
+      "flagId": 1049370800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903150600,
+          903150601,
+          903150602,
+          903150603,
+          903150604,
+          903150605,
+          903150606,
+          903150607
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          640019,
+          10670402
+        ]
+      }
+    },
+    {
+      "flagId": 1049370850,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904980600,
+          904980604,
+          904980606,
+          904980607,
+          906260600
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          640016
+        ]
+      }
+    },
+    {
+      "flagId": 1051360800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              902500301,
+              902500500,
+              902500520
+            ]
+          },
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              903460300,
+              903460501
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6402800,
+          10670406
+        ]
+      }
+    },
+    {
+      "flagId": 1252380800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904730000
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6400000
+        ]
+      }
+    },
+    {
+      "flagId": 31200800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              903800311
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              903800312
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31200,
+          312000,
+          10670472
+        ]
+      }
+    },
+    {
+      "flagId": 31100800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              903970311
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              903970312
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31100,
+          311000,
+          10670471
+        ]
+      }
+    },
+    {
+      "flagId": 30160800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904640300
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30160,
+          301600,
+          10670462
+        ]
+      }
+    },
+    {
+      "flagId": 34130800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903560000,
+          903560310,
+          903560600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          34130,
+          341300,
+          10670490
+        ]
+      }
+    },
+    {
+      "flagId": 1051430800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904770600,
+          904770601
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          640025,
+          6415400
+        ]
+      }
+    },
+    {
+      "flagId": 1052410800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904500601
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          64001,
+          10670405
+        ]
+      }
+    },
+    {
+      "flagId": 1051400800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904811600,
+          904811601,
+          904811602
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6103000,
+          6113000,
+          6203000,
+          6203001,
+          6303000,
+          6303001,
+          6313000,
+          6403000,
+          6403001,
+          6413000,
+          6503000,
+          6513000
+        ]
+      }
+    },
+    {
+      "flagId": 1049390850,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903704520
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6410900
+        ]
+      }
+    },
+    {
+      "flagId": 1052410850,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903150600,
+          903150601,
+          903150602,
+          903150603,
+          903150604,
+          903150605,
+          903150606,
+          903150607
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          640023,
+          6411700
+        ]
+      }
+    },
+    {
+      "flagId": 1048410800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903100600,
+          903100601,
+          903100602,
+          903100603
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          611006,
+          640006,
+          6110600,
+          6410600
+        ]
+      }
+    },
+    {
+      "flagId": 31190850,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          137600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31190,
+          311900,
+          10670373
+        ]
+      }
+    },
+    {
+      "flagId": 31190800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          902100300,
+          902100301,
+          902100302,
+          902100310,
+          902100600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31190,
+          311900,
+          10670373
+        ]
+      }
+    },
+    {
+      "flagId": 32040800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904600320,
+          904600321
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          32040,
+          320400,
+          10670380
+        ]
+      }
+    },
+    {
+      "flagId": 32050800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              903350311,
+              903350322
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              903350321
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          32050,
+          320500,
+          10670381
+        ]
+      }
+    },
+    {
+      "flagId": 1040520800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          902100300,
+          902100301,
+          902100302,
+          902100310,
+          902100600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30080,
+          300800,
+          10670360
+        ]
+      }
+    },
+    {
+      "flagId": 30080800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          907100300,
+          907100301,
+          907100520
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30080,
+          300800,
+          10670360
+        ]
+      }
+    },
+    {
+      "flagId": 31180800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              904820310,
+              904820600
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              904480310
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31180,
+          311800,
+          10670372
+        ]
+      }
+    },
+    {
+      "flagId": 30120800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              903700300
+            ]
+          },
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              903460300,
+              903460501
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30120,
+          301200,
+          10670363
+        ]
+      }
+    },
+    {
+      "flagId": 30070800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904260300,
+          904260301,
+          904260302,
+          904260303
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30070,
+          300700,
+          10670364
+        ]
+      }
+    },
+    {
+      "flagId": 1041520800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904510600
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          630004
+        ]
+      }
+    },
+    {
+      "flagId": 1038510800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904130540
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6300501
+        ]
+      }
+    },
+    {
+      "flagId": 1040530800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          134310,
+          903550540
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6300503,
+          10670307
+        ]
+      }
+    },
+    {
+      "flagId": 1042550800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903560000,
+          903560310,
+          903560600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6300700,
+          10670308
+        ]
+      }
+    },
+    {
+      "flagId": 1041500800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904680320,
+          904680601,
+          904680602,
+          906310600
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6108702
+        ]
+      }
+    },
+    {
+      "flagId": 1041510800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              903251600,
+              903251601,
+              903251602,
+              906251600,
+              906251601
+            ]
+          },
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              903251600,
+              903251601,
+              903251602,
+              906251600,
+              906251601
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          63000,
+          630009,
+          8000800
+        ]
+      }
+    },
+    {
+      "flagId": 1038520800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904950600,
+          904950601,
+          904950602,
+          904950603
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6310501,
+          10670305
+        ]
+      }
+    },
+    {
+      "flagId": 1041530800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904580600,
+          904580601
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6103000,
+          6113000,
+          6203000,
+          6203001,
+          6303000,
+          6303001,
+          6313000,
+          6403000,
+          6403001,
+          6413000,
+          6503000,
+          6513000
+        ]
+      }
+    },
+    {
+      "flagId": 1039500800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904750520
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6300900
+        ]
+      }
+    },
+    {
+      "flagId": 1039510800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903150600,
+          903150601,
+          903150602,
+          903150603,
+          903150604,
+          903150605,
+          903150606,
+          903150607
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          630003
+        ]
+      }
+    },
+    {
+      "flagId": 1039540800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903100500
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6302700,
+          10670306
+        ]
+      }
+    },
+    {
+      "flagId": 34120800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903600320,
+          903600520
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          34120,
+          341201,
+          10670390
+        ]
+      }
+    },
+    {
+      "flagId": 30130800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903400300,
+          903400301
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30130,
+          301300
+        ]
+      }
+    },
+    {
+      "flagId": 30100800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              902500301,
+              902500500,
+              902500520
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              902500300
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30100,
+          301000,
+          10670362
+        ]
+      }
+    },
+    {
+      "flagId": 1045520800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903250600
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          630014
+        ]
+      }
+    },
+    {
+      "flagId": 1044530800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904980601,
+          904980602,
+          904980603,
+          904980605
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          63002
+        ]
+      }
+    },
+    {
+      "flagId": 1043530800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903100600,
+          903100601,
+          903100602,
+          903100603
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          630005,
+          6300601
+        ]
+      }
+    },
+    {
+      "flagId": 31090800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904130310
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31090,
+          310900,
+          10670371
+        ]
+      }
+    },
+    {
+      "flagId": 31070800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              903810310,
+              903810311
+            ]
+          },
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              903810310,
+              903810311
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31070,
+          310700,
+          10670370
+        ]
+      }
+    },
+    {
+      "flagId": 30090800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903181300
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30090,
+          300900,
+          10670361
+        ]
+      }
+    },
+    {
+      "flagId": 1035530800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904910320,
+          904910600
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6311800
+        ]
+      }
+    },
+    {
+      "flagId": 1036540800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904680603
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          631001
+        ]
+      }
+    },
+    {
+      "flagId": 1037530800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904130600
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6310700
+        ]
+      }
+    },
+    {
+      "flagId": 1037540810,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904640000,
+          904640301,
+          904640600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6103000,
+          6113000,
+          6203000,
+          6203001,
+          6303000,
+          6303001,
+          6313000,
+          6403000,
+          6403001,
+          6413000,
+          6503000,
+          6513000
+        ]
+      }
+    },
+    {
+      "flagId": 16000860,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              904470000
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              904470001
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          160007
+        ]
+      }
+    },
+    {
+      "flagId": 16000850,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903570000,
+          903570310
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          160001,
+          10670353
+        ]
+      }
+    },
+    {
+      "flagId": 16000800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              904710000
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              904710001
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          16000,
+          160002,
+          6316000
+        ]
+      }
+    },
+    {
+      "flagId": 35000850,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          138600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          35002,
+          350003,
+          10670342
+        ]
+      }
+    },
+    {
+      "flagId": 34140850,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              902140000,
+              902140001
+            ]
+          },
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              902140000,
+              902140001
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          34140,
+          341401
+        ]
+      }
+    },
+    {
+      "flagId": 35000800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904800002
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          350000
+        ]
+      }
+    },
+    {
+      "flagId": 11000850,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904720000,
+          904720002
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          110001,
+          110501,
+          10670731
+        ]
+      }
+    },
+    {
+      "flagId": 11000800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          902130002,
+          902130003
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          110000,
+          110500,
+          10670750
+        ]
+      }
+    },
+    {
+      "flagId": 1048510800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903150600,
+          903150601,
+          903150602,
+          903150603,
+          903150604,
+          903150605,
+          903150606,
+          903150607
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          63003,
+          650000,
+          10670500
+        ]
+      }
+    },
+    {
+      "flagId": 1049520800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904770600,
+          904770601
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          63003,
+          650000,
+          10670500
+        ]
+      }
+    },
+    {
+      "flagId": 30170800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          907100300,
+          907100301,
+          907100520
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30170,
+          301700,
+          10670560
+        ]
+      }
+    },
+    {
+      "flagId": 30180800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904640000,
+          904640301,
+          904640600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30180,
+          301800,
+          10670561
+        ]
+      }
+    },
+    {
+      "flagId": 31220800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              903560000,
+              903560310,
+              903560600
+            ]
+          },
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              903570000,
+              903570310
+            ]
+          },
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              904140300,
+              904140310
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31220,
+          312200,
+          10670571
+        ]
+      }
+    },
+    {
+      "flagId": 1254560800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904503600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          650003,
+          10670501
+        ]
+      }
+    },
+    {
+      "flagId": 1052560800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904810600,
+          904810601,
+          904810602
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6103000,
+          6113000,
+          6203000,
+          6203001,
+          6303000,
+          6303001,
+          6313000,
+          6403000,
+          6403001,
+          6413000,
+          6503000,
+          6513000
+        ]
+      }
+    },
+    {
+      "flagId": 1053560800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          130401
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6500900
+        ]
+      }
+    },
+    {
+      "flagId": 1050570800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904980600,
+          904980604,
+          904980606,
+          904980607,
+          906260600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          65000,
+          8001200
+        ]
+      }
+    },
+    {
+      "flagId": 1051570800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903050500
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6502900,
+          10670505
+        ]
+      }
+    },
+    {
+      "flagId": 1052520800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904760000
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          65001
+        ]
+      }
+    },
+    {
+      "flagId": 13000850,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903575000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          130002,
+          10670744
+        ]
+      }
+    },
+    {
+      "flagId": 13000830,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904520000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          130010,
+          10670746
+        ]
+      }
+    },
+    {
+      "flagId": 13000800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          902110001
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          13000
+        ]
+      }
+    },
+    {
+      "flagId": 30200800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903320300
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30200,
+          302000,
+          10670563
+        ]
+      }
+    },
+    {
+      "flagId": 30190800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903400302
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          30190,
+          301900,
+          10670562
+        ]
+      }
+    },
+    {
+      "flagId": 32110800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904620320
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          32110,
+          321100,
+          10670580
+        ]
+      }
+    },
+    {
+      "flagId": 31120800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903460310
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          31120,
+          311200,
+          10670570
+        ]
+      }
+    },
+    {
+      "flagId": 1050560800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904911600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          65002,
+          651000
+        ]
+      }
+    },
+    {
+      "flagId": 1050570850,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904811600,
+          904811601,
+          904811602
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6103000,
+          6113000,
+          6203000,
+          6203001,
+          6303000,
+          6303001,
+          6313000,
+          6403000,
+          6403001,
+          6413000,
+          6503000,
+          6513000
+        ]
+      }
+    },
+    {
+      "flagId": 1248550800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              903150608
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              903150609
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          651001
+        ]
+      }
+    },
+    {
+      "flagId": 1048570800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904980600,
+          904980604,
+          904980606,
+          904980607,
+          906260600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          65002,
+          651000
+        ]
+      }
+    },
+    {
+      "flagId": 15000850,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903252000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          15001,
+          6515500
+        ]
+      }
+    },
+    {
+      "flagId": 15000800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              902120000
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              902120001
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          15001,
+          6515500
+        ]
+      }
+    },
+    {
+      "flagId": 12020830,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904650600,
+          904650601
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          120203,
+          10670620
+        ]
+      }
+    },
+    {
+      "flagId": 12080800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904670000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          120203,
+          10670620
+        ]
+      }
+    },
+    {
+      "flagId": 12020850,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          903320000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          12070,
+          8010200
+        ]
+      }
+    },
+    {
+      "flagId": 12090800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904670001
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6654604
+        ]
+      }
+    },
+    {
+      "flagId": 12020800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              904770000
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              904770001
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6654602
+        ]
+      }
+    },
+    {
+      "flagId": 12050800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904800000
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          6664500
+        ]
+      }
+    },
+    {
+      "flagId": 12010800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904650000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          12012,
+          8010000
+        ]
+      }
+    },
+    {
+      "flagId": 12010850,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904650600,
+          904650601
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          12012,
+          8010000
+        ]
+      }
+    },
+    {
+      "flagId": 12040800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904620001
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          120108,
+          6614700,
+          10670616
+        ]
+      }
+    },
+    {
+      "flagId": 12030390,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          902500600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          12030,
+          120303,
+          8010400,
+          10670632
+        ]
+      }
+    },
+    {
+      "flagId": 12030800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              136100,
+              137000,
+              137100
+            ]
+          },
+          {
+            "resolution": "same-display-ambiguous",
+            "textIds": [
+              132500,
+              132501
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              132900
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          12030,
+          120303,
+          8010400,
+          10670632
+        ]
+      }
+    },
+    {
+      "flagId": 12030850,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          904510000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          12030,
+          120303,
+          8010400,
+          10670632
+        ]
+      }
+    },
+    {
+      "flagId": 11050850,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          132400
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          110001,
+          110501,
+          10670731
+        ]
+      }
+    },
+    {
+      "flagId": 11050800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904720000,
+          904720002
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          110000,
+          110500,
+          10670750
+        ]
+      }
+    },
+    {
+      "flagId": 19000800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              902190000
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              902200000
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          190000
+        ]
+      }
+    },
+    {
+      "flagId": 2045440800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          905860600,
+          905860601,
+          905860603
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          68000,
+          680000
+        ]
+      }
+    },
+    {
+      "flagId": 2046410800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          142400,
+          900000563
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6805600,
+          10670800
+        ]
+      }
+    },
+    {
+      "flagId": 43000800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905081430
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          43000,
+          430000,
+          10670980
+        ]
+      }
+    },
+    {
+      "flagId": 41020800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          142700,
+          900000410
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          41020,
+          410200,
+          10670871
+        ]
+      }
+    },
+    {
+      "flagId": 41000800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905810410
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          41000,
+          410000,
+          10670870
+        ]
+      }
+    },
+    {
+      "flagId": 20000800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          905210000,
+          905210600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          20000,
+          200001,
+          6801000,
+          10670841
+        ]
+      }
+    },
+    {
+      "flagId": 2048440800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905300000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          68200,
+          6824100
+        ]
+      }
+    },
+    {
+      "flagId": 2049430800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          905860600,
+          905860601,
+          905860603
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          69000
+        ]
+      }
+    },
+    {
+      "flagId": 2049450800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905820601
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          69000
+        ]
+      }
+    },
+    {
+      "flagId": 2044470800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905820600
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          69001
+        ]
+      }
+    },
+    {
+      "flagId": 2049440800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          142500,
+          142501,
+          142502
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          690002,
+          6905400
+        ]
+      }
+    },
+    {
+      "flagId": 2049430850,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905840500
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          690009,
+          6904300
+        ]
+      }
+    },
+    {
+      "flagId": 2047450800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905840501
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6904200,
+          10670912
+        ]
+      }
+    },
+    {
+      "flagId": 2046450800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          142100,
+          900000560
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6905600,
+          10670902
+        ]
+      }
+    },
+    {
+      "flagId": 2051440800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          142300,
+          900000562
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6905601,
+          10670903
+        ]
+      }
+    },
+    {
+      "flagId": 25000800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905200000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          690006,
+          6904800
+        ]
+      }
+    },
+    {
+      "flagId": 2051450800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          142001,
+          900000606
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          690006,
+          6904800
+        ]
+      }
+    },
+    {
+      "flagId": 40000800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          905070400,
+          905070401
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          40000,
+          400000,
+          10670860
+        ]
+      }
+    },
+    {
+      "flagId": 40010800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          905070400,
+          905070401
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          40010,
+          400100,
+          10670960
+        ]
+      }
+    },
+    {
+      "flagId": 41010800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905040400
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          41010,
+          410100,
+          10670970
+        ]
+      }
+    },
+    {
+      "flagId": 21000850,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905010000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          21000,
+          6901300
+        ]
+      }
+    },
+    {
+      "flagId": 21010800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              905130000
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              905130001
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          21000,
+          6901300
+        ]
+      }
+    },
+    {
+      "flagId": 2046460800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          905210000,
+          905210600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          69400,
+          10670906
+        ]
+      }
+    },
+    {
+      "flagId": 2044450800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905030000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          694005,
+          10670908
+        ]
+      }
+    },
+    {
+      "flagId": 2048380850,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          905860600,
+          905860601,
+          905860603
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          68300,
+          683001,
+          10670804
+        ]
+      }
+    },
+    {
+      "flagId": 2046380800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          142200,
+          900000561
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          6835600,
+          10670806
+        ]
+      }
+    },
+    {
+      "flagId": 22000800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905020000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          22000,
+          220001,
+          6831700,
+          10670830
+        ]
+      }
+    },
+    {
+      "flagId": 2047390800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904980600,
+          904980604,
+          904980606,
+          904980607,
+          906260600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          68400,
+          684001
+        ]
+      }
+    },
+    {
+      "flagId": 2046400800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905730600
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          68400,
+          684001
+        ]
+      }
+    },
+    {
+      "flagId": 2049410800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          905580600,
+          905580601
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          68501,
+          685000,
+          10670810
+        ]
+      }
+    },
+    {
+      "flagId": 2052400800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          905580600,
+          905580601
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          685001
+        ]
+      }
+    },
+    {
+      "flagId": 43010800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          140700,
+          900000430
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          43010,
+          430100,
+          10670880
+        ]
+      }
+    },
+    {
+      "flagId": 2054390850,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905370600
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          685001
+        ]
+      }
+    },
+    {
+      "flagId": 2054390800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905120000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          685002,
+          10670812
+        ]
+      }
+    },
+    {
+      "flagId": 2050470800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903251600,
+          903251601,
+          903251602,
+          906251600,
+          906251601
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          693000,
+          10670910
+        ]
+      }
+    },
+    {
+      "flagId": 2050480860,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          903251600,
+          903251601,
+          903251602,
+          906251600,
+          906251601
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          693002
+        ]
+      }
+    },
+    {
+      "flagId": 2052480800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          904680320,
+          904680601,
+          904680602,
+          906310600
+        ]
+      },
+      "placeName": {
+        "resolution": "exact",
+        "textIds": [
+          693001
+        ]
+      }
+    },
+    {
+      "flagId": 2049480800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905000000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          69200,
+          692000,
+          6920000
+        ]
+      }
+    },
+    {
+      "flagId": 2050480800,
+      "npcName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          905230000,
+          905230001,
+          905230002
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          696000,
+          6920001
+        ]
+      }
+    },
+    {
+      "flagId": 2052430800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905320000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          40020,
+          400200,
+          10670961
+        ]
+      }
+    },
+    {
+      "flagId": 28000800,
+      "npcName": {
+        "resolution": "exact",
+        "textIds": [
+          905051000
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          28000,
+          6861800
+        ]
+      }
+    },
+    {
+      "flagId": 20010800,
+      "npcName": {
+        "resolution": "composite-reviewed",
+        "composition": "join",
+        "components": [
+          {
+            "resolution": "exact",
+            "textIds": [
+              905220000
+            ]
+          },
+          {
+            "resolution": "exact",
+            "textIds": [
+              905220001
+            ]
+          }
+        ]
+      },
+      "placeName": {
+        "resolution": "same-display-ambiguous",
+        "textIds": [
+          20010,
+          6941100
+        ]
+      }
+    }
+  ]
+}
