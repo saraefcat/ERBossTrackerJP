@@ -34,7 +34,7 @@ PC Steam版『ELDEN RING』のセーブファイルから、キャラクター�
 
 ## ダウンロードと起動
 
-1. [GitHub Releases](../../releases/latest)から`ERBossTrackerJP-v0.1.1-win-x64.zip`をダウンロードします。
+1. [GitHub Releases](../../releases/latest)から`ERBossTrackerJP-v0.1.2-win-x64.zip`をダウンロードします。
 2. ZIPを任意のフォルダーへ完全に展開します。
 3. 展開先の`ERBossTrackerJP.exe`を起動します。
 
@@ -189,7 +189,7 @@ dotnet test ERBossTrackerJP.sln -c Release
 .\tools\Publish-Release.ps1
 ```
 
-版番号を変更する場合は、例えば`.\tools\Publish-Release.ps1 -Version 0.1.1`と指定します。配布物の`SOURCE_COMMIT.txt`には発行元コミットが記録されます。
+版番号を変更する場合は、例えば`.\tools\Publish-Release.ps1 -Version 0.1.2`と指定します。配布物の`SOURCE_COMMIT.txt`には発行元コミットが記録されます。
 
 ## 関連資料
 

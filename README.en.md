@@ -34,7 +34,7 @@ The self-contained release includes the .NET runtime. End users do not need to i
 
 ## Download and launch
 
-1. Download `ERBossTrackerJP-v0.1.1-win-x64.zip` from [GitHub Releases](../../releases/latest).
+1. Download `ERBossTrackerJP-v0.1.2-win-x64.zip` from [GitHub Releases](../../releases/latest).
 2. Fully extract the ZIP to a folder of your choice.
 3. Launch `ERBossTrackerJP.exe` from the extracted folder.
 
@@ -191,7 +191,7 @@ The following script requires a clean Git working tree, runs the Release test su
 .\tools\Publish-Release.ps1
 ```
 
-To override the version, run a command such as `.\tools\Publish-Release.ps1 -Version 0.1.1`. `SOURCE_COMMIT.txt` in the package records the source commit.
+To override the version, run a command such as `.\tools\Publish-Release.ps1 -Version 0.1.2`. `SOURCE_COMMIT.txt` in the package records the source commit.
 
 ## Related documents
 
