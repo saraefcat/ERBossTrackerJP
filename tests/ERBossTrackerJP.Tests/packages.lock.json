@@ -109,6 +109,12 @@
       "erbosstrackerjp.core": {
         "type": "Project"
       },
+      "erbosstrackerjp.datagenerator": {
+        "type": "Project",
+        "dependencies": {
+          "ERBossTrackerJP.Core": "[1.0.0, )"
+        }
+      },
       "erbosstrackerjp.save": {
         "type": "Project",
         "dependencies": {
