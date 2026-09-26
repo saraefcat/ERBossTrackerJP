@@ -37,7 +37,7 @@ PC Steam版『ELDEN RING』のセーブファイルから、キャラクター�
 
 ## ダウンロードと起動
 
-1. [GitHub Releases](../../releases/latest)から`ERBossTrackerJP-v0.1.2-win-x64.zip`をダウンロードします。
+1. [GitHub Releases](https://github.com/saraefcat/ERBossTrackerJP/releases/latest)から`ERBossTrackerJP-v0.1.2-win-x64.zip`をダウンロードします。
 2. ZIPを任意の新しいフォルダーへ完全に展開します。ZIPを開いた画面から直接実行しないでください。
 3. 展開先の`ERBossTrackerJP.exe`を起動します。
 
@@ -73,7 +73,7 @@ Get-FileHash .\ERBossTrackerJP-v0.1.2-win-x64.zip -Algorithm SHA256
 ## 新しいバージョンへ更新する
 
 1. 起動中のER Boss Tracker JPを終了します。
-2. [GitHub Releases](../../releases/latest)から新しいバージョンのZIPをダウンロードします。
+2. [GitHub Releases](https://github.com/saraefcat/ERBossTrackerJP/releases/latest)から新しいバージョンのZIPをダウンロードします。
 3. 旧版とは別の新しいフォルダーへZIPを完全に展開します。
 4. 新しいフォルダーの`ERBossTrackerJP.exe`を起動し、正常に動作することを確認します。
 5. 問題がなければ、旧版のフォルダーは削除できます。
@@ -186,7 +186,7 @@ max(0, 累計死亡数 - 周回開始時の基準値)
 
 ログは2 MiBを超える前にローテーションし、3世代まで保持します。セーブのバイト列、イベントフラグ、キャラクター名は記録しません。セーブファイルのパス、OS・ランタイム情報、例外の詳細は含まれるため、第三者へ渡す前に内容を確認してください。
 
-解決しない場合は、個人情報を取り除いた診断ログと再現手順を添えて[GitHub Issues](../../issues)へ報告してください。実際のセーブファイルは公開しないでください。
+解決しない場合は、個人情報を取り除いた診断ログと再現手順を添えて[GitHub Issues](https://github.com/saraefcat/ERBossTrackerJP/issues)へ報告してください。実際のセーブファイルは公開しないでください。
 
 ## 既知の制限
 

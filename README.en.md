@@ -37,7 +37,7 @@ The self-contained release includes the .NET runtime. End users do not need to i
 
 ## Download and launch
 
-1. Download `ERBossTrackerJP-v0.1.2-win-x64.zip` from [GitHub Releases](../../releases/latest).
+1. Download `ERBossTrackerJP-v0.1.2-win-x64.zip` from [GitHub Releases](https://github.com/saraefcat/ERBossTrackerJP/releases/latest).
 2. Fully extract the ZIP to a new folder of your choice. Do not run the application directly from inside the ZIP viewer.
 3. Launch `ERBossTrackerJP.exe` from the extracted folder.
 
@@ -75,7 +75,7 @@ The application interface is Japanese. The language setting changes proper names
 ## Updating to a newer version
 
 1. Exit ER Boss Tracker JP if it is running.
-2. Download the new release ZIP from [GitHub Releases](../../releases/latest).
+2. Download the new release ZIP from [GitHub Releases](https://github.com/saraefcat/ERBossTrackerJP/releases/latest).
 3. Fully extract it to a new folder separate from the previous version.
 4. Launch `ERBossTrackerJP.exe` from the new folder and confirm that it works normally.
 5. After confirming the new version works, you may delete the old application folder.
@@ -188,7 +188,7 @@ Startup, save loading, automatic monitoring, and settings diagnostics are writte
 
 The log is rotated before it exceeds 2 MiB, with three previous generations retained. Save bytes, event flags, and character names are not logged. Save-file paths, operating-system and runtime information, and exception details may be present, so review the log before sharing it.
 
-If the problem continues, remove personal information and report the reproduction steps and relevant log details through [GitHub Issues](../../issues). Do not publish an actual save file.
+If the problem continues, remove personal information and report the reproduction steps and relevant log details through [GitHub Issues](https://github.com/saraefcat/ERBossTrackerJP/issues). Do not publish an actual save file.
 
 ## Known limitations
 
