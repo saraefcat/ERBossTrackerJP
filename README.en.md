@@ -21,7 +21,9 @@ ER Boss Tracker JP is a Windows application for viewing per-character boss compl
 - Automatic updates while playing by monitoring the save file
 - Cumulative save death count and an adjustable displayed count that can start from zero for a New Game cycle
 - Filtering by boss name, region, defeat state, and base game/DLC
-- Japanese/English switching for boss, region, and location names
+- Boss names shown in both Japanese and English, with the selected language used as the primary name
+- Region and location names shown in the selected language
+- Copying the selected boss's primary name to the clipboard with the Copy Name button
 - Dark and light themes
 - OBS text output for boss progress, death count, latest defeated boss, and individual totals
 - Restoration of the last save, character, settings, and window placement
@@ -37,7 +39,7 @@ The self-contained release includes the .NET runtime. End users do not need to i
 
 ## Download and launch
 
-1. Download `ERBossTrackerJP-v0.1.2-win-x64.zip` from [GitHub Releases](https://github.com/saraefcat/ERBossTrackerJP/releases/latest).
+1. Download `ERBossTrackerJP-v0.1.3-win-x64.zip` from [GitHub Releases](https://github.com/saraefcat/ERBossTrackerJP/releases/latest).
 2. Fully extract the ZIP to a new folder of your choice. Do not run the application directly from inside the ZIP viewer.
 3. Launch `ERBossTrackerJP.exe` from the extracted folder.
 
@@ -51,10 +53,10 @@ The release is self-contained, so no additional .NET runtime installation is req
 You can use Windows PowerShell to confirm that the downloaded ZIP matches the GitHub Release asset. Open PowerShell in the folder containing the ZIP and run:
 
 ```powershell
-Get-FileHash .\ERBossTrackerJP-v0.1.2-win-x64.zip -Algorithm SHA256
+Get-FileHash .\ERBossTrackerJP-v0.1.3-win-x64.zip -Algorithm SHA256
 ```
 
-Compare the displayed `Hash` value with the value in `ERBossTrackerJP-v0.1.2-win-x64.zip.sha256.txt`, which is attached to the same GitHub Release.
+Compare the displayed `Hash` value with the value in `ERBossTrackerJP-v0.1.3-win-x64.zip.sha256.txt`, which is attached to the same GitHub Release.
 
 ## Basic usage
 
@@ -68,9 +70,11 @@ Compare the displayed `Hash` value with the value in `ERBossTrackerJP-v0.1.2-win
 
 The Progress tab shows regional completion and the boss list. Filters and search terms reset whenever the application restarts.
 
+Boss names are shown in both Japanese and English, with the language selected in the settings displayed as the primary name on the first line. Select a boss and press ［名称をコピー］ (Copy Name) to copy only its primary name to the clipboard.
+
 The application starts in dark mode. Disable ［ダークモード］ (Dark Mode) on the Settings tab to use the light theme.
 
-The application interface is Japanese. The language setting changes proper names such as bosses, regions, and locations; it does not translate the interface labels.
+The application interface is Japanese. Boss names are shown in both Japanese and English, with the selected language used as the primary name. Region and location names use the selected language; the setting does not translate the interface labels.
 
 ## Updating to a newer version
 
@@ -234,7 +238,7 @@ The following script requires a clean Git working tree, runs the Release test su
 .\tools\Publish-Release.ps1
 ```
 
-To override the version, run a command such as `.\tools\Publish-Release.ps1 -Version 0.1.2`. `SOURCE_COMMIT.txt` in the package records the source commit.
+To override the version, run a command such as `.\tools\Publish-Release.ps1 -Version 0.1.3`. `SOURCE_COMMIT.txt` in the package records the source commit.
 
 ## Related documents
 

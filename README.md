@@ -21,7 +21,9 @@ PC Steam版『ELDEN RING』のセーブファイルから、キャラクター�
 - セーブ更新を監視し、ゲームプレイ中の変化を自動反映
 - セーブ内の累計死亡数と、周回開始時を0にできる表示死亡数
 - ボス名、地域、撃破状態、本編／DLCによる絞り込み
-- ボス名・地域名・場所名の日本語／英語切り替え
+- ボス名は日本語・英語を併記し、選択言語を主表示として切り替え
+- 地域名・場所名は日本語／英語を切り替え
+- 選択中ボスの主表示名を［名称をコピー］ボタンからクリップボードへコピー
 - ダークモードとライトモード
 - OBS向けの進捗、死亡数、最新撃破ボスなどのテキスト出力
 - 最後に使ったセーブ、キャラクター、各種設定、ウィンドウ位置の復元
@@ -37,7 +39,7 @@ PC Steam版『ELDEN RING』のセーブファイルから、キャラクター�
 
 ## ダウンロードと起動
 
-1. [GitHub Releases](https://github.com/saraefcat/ERBossTrackerJP/releases/latest)から`ERBossTrackerJP-v0.1.2-win-x64.zip`をダウンロードします。
+1. [GitHub Releases](https://github.com/saraefcat/ERBossTrackerJP/releases/latest)から`ERBossTrackerJP-v0.1.3-win-x64.zip`をダウンロードします。
 2. ZIPを任意の新しいフォルダーへ完全に展開します。ZIPを開いた画面から直接実行しないでください。
 3. 展開先の`ERBossTrackerJP.exe`を起動します。
 
@@ -51,10 +53,10 @@ PC Steam版『ELDEN RING』のセーブファイルから、キャラクター�
 ダウンロードしたZIPがGitHub Releaseの配布物と同一か、Windows PowerShellで確認できます。ZIPがあるフォルダーで次を実行します。
 
 ```powershell
-Get-FileHash .\ERBossTrackerJP-v0.1.2-win-x64.zip -Algorithm SHA256
+Get-FileHash .\ERBossTrackerJP-v0.1.3-win-x64.zip -Algorithm SHA256
 ```
 
-表示された`Hash`を、同じGitHub Releaseに添付されている`ERBossTrackerJP-v0.1.2-win-x64.zip.sha256.txt`の値と比較してください。
+表示された`Hash`を、同じGitHub Releaseに添付されている`ERBossTrackerJP-v0.1.3-win-x64.zip.sha256.txt`の値と比較してください。
 
 ## 基本的な使い方
 
@@ -67,6 +69,8 @@ Get-FileHash .\ERBossTrackerJP-v0.1.2-win-x64.zip -Algorithm SHA256
 4. ゲーム側でセーブが更新されると、撃破状況と死亡数が自動的に再読み込みされます。
 
 ［進捗］タブでは、地域別の達成状況とボス一覧を確認できます。フィルターや検索条件は起動のたびに初期状態へ戻ります。
+
+ボス名は日本語と英語を併記し、言語設定で選択した言語を上段の主表示として表示します。ボスを選択して［名称をコピー］を押すと、主表示側の名称だけをクリップボードへコピーできます。
 
 画面はダークモードで起動します。［設定］タブの［ダークモード］をオフにすると、ライトモードへ切り替わります。
 
@@ -194,7 +198,7 @@ max(0, 累計死亡数 - 周回開始時の基準値)
 - セーブデータの変更や、撃破状態の手動編集はできません。
 - OBS WebSocket連携とブラウザソース画面はありません。テキストファイル出力を利用してください。
 - 死亡数はセーブ更新時に反映されます。ゲームメモリを監視するリアルタイムカウンターではありません。
-- アプリ全体の表示言語は日本語です。言語設定で切り替わるのはボス名、地域名、場所名などの固有名詞です。
+- アプリ全体のUIは日本語です。ボス名は日本語・英語の両方を表示し、言語設定で選択した言語が主表示になります。地域名・場所名などは選択した言語へ切り替わります。
 
 ## 開発者向け
 
@@ -232,7 +236,7 @@ dotnet test ERBossTrackerJP.sln -c Release
 .\tools\Publish-Release.ps1
 ```
 
-版番号を変更する場合は、例えば`.\tools\Publish-Release.ps1 -Version 0.1.2`と指定します。配布物の`SOURCE_COMMIT.txt`には発行元コミットが記録されます。
+版番号を変更する場合は、例えば`.\tools\Publish-Release.ps1 -Version 0.1.3`と指定します。配布物の`SOURCE_COMMIT.txt`には発行元コミットが記録されます。
 
 ## 関連資料
 
