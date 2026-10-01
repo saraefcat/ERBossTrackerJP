@@ -4,6 +4,7 @@ using System.Windows.Threading;
 using ERBossTrackerJP.Core.Bosses;
 using ERBossTrackerJP.Core.Presentation;
 using ERBossTrackerJP.Save.Progress;
+using ERBossTrackerJP.Services.Clipboard;
 using ERBossTrackerJP.Services.Diagnostics;
 using ERBossTrackerJP.Services.Dialogs;
 using ERBossTrackerJP.Services.Monitoring;
@@ -51,7 +52,8 @@ public partial class App : Application
                 new ApplicationThemeService(),
                 new ObsTextFileOutput(),
                 trackerSnapshotService,
-                new TrackerDisplayService());
+                new TrackerDisplayService(),
+                new ClipboardService());
             var window = new MainWindow
             {
                 DataContext = _viewModel,

@@ -13,6 +13,10 @@ public sealed record BossListItem(
     GameContent Content,
     int SortOrder)
 {
+    public string PrimaryName => Name;
+
+    public string SecondaryName { get; init; } = string.Empty;
+
     public string StatusText => IsDefeated ? "撃破済み" : "未撃破";
 
     public string ContentText => Content switch

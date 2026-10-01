@@ -27,12 +27,21 @@ public sealed class TrackerDisplayServiceTests
             boss =>
             {
                 Assert.Equal("base.limgrave.tree_sentinel", boss.Id);
-                Assert.Equal("ツリーガード", boss.Name);
+                Assert.Equal("ツリーガード", boss.PrimaryName);
+                Assert.Equal("Tree Sentinel", boss.SecondaryName);
                 Assert.Equal("リムグレイブ", boss.Region);
                 Assert.Equal("エレの教会", boss.Location);
             },
-            boss => Assert.Equal("飛竜アギール", boss.Name),
-            boss => Assert.Equal("レラーナ、双月の騎士", boss.Name));
+            boss =>
+            {
+                Assert.Equal("飛竜アギール", boss.PrimaryName);
+                Assert.Equal("Flying Dragon Agheel", boss.SecondaryName);
+            },
+            boss =>
+            {
+                Assert.Equal("レラーナ、双月の騎士", boss.PrimaryName);
+                Assert.Equal("Rellana, Twin Moon Knight", boss.SecondaryName);
+            });
         Assert.Collection(
             display.Regions,
             region => Assert.Equal(
@@ -61,8 +70,10 @@ public sealed class TrackerDisplayServiceTests
         Assert.Equal(
             japanese.Regions.Select(region => (region.RegionId, region.Defeated, region.Total)),
             english.Regions.Select(region => (region.RegionId, region.Defeated, region.Total)));
-        Assert.Equal("ツリーガード", japanese.Bosses[0].Name);
-        Assert.Equal("Tree Sentinel", english.Bosses[0].Name);
+        Assert.Equal("ツリーガード", japanese.Bosses[0].PrimaryName);
+        Assert.Equal("Tree Sentinel", japanese.Bosses[0].SecondaryName);
+        Assert.Equal("Tree Sentinel", english.Bosses[0].PrimaryName);
+        Assert.Equal("ツリーガード", english.Bosses[0].SecondaryName);
         Assert.Equal("リムグレイブ", japanese.Regions[0].Name);
         Assert.Equal("Limgrave", english.Regions[0].Name);
     }

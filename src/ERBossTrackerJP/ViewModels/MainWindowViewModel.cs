@@ -7,6 +7,7 @@ using ERBossTrackerJP.Core.Models;
 using ERBossTrackerJP.Core.Outputs;
 using ERBossTrackerJP.Core.Presentation;
 using ERBossTrackerJP.Save.Exceptions;
+using ERBossTrackerJP.Services.Clipboard;
 using ERBossTrackerJP.Services.Dialogs;
 using ERBossTrackerJP.Services.Monitoring;
 using ERBossTrackerJP.Services.Outputs;
@@ -36,6 +37,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly IObsTextFileOutput _obsTextFileOutput;
     private readonly ITrackerSnapshotService _trackerSnapshotService;
     private readonly TrackerDisplayService _trackerDisplayService;
+    private readonly IClipboardService _clipboardService;
     private readonly SynchronizationContext? _synchronizationContext;
     private readonly ObservableCollection<SaveFileCandidate> _saveCandidates = [];
     private readonly ObservableCollection<CharacterSlot> _characterSlots = [];
@@ -50,11 +52,13 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly AsyncRelayCommand _applyObsProgressFormatCommand;
     private readonly AsyncRelayCommand _applyDeathCountBaselineCommand;
     private readonly AsyncRelayCommand _setCurrentDeathCountBaselineCommand;
+    private readonly RelayCommand _copySelectedBossNameCommand;
     private CancellationTokenSource _obsOutputCancellationSource = new();
     private CancellationTokenSource? _obsProgressFormatNotificationCancellationSource;
     private SaveFileCandidate? _selectedSaveCandidate;
     private CharacterSlot? _selectedCharacter;
     private RegionListItem? _selectedRegion;
+    private BossListItem? _selectedBoss;
     private LoadedSaveFile? _loadedSave;
     private TrackerSnapshot? _trackerSnapshot;
     private DisplayLanguage _displayLanguage = DisplayLanguage.Japanese;
@@ -106,7 +110,8 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         IApplicationThemeService applicationThemeService,
         IObsTextFileOutput obsTextFileOutput,
         ITrackerSnapshotService trackerSnapshotService,
-        TrackerDisplayService trackerDisplayService)
+        TrackerDisplayService trackerDisplayService,
+        IClipboardService clipboardService)
     {
         ArgumentNullException.ThrowIfNull(saveFileLocator);
         ArgumentNullException.ThrowIfNull(saveLoadService);
@@ -117,6 +122,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         ArgumentNullException.ThrowIfNull(obsTextFileOutput);
         ArgumentNullException.ThrowIfNull(trackerSnapshotService);
         ArgumentNullException.ThrowIfNull(trackerDisplayService);
+        ArgumentNullException.ThrowIfNull(clipboardService);
 
         _saveFileLocator = saveFileLocator;
         _saveLoadService = saveLoadService;
@@ -127,6 +133,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         _obsTextFileOutput = obsTextFileOutput;
         _trackerSnapshotService = trackerSnapshotService;
         _trackerDisplayService = trackerDisplayService;
+        _clipboardService = clipboardService;
         UserSettings settings = userSettingsService.Load();
         _displayLanguage = settings.DisplayLanguage is
             DisplayLanguage.Japanese or DisplayLanguage.English
@@ -221,6 +228,9 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         _setCurrentDeathCountBaselineCommand = new AsyncRelayCommand(
             SetCurrentDeathCountBaselineAsync,
             CanSetCurrentDeathCountBaseline);
+        _copySelectedBossNameCommand = new RelayCommand(
+            CopySelectedBossName,
+            () => SelectedBoss is not null);
         _saveFileMonitor.ChangeDetected += OnSaveFileChangeDetected;
         _saveFileMonitor.MonitoringError += OnSaveFileMonitoringError;
     }
@@ -289,6 +299,9 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
     public AsyncRelayCommand SetCurrentDeathCountBaselineCommand =>
         _setCurrentDeathCountBaselineCommand;
+
+    public RelayCommand CopySelectedBossNameCommand =>
+        _copySelectedBossNameCommand;
 
     public bool IsAutoMonitoringEnabled
     {
@@ -540,6 +553,18 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             }
 
             RegionFilterId = value.RegionId;
+        }
+    }
+
+    public BossListItem? SelectedBoss
+    {
+        get => _selectedBoss;
+        set
+        {
+            if (SetProperty(ref _selectedBoss, value))
+            {
+                _copySelectedBossNameCommand.NotifyCanExecuteChanged();
+            }
         }
     }
 
@@ -1270,10 +1295,12 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
     private void RefreshDisplay()
     {
         TrackerSnapshot? snapshot = _trackerSnapshot;
+        string? selectedBossId = SelectedBoss?.Id;
 
         if (snapshot is null)
         {
             ReplaceBosses([]);
+            SelectedBoss = null;
             ReplaceRegions([]);
             RaiseTrackerSummaryPropertiesChanged();
             return;
@@ -1287,9 +1314,36 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
             SearchText);
         TrackerDisplayModel display = _trackerDisplayService.Create(snapshot, filter);
         ReplaceBosses(display.Bosses);
+        SelectedBoss = selectedBossId is null
+            ? null
+            : _bosses.FirstOrDefault(
+                boss => string.Equals(
+                    boss.Id,
+                    selectedBossId,
+                    StringComparison.Ordinal));
         ReplaceRegions(display.Regions);
         SynchronizeSelectedRegion();
         RaiseTrackerSummaryPropertiesChanged();
+    }
+
+    private void CopySelectedBossName()
+    {
+        BossListItem? selectedBoss = SelectedBoss;
+
+        if (selectedBoss is null)
+        {
+            return;
+        }
+
+        try
+        {
+            _ = _clipboardService.TrySetText(selectedBoss.PrimaryName);
+        }
+        catch (Exception exception)
+        {
+            Trace.WriteLine(
+                $"[MainWindowViewModel] Boss name copy failed: {exception}");
+        }
     }
 
     private void RebuildRegionOptions()
@@ -1354,6 +1408,7 @@ public sealed class MainWindowViewModel : ViewModelBase, IDisposable
         OnPropertyChanged(nameof(RegionFilterId));
         OnPropertyChanged(nameof(SelectedRegionOption));
         ReplaceBosses([]);
+        SelectedBoss = null;
         ReplaceRegions([]);
         RebuildRegionOptions();
         SynchronizeSelectedRegion();

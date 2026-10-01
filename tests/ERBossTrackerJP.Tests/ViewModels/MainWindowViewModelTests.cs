@@ -4,6 +4,7 @@ using ERBossTrackerJP.Core.Outputs;
 using ERBossTrackerJP.Core.Presentation;
 using ERBossTrackerJP.Save.Exceptions;
 using ERBossTrackerJP.Save.Reading;
+using ERBossTrackerJP.Services.Clipboard;
 using ERBossTrackerJP.Services.Dialogs;
 using ERBossTrackerJP.Services.Monitoring;
 using ERBossTrackerJP.Services.Outputs;
@@ -204,6 +205,123 @@ public sealed class MainWindowViewModelTests
             viewModel.RegionOptions,
             option => option.Label == "Gravesite Plain");
         Assert.Equal(1, trackerService.CallCount);
+    }
+
+    [Fact]
+    public async Task DisplayLanguageChange_PreservesSelectedBossByIdAndSwapsNames()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "Selected Hero", 90)));
+        var viewModel = CreateViewModel(locator, loadService);
+        await viewModel.InitializeAsync();
+        viewModel.SelectedBoss = Assert.Single(
+            viewModel.Bosses,
+            boss => boss.Id == "margit");
+        BossListItem japaneseBoss = viewModel.SelectedBoss;
+
+        viewModel.DisplayLanguage = DisplayLanguage.English;
+
+        BossListItem englishBoss = Assert.IsType<BossListItem>(viewModel.SelectedBoss);
+        Assert.NotSame(japaneseBoss, englishBoss);
+        Assert.Equal("margit", englishBoss.Id);
+        Assert.Equal("Margit, the Fell Omen", englishBoss.PrimaryName);
+        Assert.Equal("忌み鬼、マルギット", englishBoss.SecondaryName);
+    }
+
+    [Fact]
+    public async Task Filters_PreserveSelectionWhileBossRemainsAndClearItWhenRemoved()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "Filtered Hero", 90)));
+        var viewModel = CreateViewModel(locator, loadService);
+        await viewModel.InitializeAsync();
+        viewModel.SelectedBoss = Assert.Single(
+            viewModel.Bosses,
+            boss => boss.Id == "margit");
+
+        viewModel.CompletionFilter = BossCompletionFilter.Undefeated;
+
+        Assert.Equal("margit", viewModel.SelectedBoss?.Id);
+
+        viewModel.SearchText = "マルギット";
+
+        Assert.Equal("margit", viewModel.SelectedBoss?.Id);
+
+        viewModel.ContentFilter = GameContent.ShadowOfTheErdtree;
+
+        Assert.Null(viewModel.SelectedBoss);
+    }
+
+    [Fact]
+    public async Task CopySelectedBossNameCommand_CopiesOnlyPrimaryNameOnExplicitExecute()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "Copy Hero", 90)));
+        var clipboard = new StubClipboardService();
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            clipboardService: clipboard);
+        await viewModel.InitializeAsync();
+
+        Assert.False(viewModel.CopySelectedBossNameCommand.CanExecute(null));
+        Assert.Empty(clipboard.CopiedTexts);
+
+        viewModel.SelectedBoss = Assert.Single(
+            viewModel.Bosses,
+            boss => boss.Id == "margit");
+
+        Assert.True(viewModel.CopySelectedBossNameCommand.CanExecute(null));
+        Assert.Empty(clipboard.CopiedTexts);
+
+        viewModel.CopySelectedBossNameCommand.Execute(null);
+
+        Assert.Equal(["忌み鬼、マルギット"], clipboard.CopiedTexts);
+
+        viewModel.DisplayLanguage = DisplayLanguage.English;
+        viewModel.CopySelectedBossNameCommand.Execute(null);
+
+        Assert.Equal(
+            ["忌み鬼、マルギット", "Margit, the Fell Omen"],
+            clipboard.CopiedTexts);
+    }
+
+    [Fact]
+    public async Task CopySelectedBossNameCommand_ContainsClipboardFailure()
+    {
+        SaveFileCandidate candidate = CreateCandidate("C:\\saves\\ER0000.sl2");
+        var locator = new StubSaveFileLocator([candidate]);
+        var loadService = new StubSaveLoadService();
+        loadService.Enqueue(CreateLoadedSave(
+            candidate.FilePath,
+            new CharacterSlot(0, "Copy Hero", 90)));
+        var clipboard = new StubClipboardService
+        {
+            NextException = new InvalidOperationException("clipboard unavailable"),
+        };
+        var viewModel = CreateViewModel(
+            locator,
+            loadService,
+            clipboardService: clipboard);
+        await viewModel.InitializeAsync();
+        viewModel.SelectedBoss = viewModel.Bosses[0];
+
+        Exception? exception = Record.Exception(
+            () => viewModel.CopySelectedBossNameCommand.Execute(null));
+
+        Assert.Null(exception);
     }
 
     [Fact]
@@ -1640,7 +1758,8 @@ public sealed class MainWindowViewModelTests
         IUserSettingsService? userSettingsService = null,
         IApplicationThemeService? applicationThemeService = null,
         IObsTextFileOutput? obsTextFileOutput = null,
-        ITrackerSnapshotService? trackerSnapshotService = null) =>
+        ITrackerSnapshotService? trackerSnapshotService = null,
+        IClipboardService? clipboardService = null) =>
         new(
             locator,
             loadService,
@@ -1650,7 +1769,8 @@ public sealed class MainWindowViewModelTests
             applicationThemeService ?? new StubApplicationThemeService(),
             obsTextFileOutput ?? new StubObsTextFileOutput(),
             trackerSnapshotService ?? new StubTrackerSnapshotService(),
-            new TrackerDisplayService());
+            new TrackerDisplayService(),
+            clipboardService ?? new StubClipboardService());
 
     private static SaveFileCandidate CreateCandidate(string filePath) =>
         new(
@@ -2006,5 +2126,23 @@ public sealed class MainWindowViewModelTests
                 $"{regionJa}の場所",
                 content,
                 sortOrder);
+    }
+
+    private sealed class StubClipboardService : IClipboardService
+    {
+        public List<string> CopiedTexts { get; } = [];
+
+        public Exception? NextException { get; init; }
+
+        public bool TrySetText(string text)
+        {
+            if (NextException is not null)
+            {
+                throw NextException;
+            }
+
+            CopiedTexts.Add(text);
+            return true;
+        }
     }
 }

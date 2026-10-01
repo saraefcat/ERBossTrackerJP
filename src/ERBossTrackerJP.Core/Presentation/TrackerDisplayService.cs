@@ -28,13 +28,19 @@ public sealed class TrackerDisplayService
                 continue;
             }
 
-            string name = GetText(
+            string primaryName = GetText(
                 filter.Language,
+                progress.Boss.NameJa,
+                progress.Boss.NameEn);
+            string secondaryName = GetText(
+                filter.Language == DisplayLanguage.Japanese
+                    ? DisplayLanguage.English
+                    : DisplayLanguage.Japanese,
                 progress.Boss.NameJa,
                 progress.Boss.NameEn);
 
             if (searchText.Length > 0 &&
-                !name.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                !primaryName.Contains(searchText, StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
@@ -43,7 +49,7 @@ public sealed class TrackerDisplayService
                 progress.Boss.Id,
                 progress.Boss.FlagId,
                 progress.IsDefeated,
-                name,
+                primaryName,
                 progress.Boss.RegionId,
                 GetText(
                     filter.Language,
@@ -54,7 +60,10 @@ public sealed class TrackerDisplayService
                     progress.Boss.LocationJa,
                     progress.Boss.LocationEn),
                 progress.Boss.Content,
-                progress.Boss.SortOrder));
+                progress.Boss.SortOrder)
+            {
+                SecondaryName = secondaryName,
+            });
         }
 
         RegionListItem[] regions = snapshot.Regions
