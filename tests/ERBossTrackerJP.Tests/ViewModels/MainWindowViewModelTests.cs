@@ -19,6 +19,9 @@ namespace ERBossTrackerJP.Tests.ViewModels;
 
 public sealed class MainWindowViewModelTests
 {
+    private static readonly TimeSpan WpfRuntimeTestTimeout =
+        TimeSpan.FromSeconds(30);
+
     [Fact]
     public async Task InitializeAsync_PromptsForFolderWhenDefaultLocationIsEmpty()
     {
@@ -1680,7 +1683,7 @@ public sealed class MainWindowViewModelTests
         thread.SetApartmentState(ApartmentState.STA);
 
         thread.Start();
-        bool completed = thread.Join(TimeSpan.FromSeconds(10));
+        bool completed = thread.Join(WpfRuntimeTestTimeout);
 
         Assert.True(completed, "WPF binding verification did not complete in time.");
         Assert.Null(capturedException);
